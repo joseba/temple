@@ -4,47 +4,68 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TEMPLE — Concilio de los Tres</title>
+<title>TEMPLE // Concilium System</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/11.1.1/marked.min.js"></script>
 <style>
+/* ================================================================
+   TEMPLE — Concilium Decision System
+   Minority Report inspired HUD aesthetic
+   ================================================================ */
+
 :root {
-  --bg: #161210;
-  --bg-deep: #0d0a09;
-  --paper: #211c18;
-  --paper-light: #2a241f;
-  --line: #3a3128;
-  --line-soft: #2d2620;
-  --ink: #e8dcc4;
-  --ink-dim: #a89d87;
-  --ink-faded: #6b6356;
-  --gold: #c9a449;
-  --gold-deep: #8a6f2e;
-  --burgundy: #8b3a3a;
-  --agatha: #d4a849;
-  --arthur: #6a9a78;
-  --dashiell: #b56a5a;
-  --error: #c95444;
-  --success: #6a9a78;
+–bg-void: #04070d;
+–bg-deep: #070c16;
+–bg-panel: rgba(10, 22, 40, 0.55);
+–bg-panel-solid: #0a1628;
+–bg-elevated: rgba(15, 30, 55, 0.85);
+
+–line: rgba(0, 200, 255, 0.14);
+–line-strong: rgba(0, 220, 255, 0.32);
+–line-bright: rgba(0, 230, 255, 0.7);
+
+–cyan: #00e5ff;
+–cyan-dim: #00a8c9;
+–cyan-glow: rgba(0, 229, 255, 0.5);
+
+–amber: #ffb340;
+–magenta: #ff3d97;
+–green: #00ff95;
+–red: #ff4565;
+
+–agatha: #ff6b9d;
+–arthur: #00e5ff;
+–dashiell: #ffb340;
+
+–ink: #e8f1fb;
+–ink-bright: #ffffff;
+–ink-dim: #8090a8;
+–ink-faded: #4a5970;
+
+–grid-size: 32px;
 }
 
 - { box-sizing: border-box; margin: 0; padding: 0; }
 
 html, body {
-background: var(–bg);
+background: var(–bg-void);
 color: var(–ink);
-font-family: ‘EB Garamond’, Georgia, serif;
-font-size: 17px;
-line-height: 1.55;
+font-family: ‘IBM Plex Sans’, sans-serif;
+font-size: 15px;
+line-height: 1.5;
 min-height: 100vh;
+overflow-x: hidden;
+-webkit-font-smoothing: antialiased;
 }
 
+/* ===== ATMOSPHERIC BACKGROUND ===== */
 body {
 background-image:
-radial-gradient(ellipse at 20% 0%, rgba(201, 164, 73, 0.04) 0%, transparent 50%),
-radial-gradient(ellipse at 80% 100%, rgba(139, 58, 58, 0.04) 0%, transparent 50%);
+radial-gradient(ellipse 90% 60% at 20% 0%, rgba(0, 100, 180, 0.25) 0%, transparent 60%),
+radial-gradient(ellipse 80% 50% at 80% 100%, rgba(120, 30, 100, 0.15) 0%, transparent 60%),
+linear-gradient(180deg, var(–bg-void) 0%, var(–bg-deep) 100%);
 background-attachment: fixed;
 }
 
@@ -52,217 +73,389 @@ body::before {
 content: ‘’;
 position: fixed;
 inset: 0;
+background-image:
+linear-gradient(rgba(0, 200, 255, 0.025) 1px, transparent 1px),
+linear-gradient(90deg, rgba(0, 200, 255, 0.025) 1px, transparent 1px);
+background-size: var(–grid-size) var(–grid-size);
 pointer-events: none;
-background-image: url(“data:image/svg+xml,%3Csvg viewBox=‘0 0 200 200’ xmlns=‘http://www.w3.org/2000/svg’%3E%3Cfilter id=‘n’%3E%3CfeTurbulence type=‘fractalNoise’ baseFrequency=‘0.9’ numOctaves=‘3’/%3E%3CfeColorMatrix values=‘0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.04 0’/%3E%3C/filter%3E%3Crect width=‘100%25’ height=‘100%25’ filter=‘url(%23n)’/%3E%3C/svg%3E”);
-opacity: 0.5;
+z-index: 1;
+mask-image: radial-gradient(ellipse at center, black 30%, transparent 90%);
+}
+
+body::after {
+content: ‘’;
+position: fixed;
+inset: 0;
+background: repeating-linear-gradient(
+0deg,
+transparent 0,
+transparent 2px,
+rgba(0, 200, 255, 0.012) 2px,
+rgba(0, 200, 255, 0.012) 4px
+);
+pointer-events: none;
 z-index: 1;
 }
 
-.container {
-max-width: 1180px;
-margin: 0 auto;
-padding: 60px 32px 80px;
+/* ===== HEADER ===== */
+.topbar {
+position: sticky;
+top: 0;
+z-index: 100;
+background: rgba(4, 8, 16, 0.85);
+backdrop-filter: blur(12px);
+-webkit-backdrop-filter: blur(12px);
+border-bottom: 1px solid var(–line);
+padding: 14px 28px;
+display: grid;
+grid-template-columns: 1fr auto 1fr;
+align-items: center;
+gap: 24px;
+}
+
+.brand {
+display: flex;
+align-items: center;
+gap: 14px;
+}
+
+.brand-mark {
+width: 36px;
+height: 36px;
 position: relative;
+display: grid;
+place-items: center;
+}
+
+.brand-mark::before, .brand-mark::after {
+content: ‘’;
+position: absolute;
+inset: 0;
+border: 1px solid var(–cyan);
+}
+.brand-mark::before { transform: rotate(45deg); opacity: 0.5; }
+.brand-mark::after { animation: rotate 12s linear infinite; opacity: 0.8; }
+
+.brand-mark-inner {
+width: 8px;
+height: 8px;
+background: var(–cyan);
+box-shadow: 0 0 12px var(–cyan-glow);
 z-index: 2;
 }
 
-/* ===== HEADER ===== */
-.masthead {
-text-align: center;
-padding: 24px 0 48px;
-border-bottom: 1px solid var(–line);
-margin-bottom: 48px;
-position: relative;
+@keyframes rotate {
+from { transform: rotate(0deg); }
+to { transform: rotate(360deg); }
 }
 
-.masthead::before, .masthead::after {
-content: ‘’;
-position: absolute;
-bottom: -1px;
-height: 1px;
-background: var(–gold);
-width: 80px;
-}
-.masthead::before { left: 50%; transform: translateX(-180px); }
-.masthead::after { left: 50%; transform: translateX(100px); }
-
-.eyebrow {
-font-family: ‘JetBrains Mono’, monospace;
-font-size: 11px;
-letter-spacing: 0.32em;
-color: var(–gold);
-text-transform: uppercase;
-margin-bottom: 18px;
-}
-
-h1.title {
-font-family: ‘Cormorant Garamond’, serif;
-font-size: clamp(56px, 10vw, 104px);
-font-weight: 500;
-letter-spacing: 0.12em;
-line-height: 0.95;
-color: var(–ink);
-margin-bottom: 14px;
-}
-
-h1.title .ornament {
-display: inline-block;
-margin: 0 14px;
-color: var(–gold);
-font-size: 0.7em;
-vertical-align: 0.15em;
-font-style: italic;
-}
-
-.subtitle {
-font-family: ‘Cormorant Garamond’, serif;
-font-style: italic;
-font-size: 19px;
-color: var(–ink-dim);
-letter-spacing: 0.04em;
-margin-bottom: 6px;
-}
-
-.attribution {
-font-family: ‘JetBrains Mono’, monospace;
-font-size: 10px;
-letter-spacing: 0.28em;
-color: var(–ink-faded);
-text-transform: uppercase;
-margin-top: 8px;
-}
-
-/* ===== SECTIONS ===== */
-.section {
-margin-bottom: 56px;
-}
-
-.section-header {
+.brand-text {
 display: flex;
-align-items: baseline;
-gap: 16px;
-margin-bottom: 20px;
-border-bottom: 1px solid var(–line-soft);
-padding-bottom: 14px;
-}
-
-.section-number {
-font-family: ‘Cormorant Garamond’, serif;
-font-size: 36px;
-font-style: italic;
-color: var(–gold);
-font-weight: 500;
+flex-direction: column;
 line-height: 1;
 }
-
-.section-title {
-font-family: ‘Cormorant Garamond’, serif;
-font-size: 28px;
-font-weight: 500;
-letter-spacing: 0.04em;
-color: var(–ink);
+.brand-name {
+font-family: ‘Rajdhani’, sans-serif;
+font-size: 24px;
+font-weight: 600;
+letter-spacing: 0.32em;
+color: var(–ink-bright);
 }
-
-.section-subtitle {
-font-style: italic;
-color: var(–ink-dim);
-font-size: 16px;
-margin-left: auto;
-}
-
-/* ===== CONFIG PANEL ===== */
-.config-toggle {
-background: transparent;
-border: 1px solid var(–line);
-color: var(–ink-dim);
-padding: 10px 18px;
+.brand-tagline {
 font-family: ‘JetBrains Mono’, monospace;
-font-size: 11px;
+font-size: 9px;
+letter-spacing: 0.28em;
+color: var(–cyan);
+margin-top: 4px;
+text-transform: uppercase;
+}
+
+/* Tabs in topbar center */
+.tabs {
+display: flex;
+gap: 0;
+border: 1px solid var(–line-strong);
+background: rgba(0, 0, 0, 0.3);
+}
+
+.tab-btn {
+background: transparent;
+border: none;
+color: var(–ink-dim);
+padding: 10px 22px;
+font-family: ‘Rajdhani’, sans-serif;
+font-size: 13px;
+font-weight: 600;
 letter-spacing: 0.18em;
 text-transform: uppercase;
 cursor: pointer;
 transition: all 0.2s;
-}
-.config-toggle:hover {
-border-color: var(–gold);
-color: var(–gold);
-}
-.config-toggle .chev {
-display: inline-block;
-margin-left: 8px;
-transition: transform 0.3s;
-}
-.config-toggle.open .chev { transform: rotate(180deg); }
-
-.config-panel {
-background: var(–paper);
-border: 1px solid var(–line);
-padding: 32px;
-margin-top: 18px;
-display: none;
 position: relative;
+border-right: 1px solid var(–line);
 }
-.config-panel.open { display: block; }
-
-.config-panel::before {
+.tab-btn:last-child { border-right: none; }
+.tab-btn:hover { color: var(–ink); background: rgba(0, 229, 255, 0.05); }
+.tab-btn.active {
+color: var(–cyan);
+background: rgba(0, 229, 255, 0.1);
+text-shadow: 0 0 8px var(–cyan-glow);
+}
+.tab-btn.active::after {
 content: ‘’;
 position: absolute;
-inset: 6px;
-border: 1px solid var(–line-soft);
-pointer-events: none;
+left: 0; right: 0; bottom: -1px;
+height: 2px;
+background: var(–cyan);
+box-shadow: 0 0 8px var(–cyan);
 }
 
-.config-row {
-margin-bottom: 28px;
+.tab-num {
+font-family: ‘JetBrains Mono’, monospace;
+font-size: 10px;
+color: var(–ink-faded);
+margin-right: 6px;
+}
+.tab-btn.active .tab-num { color: var(–cyan-dim); }
+
+/* Right side status */
+.system-status {
+display: flex;
+align-items: center;
+justify-content: flex-end;
+gap: 18px;
+font-family: ‘JetBrains Mono’, monospace;
+font-size: 10px;
+letter-spacing: 0.16em;
+text-transform: uppercase;
+color: var(–ink-dim);
+}
+
+.status-pill {
+display: flex;
+align-items: center;
+gap: 8px;
+}
+
+.status-dot {
+width: 8px;
+height: 8px;
+border-radius: 50%;
+background: var(–ink-faded);
 position: relative;
 }
+.status-dot.ok { background: var(–green); box-shadow: 0 0 8px rgba(0, 255, 149, 0.6); }
+.status-dot.ok::before {
+content: ‘’;
+position: absolute;
+inset: -3px;
+border-radius: 50%;
+border: 1px solid var(–green);
+opacity: 0.4;
+animation: pulse-ring 2s ease-out infinite;
+}
+.status-dot.warn { background: var(–amber); }
+.status-dot.err { background: var(–red); }
 
+@keyframes pulse-ring {
+0% { transform: scale(0.8); opacity: 0.6; }
+100% { transform: scale(2); opacity: 0; }
+}
+
+/* ===== MAIN ===== */
+.main {
+position: relative;
+z-index: 2;
+max-width: 1400px;
+margin: 0 auto;
+padding: 36px 28px 80px;
+}
+
+.tab-content {
+display: none;
+animation: fadeIn 0.4s ease;
+}
+.tab-content.active { display: block; }
+
+@keyframes fadeIn {
+from { opacity: 0; transform: translateY(8px); }
+to { opacity: 1; transform: translateY(0); }
+}
+
+/* ===== PANELS ===== */
+.panel {
+background: var(–bg-panel);
+backdrop-filter: blur(8px);
+-webkit-backdrop-filter: blur(8px);
+border: 1px solid var(–line);
+position: relative;
+padding: 28px;
+}
+
+.panel.with-corners::before,
+.panel.with-corners::after {
+content: ‘’;
+position: absolute;
+width: 16px;
+height: 16px;
+border: 1px solid var(–cyan);
+pointer-events: none;
+}
+.panel.with-corners::before {
+top: -1px; left: -1px;
+border-right: none;
+border-bottom: none;
+}
+.panel.with-corners::after {
+bottom: -1px; right: -1px;
+border-left: none;
+border-top: none;
+}
+
+.panel-corner-tr,
+.panel-corner-bl {
+position: absolute;
+width: 16px;
+height: 16px;
+border: 1px solid var(–cyan);
+pointer-events: none;
+}
+.panel-corner-tr {
+top: -1px; right: -1px;
+border-left: none;
+border-bottom: none;
+}
+.panel-corner-bl {
+bottom: -1px; left: -1px;
+border-right: none;
+border-top: none;
+}
+
+.panel-header {
+display: flex;
+align-items: center;
+justify-content: space-between;
+gap: 16px;
+margin-bottom: 20px;
+padding-bottom: 14px;
+border-bottom: 1px solid var(–line);
+}
+
+.panel-title {
+font-family: ‘Rajdhani’, sans-serif;
+font-size: 18px;
+font-weight: 600;
+letter-spacing: 0.18em;
+color: var(–ink-bright);
+text-transform: uppercase;
+display: flex;
+align-items: center;
+gap: 10px;
+}
+
+.panel-title .marker {
+display: inline-block;
+width: 4px;
+height: 18px;
+background: var(–cyan);
+box-shadow: 0 0 8px var(–cyan-glow);
+}
+
+.panel-meta {
+font-family: ‘JetBrains Mono’, monospace;
+font-size: 10px;
+letter-spacing: 0.18em;
+text-transform: uppercase;
+color: var(–ink-faded);
+}
+
+.panel-section {
+margin-bottom: 32px;
+}
+.panel-section:last-child { margin-bottom: 0; }
+
+.section-label {
+font-family: ‘JetBrains Mono’, monospace;
+font-size: 10px;
+letter-spacing: 0.24em;
+text-transform: uppercase;
+color: var(–cyan);
+margin-bottom: 12px;
+display: flex;
+align-items: center;
+gap: 10px;
+}
+
+.section-label::before {
+content: ‘’;
+width: 12px;
+height: 1px;
+background: var(–cyan);
+}
+
+.section-label::after {
+content: ‘’;
+flex: 1;
+height: 1px;
+background: linear-gradient(90deg, var(–line) 0%, transparent 100%);
+}
+
+/* ===== INPUTS ===== */
 label {
 display: block;
 font-family: ‘JetBrains Mono’, monospace;
 font-size: 10px;
 letter-spacing: 0.22em;
-color: var(–ink-faded);
+color: var(–ink-dim);
 text-transform: uppercase;
-margin-bottom: 10px;
+margin-bottom: 8px;
 }
 
 input[type=“text”], input[type=“password”], textarea, select {
 width: 100%;
-background: var(–bg-deep);
-border: 1px solid var(–line);
+background: rgba(0, 10, 25, 0.6);
+border: 1px solid var(–line-strong);
 color: var(–ink);
-padding: 14px 16px;
+padding: 12px 14px;
 font-family: ‘JetBrains Mono’, monospace;
 font-size: 13px;
 letter-spacing: 0.02em;
 outline: none;
-transition: border-color 0.2s;
+transition: all 0.2s;
+border-radius: 0;
 }
 
 textarea {
-font-family: ‘EB Garamond’, Georgia, serif;
-font-size: 17px;
-line-height: 1.5;
+font-family: ‘IBM Plex Sans’, sans-serif;
+font-size: 14.5px;
+line-height: 1.55;
 resize: vertical;
-min-height: 120px;
+min-height: 100px;
 }
 
-input[type=“text”]:focus, input[type=“password”]:focus, textarea:focus, select:focus {
-border-color: var(–gold);
+textarea.code-area {
+font-family: ‘JetBrains Mono’, monospace;
+font-size: 12.5px;
+line-height: 1.5;
+background: rgba(0, 5, 12, 0.7);
+}
+
+input:focus, textarea:focus, select:focus {
+border-color: var(–cyan);
+box-shadow: 0 0 0 1px var(–cyan), 0 0 16px rgba(0, 229, 255, 0.2);
+background: rgba(0, 15, 35, 0.7);
 }
 
 select {
 appearance: none;
-background-image: url(“data:image/svg+xml,%3Csvg width=‘12’ height=‘8’ xmlns=‘http://www.w3.org/2000/svg’%3E%3Cpath d=‘M1 1l5 5 5-5’ stroke=’%23c9a449’ stroke-width=‘1.2’ fill=‘none’/%3E%3C/svg%3E”);
+background-image: url(“data:image/svg+xml,%3Csvg width=‘10’ height=‘6’ xmlns=‘http://www.w3.org/2000/svg’%3E%3Cpath d=‘M0 0l5 6 5-6z’ fill=’%2300e5ff’/%3E%3C/svg%3E”);
 background-repeat: no-repeat;
-background-position: right 16px center;
-padding-right: 40px;
+background-position: right 14px center;
+padding-right: 36px;
 cursor: pointer;
 }
 
 select option {
-background: var(–paper);
+background: var(–bg-panel-solid);
 color: var(–ink);
 }
 
@@ -270,257 +463,445 @@ color: var(–ink);
 position: relative;
 }
 
-.toggle-visibility {
+.toggle-vis {
 position: absolute;
-right: 12px;
+right: 8px;
 top: 50%;
 transform: translateY(-50%);
 background: transparent;
-border: none;
-color: var(–ink-faded);
+border: 1px solid var(–line);
+color: var(–ink-dim);
 font-family: ‘JetBrains Mono’, monospace;
-font-size: 10px;
-letter-spacing: 0.15em;
+font-size: 9px;
+letter-spacing: 0.18em;
+padding: 5px 10px;
 cursor: pointer;
-padding: 4px 8px;
+transition: all 0.2s;
 }
-.toggle-visibility:hover { color: var(–gold); }
+.toggle-vis:hover { color: var(–cyan); border-color: var(–cyan); }
 
-/* ===== AGENT CONFIG GRID ===== */
+.note {
+font-family: ‘IBM Plex Sans’, sans-serif;
+font-size: 12px;
+color: var(–ink-dim);
+margin-top: 8px;
+line-height: 1.5;
+font-style: italic;
+}
+
+.note code {
+font-family: ‘JetBrains Mono’, monospace;
+font-size: 11px;
+background: rgba(0, 229, 255, 0.08);
+border: 1px solid var(–line-strong);
+padding: 1px 6px;
+color: var(–cyan);
+font-style: normal;
+}
+
+/* ===== AGENT GRID ===== */
 .agents-grid {
 display: grid;
 grid-template-columns: repeat(3, 1fr);
-gap: 20px;
-margin-top: 8px;
+gap: 18px;
 }
 
-@media (max-width: 820px) {
+@media (max-width: 900px) {
 .agents-grid { grid-template-columns: 1fr; }
 }
 
 .agent-config {
-background: var(–bg-deep);
+background: rgba(0, 10, 25, 0.6);
 border: 1px solid var(–line);
-padding: 24px 20px;
+border-top: 2px solid var(–agent-color, var(–cyan));
+padding: 22px 20px;
 position: relative;
-border-top: 2px solid var(–agent-color, var(–gold));
+transition: all 0.3s;
+}
+
+.agent-config:hover {
+border-color: var(–line-strong);
+background: rgba(0, 15, 35, 0.7);
 }
 
 .agent-config[data-agent=“agatha”] { –agent-color: var(–agatha); }
 .agent-config[data-agent=“arthur”] { –agent-color: var(–arthur); }
 .agent-config[data-agent=“dashiell”] { –agent-color: var(–dashiell); }
 
+.agent-header {
+margin-bottom: 18px;
+padding-bottom: 14px;
+border-bottom: 1px solid var(–line);
+}
+
 .agent-name {
-font-family: ‘Cormorant Garamond’, serif;
-font-size: 26px;
-letter-spacing: 0.06em;
-font-weight: 500;
+font-family: ‘Rajdhani’, sans-serif;
+font-size: 22px;
+font-weight: 700;
+letter-spacing: 0.22em;
 color: var(–agent-color);
-margin-bottom: 4px;
+text-shadow: 0 0 16px var(–agent-color);
+filter: brightness(1.1);
 }
 
 .agent-tag {
-font-family: ‘Cormorant Garamond’, serif;
-font-style: italic;
-font-size: 13px;
+font-family: ‘JetBrains Mono’, monospace;
+font-size: 10px;
+letter-spacing: 0.16em;
 color: var(–ink-faded);
-margin-bottom: 18px;
-padding-bottom: 14px;
-border-bottom: 1px solid var(–line-soft);
+text-transform: uppercase;
+margin-top: 6px;
 }
 
-.field-group {
-margin-bottom: 16px;
+.agent-id {
+font-family: ‘JetBrains Mono’, monospace;
+font-size: 9px;
+color: var(–ink-faded);
+margin-bottom: 4px;
+letter-spacing: 0.18em;
 }
-.field-group:last-child { margin-bottom: 0; }
 
-.effort-slider {
+.field-row {
+margin-bottom: 14px;
+}
+.field-row:last-child { margin-bottom: 0; }
+
+.effort-grid {
 display: grid;
 grid-template-columns: repeat(5, 1fr);
 gap: 4px;
-background: var(–bg);
+background: rgba(0, 0, 0, 0.4);
 padding: 4px;
 border: 1px solid var(–line);
 }
+
 .effort-btn {
 background: transparent;
 border: none;
 color: var(–ink-faded);
-padding: 8px 4px;
+padding: 7px 4px;
 font-family: ‘JetBrains Mono’, monospace;
 font-size: 9px;
 letter-spacing: 0.12em;
 text-transform: uppercase;
 cursor: pointer;
 transition: all 0.15s;
+font-weight: 500;
 }
 .effort-btn:hover { color: var(–ink); }
 .effort-btn.active {
-background: var(–agent-color);
-color: var(–bg);
+background: var(–agent-color, var(–cyan));
+color: var(–bg-void);
+font-weight: 700;
+box-shadow: 0 0 10px var(–agent-color);
+}
+
+/* ===== BUTTONS ===== */
+.btn {
+background: transparent;
+border: 1px solid var(–cyan);
+color: var(–cyan);
+padding: 13px 32px;
+font-family: ‘Rajdhani’, sans-serif;
+font-size: 14px;
 font-weight: 600;
-}
-
-.note {
-font-family: ‘EB Garamond’, serif;
-font-style: italic;
-font-size: 13px;
-color: var(–ink-faded);
-margin-top: 8px;
-line-height: 1.4;
-}
-
-/* ===== QUESTION FORM ===== */
-.question-form {
-background: var(–paper);
-border: 1px solid var(–line);
-padding: 36px 40px;
-position: relative;
-}
-
-.question-form::before {
-content: ‘’;
-position: absolute;
-inset: 6px;
-border: 1px solid var(–line-soft);
-pointer-events: none;
-}
-
-.question-form textarea {
-background: var(–bg-deep);
-margin-bottom: 24px;
-}
-
-.controls-bar {
-display: flex;
-align-items: center;
-justify-content: space-between;
-gap: 20px;
-flex-wrap: wrap;
-}
-
-.btn-primary {
-background: var(–gold);
-color: var(–bg-deep);
-border: none;
-padding: 14px 36px;
-font-family: ‘JetBrains Mono’, monospace;
-font-size: 12px;
 letter-spacing: 0.28em;
 text-transform: uppercase;
-font-weight: 600;
 cursor: pointer;
 transition: all 0.2s;
 position: relative;
+overflow: hidden;
 }
 
-.btn-primary:hover:not(:disabled) {
-background: var(–ink);
-letter-spacing: 0.32em;
+.btn::before {
+content: ‘’;
+position: absolute;
+inset: 0;
+background: var(–cyan);
+opacity: 0;
+transition: opacity 0.2s;
+z-index: 0;
 }
 
-.btn-primary:disabled {
-background: var(–line);
+.btn span { position: relative; z-index: 1; }
+
+.btn:hover:not(:disabled) {
+color: var(–bg-void);
+box-shadow: 0 0 24px var(–cyan-glow);
+}
+.btn:hover:not(:disabled)::before { opacity: 1; }
+
+.btn:disabled {
+border-color: var(–line);
 color: var(–ink-faded);
 cursor: not-allowed;
 }
 
 .btn-secondary {
-background: transparent;
+border-color: var(–line-strong);
 color: var(–ink-dim);
-border: 1px solid var(–line);
-padding: 12px 24px;
-font-family: ‘JetBrains Mono’, monospace;
 font-size: 11px;
+padding: 9px 18px;
+letter-spacing: 0.22em;
+}
+.btn-secondary::before { background: var(–ink-dim); }
+.btn-secondary:hover:not(:disabled) {
+color: var(–bg-void);
+box-shadow: 0 0 16px rgba(122, 139, 165, 0.4);
+}
+
+.btn-warn {
+border-color: var(–amber);
+color: var(–amber);
+font-size: 10px;
+padding: 7px 14px;
 letter-spacing: 0.2em;
+}
+.btn-warn::before { background: var(–amber); }
+.btn-warn:hover:not(:disabled) {
+color: var(–bg-void);
+box-shadow: 0 0 14px rgba(255, 179, 64, 0.4);
+}
+
+/* ===== PROTOCOLS / PROMPT EDITOR ===== */
+.protocol-tabs {
+display: grid;
+grid-template-columns: repeat(4, 1fr);
+gap: 0;
+margin-bottom: 24px;
+border: 1px solid var(–line-strong);
+background: rgba(0, 0, 0, 0.4);
+}
+
+.protocol-tab {
+background: transparent;
+border: none;
+border-right: 1px solid var(–line);
+color: var(–ink-dim);
+padding: 16px 12px;
+font-family: ‘Rajdhani’, sans-serif;
+font-size: 13px;
+font-weight: 600;
+letter-spacing: 0.16em;
 text-transform: uppercase;
 cursor: pointer;
 transition: all 0.2s;
+display: flex;
+flex-direction: column;
+gap: 4px;
+align-items: flex-start;
+text-align: left;
+position: relative;
+}
+.protocol-tab:last-child { border-right: none; }
+
+.protocol-tab .num {
+font-family: ‘JetBrains Mono’, monospace;
+font-size: 10px;
+color: var(–ink-faded);
+letter-spacing: 0.2em;
 }
 
-.btn-secondary:hover {
-border-color: var(–ink-dim);
-color: var(–ink);
+.protocol-tab:hover { color: var(–ink); background: rgba(0, 229, 255, 0.04); }
+.protocol-tab.active {
+color: var(–cyan);
+background: rgba(0, 229, 255, 0.08);
+}
+.protocol-tab.active .num { color: var(–cyan-dim); }
+.protocol-tab.active::before {
+content: ‘’;
+position: absolute;
+top: 0;
+left: 0;
+right: 0;
+height: 2px;
+background: var(–cyan);
+box-shadow: 0 0 8px var(–cyan);
 }
 
-.status-line {
+.protocol-editor { display: none; }
+.protocol-editor.active { display: block; animation: fadeIn 0.3s ease; }
+
+.editor-block {
+background: rgba(0, 5, 15, 0.5);
+border: 1px solid var(–line);
+padding: 22px;
+margin-bottom: 18px;
+}
+
+.editor-block-header {
+display: flex;
+justify-content: space-between;
+align-items: center;
+margin-bottom: 10px;
+}
+
+.editor-block-title {
+font-family: ‘Rajdhani’, sans-serif;
+font-size: 13px;
+font-weight: 600;
+letter-spacing: 0.24em;
+color: var(–ink-bright);
+text-transform: uppercase;
+}
+
+.editor-block-status {
+font-family: ‘JetBrains Mono’, monospace;
+font-size: 9px;
+letter-spacing: 0.18em;
+text-transform: uppercase;
+color: var(–ink-faded);
+}
+.editor-block-status.modified { color: var(–amber); }
+
+.variables-doc {
+background: rgba(0, 229, 255, 0.05);
+border-left: 2px solid var(–cyan);
+padding: 10px 14px;
+margin: 10px 0 14px;
+font-family: ‘JetBrains Mono’, monospace;
+font-size: 11px;
+line-height: 1.6;
+color: var(–ink-dim);
+}
+.variables-doc strong {
+color: var(–cyan);
+font-weight: 500;
+background: rgba(0, 229, 255, 0.1);
+padding: 1px 6px;
+margin: 0 2px;
+}
+
+.editor-actions {
+display: flex;
+gap: 10px;
+margin-top: 16px;
+justify-content: flex-end;
+}
+
+/* ===== CHAMBER (question + phases) ===== */
+.question-bay {
+margin-bottom: 36px;
+}
+
+.controls-bar {
+display: flex;
+align-items: center;
+gap: 16px;
+margin-top: 18px;
+flex-wrap: wrap;
+}
+
+.global-status {
+margin-left: auto;
 font-family: ‘JetBrains Mono’, monospace;
 font-size: 11px;
 letter-spacing: 0.18em;
-color: var(–ink-faded);
 text-transform: uppercase;
-}
-
-.status-line.error { color: var(–error); }
-.status-line.success { color: var(–success); }
-
-/* ===== PHASE SECTIONS ===== */
-.phase {
-margin-bottom: 48px;
-opacity: 0.45;
-transition: opacity 0.5s;
-}
-.phase.active { opacity: 1; }
-.phase.completed { opacity: 1; }
-
-.phase-frame {
-background: var(–paper);
-border: 1px solid var(–line);
-padding: 32px;
-position: relative;
-}
-
-.phase-frame::before {
-content: ‘’;
-position: absolute;
-inset: 6px;
-border: 1px solid var(–line-soft);
-pointer-events: none;
-}
-
-.phase-status {
-display: inline-flex;
+color: var(–ink-dim);
+display: flex;
 align-items: center;
 gap: 10px;
+}
+
+.global-status.error { color: var(–red); }
+.global-status.success { color: var(–green); }
+.global-status.working { color: var(–cyan); }
+
+/* ===== PHASES ===== */
+.phase-track {
+margin-bottom: 32px;
+position: relative;
+opacity: 0.4;
+transition: opacity 0.4s;
+}
+.phase-track.active { opacity: 1; }
+.phase-track.completed { opacity: 1; }
+
+.phase-marker {
+display: flex;
+align-items: center;
+gap: 16px;
+margin-bottom: 14px;
+}
+
+.phase-num {
+font-family: ‘Rajdhani’, sans-serif;
+font-size: 32px;
+font-weight: 300;
+color: var(–ink-faded);
+letter-spacing: 0.05em;
+line-height: 1;
+}
+.phase-track.active .phase-num,
+.phase-track.completed .phase-num { color: var(–cyan); text-shadow: 0 0 12px var(–cyan-glow); }
+
+.phase-title {
+font-family: ‘Rajdhani’, sans-serif;
+font-size: 18px;
+font-weight: 600;
+letter-spacing: 0.18em;
+color: var(–ink);
+text-transform: uppercase;
+}
+
+.phase-subtitle {
 font-family: ‘JetBrains Mono’, monospace;
 font-size: 10px;
-letter-spacing: 0.22em;
+letter-spacing: 0.18em;
+color: var(–ink-faded);
+text-transform: uppercase;
+margin-top: 3px;
+}
+
+.phase-state {
+margin-left: auto;
+font-family: ‘JetBrains Mono’, monospace;
+font-size: 10px;
+letter-spacing: 0.18em;
 text-transform: uppercase;
 color: var(–ink-faded);
-margin-bottom: 20px;
+display: flex;
+align-items: center;
+gap: 8px;
 }
 
-.phase-status .dot {
-width: 8px; height: 8px;
-border-radius: 50%;
-background: var(–ink-faded);
+.phase-track.active .phase-state { color: var(–cyan); }
+.phase-track.active .phase-state::before {
+content: ‘’;
+width: 8px;
+height: 8px;
+background: var(–cyan);
+box-shadow: 0 0 8px var(–cyan);
+animation: blink 1s ease-in-out infinite;
+}
+.phase-track.completed .phase-state { color: var(–green); }
+.phase-track.completed .phase-state::before {
+content: ‘’;
+width: 8px;
+height: 8px;
+background: var(–green);
+}
+.phase-track.error .phase-state { color: var(–red); }
+.phase-track.error .phase-state::before {
+content: ‘’;
+width: 8px;
+height: 8px;
+background: var(–red);
 }
 
-.phase.active .phase-status { color: var(–gold); }
-.phase.active .phase-status .dot {
-background: var(–gold);
-animation: pulse 1.4s ease-in-out infinite;
+@keyframes blink {
+0%, 100% { opacity: 1; }
+50% { opacity: 0.3; }
 }
 
-.phase.completed .phase-status { color: var(–success); }
-.phase.completed .phase-status .dot { background: var(–success); }
-
-.phase.error .phase-status { color: var(–error); }
-.phase.error .phase-status .dot { background: var(–error); }
-
-@keyframes pulse {
-0%, 100% { opacity: 1; transform: scale(1); }
-50% { opacity: 0.4; transform: scale(1.3); }
-}
-
-/* ===== AGENT RESPONSE CARDS ===== */
 .responses-grid {
 display: grid;
 grid-template-columns: repeat(3, 1fr);
-gap: 18px;
+gap: 16px;
 }
 
-@media (max-width: 980px) {
+@media (max-width: 1100px) {
 .responses-grid { grid-template-columns: 1fr; }
 }
 
@@ -528,534 +909,531 @@ gap: 18px;
 grid-template-columns: 1fr;
 }
 
-.agent-card {
-background: var(–bg-deep);
+/* ===== AGENT RESPONSE CARDS ===== */
+.response-card {
+background: var(–bg-panel);
+backdrop-filter: blur(6px);
+-webkit-backdrop-filter: blur(6px);
 border: 1px solid var(–line);
-border-top: 2px solid var(–agent-color, var(–gold));
-padding: 22px 22px 20px;
+border-top: 2px solid var(–agent-color, var(–cyan));
+padding: 0;
 display: flex;
 flex-direction: column;
-min-height: 220px;
+min-height: 240px;
+position: relative;
+overflow: hidden;
 }
 
-.agent-card[data-agent=“agatha”] { –agent-color: var(–agatha); }
-.agent-card[data-agent=“arthur”] { –agent-color: var(–arthur); }
-.agent-card[data-agent=“dashiell”] { –agent-color: var(–dashiell); }
+.response-card[data-agent=“agatha”] { –agent-color: var(–agatha); }
+.response-card[data-agent=“arthur”] { –agent-color: var(–arthur); }
+.response-card[data-agent=“dashiell”] { –agent-color: var(–dashiell); }
 
-.agent-card-header {
+.response-card.thinking::after {
+content: ‘’;
+position: absolute;
+top: 0; left: -100%;
+width: 100%;
+height: 2px;
+background: linear-gradient(90deg, transparent, var(–agent-color), transparent);
+animation: scan 2s linear infinite;
+z-index: 5;
+}
+
+@keyframes scan {
+to { left: 100%; }
+}
+
+.rc-header {
+padding: 16px 18px 12px;
+border-bottom: 1px solid var(–line);
 display: flex;
-align-items: baseline;
 justify-content: space-between;
-margin-bottom: 16px;
-padding-bottom: 12px;
-border-bottom: 1px solid var(–line-soft);
+align-items: center;
+gap: 10px;
 }
 
-.agent-card-name {
-font-family: ‘Cormorant Garamond’, serif;
-font-size: 22px;
-letter-spacing: 0.05em;
+.rc-id {
+display: flex;
+flex-direction: column;
+gap: 2px;
+}
+
+.rc-name {
+font-family: ‘Rajdhani’, sans-serif;
+font-size: 16px;
+font-weight: 700;
+letter-spacing: 0.22em;
 color: var(–agent-color);
+text-shadow: 0 0 10px var(–agent-color);
+filter: brightness(1.1);
 }
 
-.agent-card-meta {
+.rc-meta {
 font-family: ‘JetBrains Mono’, monospace;
 font-size: 9px;
-letter-spacing: 0.16em;
+letter-spacing: 0.14em;
 color: var(–ink-faded);
 text-transform: uppercase;
 }
 
-.agent-card-state {
+.rc-state {
 font-family: ‘JetBrains Mono’, monospace;
-font-size: 10px;
+font-size: 9px;
 letter-spacing: 0.18em;
 text-transform: uppercase;
 color: var(–ink-faded);
+padding: 4px 8px;
+border: 1px solid var(–line);
 }
 
-.agent-card-state.thinking { color: var(–gold); }
-.agent-card-state.thinking::after {
+.rc-state.thinking { color: var(–cyan); border-color: var(–cyan); }
+.rc-state.thinking::after {
 content: ‘…’;
 display: inline-block;
-animation: dots 1.4s steps(4, end) infinite;
-width: 18px;
+width: 14px;
 text-align: left;
+animation: dots-anim 1.4s steps(4) infinite;
 overflow: hidden;
 vertical-align: bottom;
 }
-.agent-card-state.done { color: var(–success); }
-.agent-card-state.error { color: var(–error); }
 
-@keyframes dots {
+@keyframes dots-anim {
 0%, 20% { content: ‘’; }
 40% { content: ‘.’; }
 60% { content: ‘..’; }
 80%, 100% { content: ‘…’; }
 }
 
-.agent-card-body {
+.rc-state.done { color: var(–green); border-color: var(–green); }
+.rc-state.error { color: var(–red); border-color: var(–red); }
+
+.rc-body {
+padding: 18px;
 flex: 1;
-font-size: 15.5px;
+font-size: 14.5px;
 line-height: 1.6;
 color: var(–ink);
 overflow-x: auto;
 }
 
-.agent-card-body p { margin: 0 0 12px; }
-.agent-card-body p:last-child { margin-bottom: 0; }
-.agent-card-body h1, .agent-card-body h2, .agent-card-body h3 {
-font-family: ‘Cormorant Garamond’, serif;
-font-weight: 600;
-margin: 18px 0 10px;
-letter-spacing: 0.02em;
+.rc-body em.placeholder {
+color: var(–ink-faded);
+font-style: italic;
+}
+
+.rc-body p { margin: 0 0 12px; }
+.rc-body p:last-child { margin-bottom: 0; }
+.rc-body h1, .rc-body h2, .rc-body h3, .rc-body h4 {
+font-family: ‘Rajdhani’, sans-serif;
+letter-spacing: 0.08em;
+text-transform: uppercase;
 color: var(–agent-color);
+filter: brightness(1.15);
+margin: 18px 0 10px;
+font-weight: 600;
 }
-.agent-card-body h1 { font-size: 22px; }
-.agent-card-body h2 { font-size: 19px; border-bottom: 1px solid var(–line-soft); padding-bottom: 6px; }
-.agent-card-body h3 { font-size: 16px; color: var(–gold); }
-.agent-card-body h1:first-child, .agent-card-body h2:first-child, .agent-card-body h3:first-child { margin-top: 0; }
-.agent-card-body ul, .agent-card-body ol { margin: 8px 0 14px 22px; }
-.agent-card-body li { margin-bottom: 4px; }
-.agent-card-body strong { color: var(–ink); font-weight: 600; }
-.agent-card-body em { color: var(–ink-dim); font-style: italic; }
-.agent-card-body code {
+.rc-body h1 { font-size: 18px; }
+.rc-body h2 { font-size: 15px; border-bottom: 1px solid var(–line); padding-bottom: 6px; }
+.rc-body h3 { font-size: 13px; color: var(–cyan); }
+.rc-body h4 { font-size: 12px; color: var(–ink); }
+.rc-body h2:first-child, .rc-body h1:first-child, .rc-body h3:first-child { margin-top: 0; }
+.rc-body ul, .rc-body ol { margin: 8px 0 14px 20px; }
+.rc-body li { margin-bottom: 4px; }
+.rc-body strong { color: var(–ink-bright); font-weight: 600; }
+.rc-body em { color: var(–ink); font-style: italic; }
+.rc-body code {
 font-family: ‘JetBrains Mono’, monospace;
-font-size: 13px;
-background: var(–bg);
+font-size: 12px;
+background: rgba(0, 229, 255, 0.08);
+border: 1px solid var(–line-strong);
 padding: 1px 6px;
-border: 1px solid var(–line-soft);
-color: var(–gold);
+color: var(–cyan);
+border-radius: 0;
 }
-.agent-card-body blockquote {
-border-left: 2px solid var(–gold-deep);
-padding: 4px 0 4px 14px;
+.rc-body blockquote {
+border-left: 2px solid var(–cyan);
+padding: 6px 0 6px 14px;
 margin: 12px 0;
 color: var(–ink-dim);
 font-style: italic;
 }
-
-.reasoning-toggle {
-margin-top: 14px;
-padding-top: 14px;
-border-top: 1px dashed var(–line-soft);
-font-family: ‘JetBrains Mono’, monospace;
-font-size: 10px;
-letter-spacing: 0.16em;
-text-transform: uppercase;
-color: var(–ink-faded);
-cursor: pointer;
-user-select: none;
+.rc-body hr {
+border: none;
+height: 1px;
+background: var(–line);
+margin: 16px 0;
 }
-.reasoning-toggle:hover { color: var(–gold); }
 
-.reasoning-block {
-display: none;
-margin-top: 12px;
-padding: 14px;
-background: var(–bg);
-border: 1px solid var(–line-soft);
+.rc-footer {
+border-top: 1px dashed var(–line);
+padding: 10px 18px;
+display: flex;
+gap: 12px;
+flex-wrap: wrap;
+}
+
+.rc-footer-btn {
+background: transparent;
+border: none;
+color: var(–ink-dim);
 font-family: ‘JetBrains Mono’, monospace;
-font-size: 12px;
+font-size: 9px;
+letter-spacing: 0.18em;
+text-transform: uppercase;
+cursor: pointer;
+padding: 0;
+transition: color 0.2s;
+}
+.rc-footer-btn:hover { color: var(–cyan); }
+
+.rc-collapsible {
+display: none;
+padding: 12px 18px 16px;
+border-top: 1px solid var(–line);
+font-family: ‘JetBrains Mono’, monospace;
+font-size: 11px;
 line-height: 1.55;
 color: var(–ink-dim);
 white-space: pre-wrap;
-max-height: 280px;
+max-height: 320px;
 overflow-y: auto;
+background: rgba(0, 0, 0, 0.3);
 }
-.reasoning-block.open { display: block; }
+.rc-collapsible.open { display: block; }
 
-.error-msg {
+.error-block {
 padding: 14px;
-background: rgba(201, 84, 68, 0.08);
-border: 1px solid var(–error);
-color: var(–error);
+background: rgba(255, 69, 101, 0.06);
+border: 1px solid var(–red);
+color: var(–red);
 font-family: ‘JetBrains Mono’, monospace;
-font-size: 12px;
+font-size: 11px;
 line-height: 1.5;
+word-break: break-word;
 }
 
 /* ===== SYNTHESIS CARD (special) ===== */
-.synthesis-card {
-background: linear-gradient(180deg, var(–paper) 0%, var(–bg-deep) 100%);
-border: 1px solid var(–gold-deep);
-border-top: 3px solid var(–gold);
-padding: 36px 40px;
-position: relative;
+.response-card.synthesis-card {
+border: 1px solid var(–agatha);
+border-top: 3px solid var(–agatha);
+box-shadow: 0 0 40px rgba(255, 107, 157, 0.15), inset 0 0 30px rgba(255, 107, 157, 0.04);
 }
 
-.synthesis-card::before, .synthesis-card::after {
-content: ‘’;
-position: absolute;
-width: 40px;
-height: 40px;
-border: 1px solid var(–gold-deep);
-}
-.synthesis-card::before { top: 8px; left: 8px; border-right: none; border-bottom: none; }
-.synthesis-card::after { bottom: 8px; right: 8px; border-left: none; border-top: none; }
+.synthesis-card .rc-name { font-size: 20px; }
+.synthesis-card .rc-body { font-size: 15.5px; padding: 24px; }
 
-.synthesis-card .agent-card-name { font-size: 28px; }
-.synthesis-card .agent-card-body { font-size: 17px; }
+/* ===== SCROLLBAR ===== */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.3); }
+::-webkit-scrollbar-thumb { background: var(–line-strong); }
+::-webkit-scrollbar-thumb:hover { background: var(–cyan-dim); }
 
-/* ===== FOOTER ===== */
-.colophon {
-margin-top: 72px;
-padding-top: 28px;
-border-top: 1px solid var(–line);
-text-align: center;
-font-family: ‘Cormorant Garamond’, serif;
-font-style: italic;
-font-size: 14px;
-color: var(–ink-faded);
-letter-spacing: 0.04em;
-}
-
-.colophon::before {
-content: ‘✦’;
-display: block;
-color: var(–gold);
-font-size: 12px;
-margin-bottom: 10px;
+/* ===== TOAST ===== */
+.toast {
+position: fixed;
+bottom: 30px;
+right: 30px;
+background: var(–bg-panel-solid);
+border: 1px solid var(–cyan);
+color: var(–ink);
+padding: 14px 22px;
+font-family: ‘JetBrains Mono’, monospace;
+font-size: 11px;
+letter-spacing: 0.16em;
+text-transform: uppercase;
+box-shadow: 0 0 24px rgba(0, 229, 255, 0.2);
+z-index: 1000;
+transform: translateY(100px);
+opacity: 0;
+transition: all 0.3s;
 }
 
-::-webkit-scrollbar { width: 10px; height: 10px; }
-::-webkit-scrollbar-track { background: var(–bg-deep); }
-::-webkit-scrollbar-thumb { background: var(–line); }
-::-webkit-scrollbar-thumb:hover { background: var(–gold-deep); }
+.toast.show { transform: translateY(0); opacity: 1; }
+.toast.error { border-color: var(–red); color: var(–red); box-shadow: 0 0 24px rgba(255, 69, 101, 0.2); }
+.toast.success { border-color: var(–green); color: var(–green); box-shadow: 0 0 24px rgba(0, 255, 149, 0.2); }
 
-/* hide elements before reveal */
-.hidden { display: none !important; }
+/* ===== UTILITY ===== */
+.row-2 {
+display: grid;
+grid-template-columns: 1fr 1fr;
+gap: 24px;
+}
+@media (max-width: 800px) { .row-2 { grid-template-columns: 1fr; } }
+
+.spacer { height: 16px; }
+
+@media (max-width: 900px) {
+.topbar { grid-template-columns: 1fr; gap: 14px; padding: 12px 16px; }
+.system-status { justify-content: flex-start; }
+.tabs { width: 100%; overflow-x: auto; }
+.tab-btn { padding: 10px 14px; font-size: 11px; }
+.main { padding: 24px 16px 60px; }
+.panel { padding: 18px; }
+}
 </style>
 
 </head>
 <body>
-<div class="container">
 
-  <!-- ============ MASTHEAD ============ -->
+<!-- ============ TOPBAR ============ -->
 
-  <header class="masthead">
-    <div class="eyebrow">Concilium · MMXXVI</div>
-    <h1 class="title">Tem<span class="ornament">·</span>ple</h1>
-    <div class="subtitle">El concilio de Agatha, Arthur y Dashiell</div>
-    <div class="attribution">Delphi · Red Team · ACH · Tumor Board</div>
-  </header>
+<header class="topbar">
+  <div class="brand">
+    <div class="brand-mark"><div class="brand-mark-inner"></div></div>
+    <div class="brand-text">
+      <div class="brand-name">TEMPLE</div>
+      <div class="brand-tagline">Concilium // v2.0</div>
+    </div>
+  </div>
 
-  <!-- ============ SECTION I — CONFIGURATION ============ -->
+  <nav class="tabs">
+    <button class="tab-btn active" data-tab="system">
+      <span class="tab-num">01</span>SISTEMA
+    </button>
+    <button class="tab-btn" data-tab="protocols">
+      <span class="tab-num">02</span>PROTOCOLOS
+    </button>
+    <button class="tab-btn" data-tab="chamber">
+      <span class="tab-num">03</span>CÁMARA
+    </button>
+  </nav>
 
-  <section class="section">
-    <div class="section-header">
-      <span class="section-number">I.</span>
-      <h2 class="section-title">Configuración del concilio</h2>
-      <span class="section-subtitle">credenciales y caracteres de los tres oráculos</span>
+  <div class="system-status">
+    <div class="status-pill">
+      <span class="status-dot" id="dot-api"></span>
+      <span id="api-state">API</span>
+    </div>
+    <div class="status-pill">
+      <span class="status-dot ok"></span>
+      <span>3 CARACTERES</span>
+    </div>
+  </div>
+</header>
+
+<!-- ============ MAIN ============ -->
+
+<main class="main">
+
+<!-- =========== TAB 01 — SYSTEM =========== -->
+
+<section id="tab-system" class="tab-content active">
+
+  <div class="panel with-corners">
+    <span class="panel-corner-tr"></span>
+    <span class="panel-corner-bl"></span>
+    <div class="panel-header">
+      <div class="panel-title"><span class="marker"></span>Credenciales</div>
+      <div class="panel-meta">openrouter.ai</div>
     </div>
 
 ```
-<button class="config-toggle" id="configToggle">
-  Mostrar configuración <span class="chev">▾</span>
-</button>
-
-<div class="config-panel" id="configPanel">
-  <div class="config-row">
-    <label for="apiKey">OpenRouter API Key</label>
-    <div class="api-key-wrap">
-      <input type="password" id="apiKey" placeholder="sk-or-v1-..." autocomplete="off">
-      <button class="toggle-visibility" id="toggleKey" type="button">VER</button>
-    </div>
-    <p class="note">Se almacena solo en la memoria de tu navegador para esta sesión. Obtén una clave en <span style="color:var(--gold)">openrouter.ai/keys</span>.</p>
+<div class="panel-section">
+  <label for="apiKey">OPENROUTER API KEY</label>
+  <div class="api-key-wrap">
+    <input type="password" id="apiKey" placeholder="sk-or-v1-..." autocomplete="off">
+    <button class="toggle-vis" id="toggleKey" type="button">VER</button>
   </div>
-
-  <div class="config-row">
-    <label>Caracteres del concilio</label>
-    <div class="agents-grid" id="agentsGrid">
-      <!-- agent cards inserted by JS -->
-    </div>
-    <p class="note">El esfuerzo se mapea automáticamente: en GPT‑5.5 va como <code style="color:var(--gold);background:var(--bg);padding:0 4px">reasoning.effort</code>; en Claude se traduce a presupuesto de tokens (xhigh ≈ 95%, high ≈ 80%, medium ≈ 50%, low ≈ 20%, minimal ≈ 10%); en Gemini 3 mapea a <code style="color:var(--gold);background:var(--bg);padding:0 4px">thinkingLevel</code> (xhigh se baja a high).</p>
-  </div>
+  <div class="note">Persiste en <code>localStorage</code>. Obtén una clave en openrouter.ai/keys.</div>
 </div>
 ```
 
-  </section>
+  </div>
 
-  <!-- ============ SECTION II — QUESTION ============ -->
+  <div class="spacer"></div>
 
-  <section class="section">
-    <div class="section-header">
-      <span class="section-number">II.</span>
-      <h2 class="section-title">La pregunta sometida al concilio</h2>
-      <span class="section-subtitle">se enviará a los tres oráculos en paralelo</span>
+  <div class="panel with-corners">
+    <span class="panel-corner-tr"></span>
+    <span class="panel-corner-bl"></span>
+    <div class="panel-header">
+      <div class="panel-title"><span class="marker"></span>Caracteres del concilio</div>
+      <div class="panel-meta">3 // active</div>
     </div>
 
 ```
-<div class="question-form">
-  <label for="question">Pregunta o problema</label>
+<div class="panel-section">
+  <div class="agents-grid" id="agentsGrid"></div>
+  <div class="note">El esfuerzo se normaliza a través de OpenRouter: GPT‑5 lo usa nativamente, Claude lo mapea a presupuesto de tokens (xhigh ≈ 95%, high ≈ 80%, medium ≈ 50%, low ≈ 20%, minimal ≈ 10%), y Gemini 3 lo mapea a <code>thinkingLevel</code>.</div>
+</div>
+```
+
+  </div>
+
+</section>
+
+<!-- =========== TAB 02 — PROTOCOLS =========== -->
+
+<section id="tab-protocols" class="tab-content">
+
+  <div class="panel with-corners">
+    <span class="panel-corner-tr"></span>
+    <span class="panel-corner-bl"></span>
+    <div class="panel-header">
+      <div class="panel-title"><span class="marker"></span>Editor de protocolos</div>
+      <div class="panel-meta">4 fases // editable</div>
+    </div>
+
+```
+<div class="note" style="margin-bottom: 22px;">
+  Edita los prompts que se envían en cada fase. Las variables entre <code>{{dobles llaves}}</code> se sustituyen en tiempo de ejecución. Los cambios se guardan automáticamente.
+</div>
+
+<div class="protocol-tabs">
+  <button class="protocol-tab active" data-protocol="phase1">
+    <span class="num">FASE 01</span>Generación
+  </button>
+  <button class="protocol-tab" data-protocol="phase2">
+    <span class="num">FASE 02</span>Crítica
+  </button>
+  <button class="protocol-tab" data-protocol="phase3">
+    <span class="num">FASE 03</span>Refinamiento
+  </button>
+  <button class="protocol-tab" data-protocol="phase4">
+    <span class="num">FASE 04</span>Síntesis
+  </button>
+</div>
+
+<div id="protocolEditors"></div>
+```
+
+  </div>
+
+</section>
+
+<!-- =========== TAB 03 — CHAMBER =========== -->
+
+<section id="tab-chamber" class="tab-content">
+
+  <div class="panel with-corners question-bay">
+    <span class="panel-corner-tr"></span>
+    <span class="panel-corner-bl"></span>
+    <div class="panel-header">
+      <div class="panel-title"><span class="marker"></span>Pregunta sometida al concilio</div>
+      <div class="panel-meta">paralelo // 3 oráculos</div>
+    </div>
+
+```
+<div class="panel-section">
+  <label for="question">CONSULTA</label>
   <textarea id="question" placeholder="Plantea la pregunta sobre la que el concilio deliberará..."></textarea>
+
   <div class="controls-bar">
-    <button class="btn-primary" id="convoke">Convocar al concilio</button>
-    <button class="btn-secondary" id="reset">Reiniciar</button>
-    <span class="status-line" id="globalStatus">En reposo</span>
+    <button class="btn" id="convoke"><span>► Convocar concilio</span></button>
+    <button class="btn-secondary btn" id="reset"><span>Reiniciar</span></button>
+    <div class="global-status" id="globalStatus">
+      <span class="status-dot"></span>
+      <span>EN REPOSO</span>
+    </div>
   </div>
 </div>
 ```
 
-  </section>
+  </div>
 
-  <!-- ============ PHASE 1 — INDEPENDENT GENERATION ============ -->
+  <!-- Phase 1 -->
 
-  <section class="section phase" id="phase1">
-    <div class="section-header">
-      <span class="section-number">III.</span>
-      <h2 class="section-title">Ronda primera — generación independiente</h2>
-      <span class="section-subtitle">Delphi · cada oráculo responde sin ver a los demás</span>
+  <div class="phase-track" id="phase1">
+    <div class="phase-marker">
+      <div class="phase-num">01</div>
+      <div>
+        <div class="phase-title">Generación independiente</div>
+        <div class="phase-subtitle">Delphi // tres oráculos en paralelo, sin contaminación</div>
+      </div>
+      <div class="phase-state"><span class="phase-state-text">EN ESPERA</span></div>
     </div>
-    <div class="phase-frame">
-      <div class="phase-status"><span class="dot"></span><span class="phase-status-text">En espera</span></div>
-      <div class="responses-grid" id="phase1Grid"></div>
-    </div>
-  </section>
+    <div class="responses-grid" id="phase1Grid"></div>
+  </div>
 
-  <!-- ============ PHASE 2 — CROSS CRITIQUE ============ -->
+  <!-- Phase 2 -->
 
-  <section class="section phase" id="phase2">
-    <div class="section-header">
-      <span class="section-number">IV.</span>
-      <h2 class="section-title">Ronda segunda — crítica cruzada</h2>
-      <span class="section-subtitle">Devil's Advocate · cada oráculo destroza al resto</span>
+  <div class="phase-track" id="phase2">
+    <div class="phase-marker">
+      <div class="phase-num">02</div>
+      <div>
+        <div class="phase-title">Crítica cruzada</div>
+        <div class="phase-subtitle">Devil's Advocate // cada oráculo destroza al resto</div>
+      </div>
+      <div class="phase-state"><span class="phase-state-text">EN ESPERA</span></div>
     </div>
-    <div class="phase-frame">
-      <div class="phase-status"><span class="dot"></span><span class="phase-status-text">En espera</span></div>
-      <div class="responses-grid" id="phase2Grid"></div>
-    </div>
-  </section>
+    <div class="responses-grid" id="phase2Grid"></div>
+  </div>
 
-  <!-- ============ PHASE 3 — REFINEMENT + ACH ============ -->
+  <!-- Phase 3 -->
 
-  <section class="section phase" id="phase3">
-    <div class="section-header">
-      <span class="section-number">V.</span>
-      <h2 class="section-title">Ronda tercera — refinamiento e hipótesis en competencia</h2>
-      <span class="section-subtitle">ACH · cada oráculo lista qué descartaría su tesis</span>
+  <div class="phase-track" id="phase3">
+    <div class="phase-marker">
+      <div class="phase-num">03</div>
+      <div>
+        <div class="phase-title">Refinamiento + ACH</div>
+        <div class="phase-subtitle">Análisis de hipótesis en competencia // qué descartaría mi tesis</div>
+      </div>
+      <div class="phase-state"><span class="phase-state-text">EN ESPERA</span></div>
     </div>
-    <div class="phase-frame">
-      <div class="phase-status"><span class="dot"></span><span class="phase-status-text">En espera</span></div>
-      <div class="responses-grid" id="phase3Grid"></div>
-    </div>
-  </section>
+    <div class="responses-grid" id="phase3Grid"></div>
+  </div>
 
-  <!-- ============ PHASE 4 — SYNTHESIS ============ -->
+  <!-- Phase 4 -->
 
-  <section class="section phase" id="phase4">
-    <div class="section-header">
-      <span class="section-number">VI.</span>
-      <h2 class="section-title">Dictamen final — Agatha preside</h2>
-      <span class="section-subtitle">Tumor Board · síntesis con disensos preservados</span>
+  <div class="phase-track" id="phase4">
+    <div class="phase-marker">
+      <div class="phase-num">04</div>
+      <div>
+        <div class="phase-title">Dictamen final</div>
+        <div class="phase-subtitle">Tumor Board // Agatha preside, disensos preservados</div>
+      </div>
+      <div class="phase-state"><span class="phase-state-text">EN ESPERA</span></div>
     </div>
-    <div class="phase-frame">
-      <div class="phase-status"><span class="dot"></span><span class="phase-status-text">En espera</span></div>
-      <div class="responses-grid synthesis" id="phase4Grid"></div>
-    </div>
-  </section>
+    <div class="responses-grid synthesis" id="phase4Grid"></div>
+  </div>
 
-  <footer class="colophon">
-    Quod scripsi, scripsi · El concilio no se equivoca, solo discrepa.
-  </footer>
-</div>
+</section>
+
+</main>
+
+<div class="toast" id="toast"></div>
 
 <script>
-// =============================================================
-//  TEMPLE — Concilium of three frontier reasoning models
-//  Single-file artifact. Vanilla JS. No build step.
-// =============================================================
+// ================================================================
+//  TEMPLE — Concilium Decision System
+//  Single-file artifact. Vanilla JS. localStorage-backed.
+// ================================================================
+
+const STORAGE_KEY = 'temple_state_v2';
 
 const MODELS = [
-  { id: 'openai/gpt-5.5',                  label: 'GPT-5.5 (OpenAI)',          provider: 'openai' },
-  { id: 'openai/gpt-5.5-pro',              label: 'GPT-5.5 Pro (OpenAI)',      provider: 'openai' },
-  { id: 'openai/gpt-5.4',                  label: 'GPT-5.4 (OpenAI)',          provider: 'openai' },
-  { id: 'anthropic/claude-opus-4.7',       label: 'Claude Opus 4.7 (Anthropic)', provider: 'anthropic' },
-  { id: 'anthropic/claude-opus-4.6',       label: 'Claude Opus 4.6 (Anthropic)', provider: 'anthropic' },
-  { id: 'anthropic/claude-sonnet-4.5',     label: 'Claude Sonnet 4.5 (Anthropic)', provider: 'anthropic' },
-  { id: 'google/gemini-3.1-pro-preview',   label: 'Gemini 3.1 Pro (Google)',   provider: 'google' },
-  { id: 'google/gemini-3-pro-preview',     label: 'Gemini 3 Pro (Google)',     provider: 'google' },
-  { id: 'google/gemini-3-flash-preview',   label: 'Gemini 3 Flash (Google)',   provider: 'google' },
-  { id: 'x-ai/grok-4',                     label: 'Grok 4 (xAI)',              provider: 'xai' },
-  { id: 'deepseek/deepseek-v4-pro',        label: 'DeepSeek V4 Pro',           provider: 'deepseek' }
+  { id: 'openai/gpt-5.5',                  label: 'GPT-5.5 (OpenAI)' },
+  { id: 'openai/gpt-5.5-pro',              label: 'GPT-5.5 Pro (OpenAI)' },
+  { id: 'openai/gpt-5.4',                  label: 'GPT-5.4 (OpenAI)' },
+  { id: 'anthropic/claude-opus-4.7',       label: 'Claude Opus 4.7 (Anthropic)' },
+  { id: 'anthropic/claude-opus-4.6',       label: 'Claude Opus 4.6 (Anthropic)' },
+  { id: 'anthropic/claude-sonnet-4.5',     label: 'Claude Sonnet 4.5 (Anthropic)' },
+  { id: 'google/gemini-3.1-pro-preview',   label: 'Gemini 3.1 Pro (Google)' },
+  { id: 'google/gemini-3-pro-preview',     label: 'Gemini 3 Pro (Google)' },
+  { id: 'google/gemini-3-flash-preview',   label: 'Gemini 3 Flash (Google)' },
+  { id: 'x-ai/grok-4',                     label: 'Grok 4 (xAI)' },
+  { id: 'deepseek/deepseek-v4-pro',        label: 'DeepSeek V4 Pro' }
 ];
 
 const EFFORT_LEVELS = ['minimal','low','medium','high','xhigh'];
 
-// Default character setup — one model per company, by default
 const AGENTS = [
   { key: 'agatha',   name: 'AGATHA',   tag: 'la presidenta · síntesis',     defaultModel: 'anthropic/claude-opus-4.7',    defaultEffort: 'high' },
   { key: 'arthur',   name: 'ARTHUR',   tag: 'el lógico · método deductivo', defaultModel: 'openai/gpt-5.5',                defaultEffort: 'high' },
   { key: 'dashiell', name: 'DASHIELL', tag: 'el cínico · mirada noir',      defaultModel: 'google/gemini-3.1-pro-preview', defaultEffort: 'high' }
 ];
 
-// In-memory state
-const state = {
-  apiKey: '',
-  agents: {},          // keyed by agent.key — { model, effort }
-  question: '',
-  results: {           // each phase
-    phase1: {},        // agent_key -> { content, reasoning, error }
-    phase2: {},
-    phase3: {},
-    phase4: {}
-  }
-};
+// Default prompts — these are the templates editable by the user
+const DEFAULT_PROMPTS = {
+  phase1: {
+    label: 'GENERACIÓN INDEPENDIENTE',
+    description: 'Cada agente recibe esta misma plantilla en paralelo, sin ver lo de los demás.',
+    variables: [
+      { name: 'question', desc: 'la pregunta del usuario' }
+    ],
+    system: `Eres un consultor experto invitado a un panel de deliberación. Vas a responder de forma INDEPENDIENTE — no verás aún a los otros expertos. Tu respuesta servirá luego para crítica cruzada.
 
-// Try to restore from sessionStorage gracefully
-function safeStorage(op, key, value) {
-  try {
-    if (op === 'get') return sessionStorage.getItem(key);
-    if (op === 'set') sessionStorage.setItem(key, value);
-    if (op === 'del') sessionStorage.removeItem(key);
-  } catch (e) { return null; }
-}
-
-// ============= CONFIG UI =============
-function buildAgentConfigCards() {
-  const grid = document.getElementById('agentsGrid');
-  grid.innerHTML = '';
-
-  AGENTS.forEach(agent => {
-    state.agents[agent.key] = {
-      model: agent.defaultModel,
-      effort: agent.defaultEffort
-    };
-
-    const card = document.createElement('div');
-    card.className = 'agent-config';
-    card.dataset.agent = agent.key;
-
-    const modelOptions = MODELS.map(m =>
-      `<option value="${m.id}" ${m.id === agent.defaultModel ? 'selected' : ''}>${m.label}</option>`
-    ).join('');
-
-    const effortBtns = EFFORT_LEVELS.map(lvl =>
-      `<button class="effort-btn ${lvl === agent.defaultEffort ? 'active' : ''}" data-effort="${lvl}" type="button">${lvl}</button>`
-    ).join('');
-
-    card.innerHTML = `
-      <div class="agent-name">${agent.name}</div>
-      <div class="agent-tag">${agent.tag}</div>
-      <div class="field-group">
-        <label>Modelo</label>
-        <select class="model-select">${modelOptions}</select>
-      </div>
-      <div class="field-group">
-        <label>Esfuerzo de razonamiento</label>
-        <div class="effort-slider">${effortBtns}</div>
-      </div>
-    `;
-
-    // wire up
-    card.querySelector('.model-select').addEventListener('change', e => {
-      state.agents[agent.key].model = e.target.value;
-      saveConfig();
-    });
-
-    card.querySelectorAll('.effort-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        card.querySelectorAll('.effort-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        state.agents[agent.key].effort = btn.dataset.effort;
-        saveConfig();
-      });
-    });
-
-    grid.appendChild(card);
-  });
-}
-
-function saveConfig() {
-  safeStorage('set', 'temple_apiKey', state.apiKey);
-  safeStorage('set', 'temple_agents', JSON.stringify(state.agents));
-}
-
-function loadConfig() {
-  const k = safeStorage('get', 'temple_apiKey');
-  if (k) {
-    state.apiKey = k;
-    document.getElementById('apiKey').value = k;
-  }
-  const a = safeStorage('get', 'temple_agents');
-  if (a) {
-    try {
-      const parsed = JSON.parse(a);
-      Object.keys(parsed).forEach(key => {
-        if (state.agents[key]) {
-          state.agents[key] = parsed[key];
-          // reflect in UI
-          const card = document.querySelector(`.agent-config[data-agent="${key}"]`);
-          if (card) {
-            card.querySelector('.model-select').value = parsed[key].model;
-            card.querySelectorAll('.effort-btn').forEach(b => {
-              b.classList.toggle('active', b.dataset.effort === parsed[key].effort);
-            });
-          }
-        }
-      });
-    } catch (e) {}
-  }
-}
-
-// ============= API CALLS =============
-async function callOpenRouter(model, effort, messages) {
-  // Build request — use unified `reasoning.effort`. OpenRouter normalizes
-  // it across providers (OpenAI native, Anthropic mapped to max_tokens
-  // ratio, Gemini 3 mapped to thinkingLevel).
-  const body = {
-    model,
-    messages,
-    reasoning: {
-      effort: effort
-    }
-  };
-
-  // Anthropic models need max_tokens explicitly higher than reasoning budget.
-  // For other reasoning-effort models it's fine to omit and let the API decide,
-  // but we set a generous max_tokens so Anthropic models don't refuse.
-  body.max_tokens = 16000;
-
-  const resp = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${state.apiKey}`,
-      'Content-Type': 'application/json',
-      'X-Title': 'Temple'
-    },
-    body: JSON.stringify(body)
-  });
-
-  if (!resp.ok) {
-    let detail = '';
-    try { detail = JSON.stringify(await resp.json()); } catch (e) { detail = await resp.text(); }
-    throw new Error(`HTTP ${resp.status}: ${detail.slice(0, 400)}`);
-  }
-
-  const data = await resp.json();
-  const msg = data.choices && data.choices[0] && data.choices[0].message;
-  if (!msg) throw new Error('Respuesta sin choices/message');
-
-  return {
-    content: msg.content || '',
-    reasoning: msg.reasoning || (Array.isArray(msg.reasoning_details)
-      ? msg.reasoning_details.map(r => r.text || r.summary || '').filter(Boolean).join('\n\n')
-      : ''),
-    usage: data.usage || null
-  };
-}
-
-// ============= PROMPT TEMPLATES =============
-
-function promptPhase1(question) {
-  return [
-    { role: 'system', content:
-`Eres un consultor experto invitado a un panel de deliberación. Vas a responder de forma INDEPENDIENTE — no verás aún a los otros expertos. Tu respuesta servirá luego para crítica cruzada.
-
-Sé riguroso, claro y conciso. No te disculpes ni añadas preámbulos. No menciones que formas parte de un panel.` },
-    { role: 'user', content:
-`PREGUNTA:
-${question}
+Sé riguroso, claro y conciso. No te disculpes ni añadas preámbulos. No menciones que formas parte de un panel.`,
+    user: `PREGUNTA:
+{{question}}
 
 Estructura tu respuesta exactamente así, en Markdown:
 
@@ -1069,28 +1447,30 @@ Justificación: (una o dos frases)
 ## SUPUESTOS CLAVE
 - supuesto 1
 - supuesto 2
-- ...` }
-  ];
-}
+- ...`
+  },
+  phase2: {
+    label: 'CRÍTICA CRUZADA',
+    description: 'Cada agente recibe las respuestas de los otros dos anonimizadas como A y B, y las destroza.',
+    variables: [
+      { name: 'question', desc: 'la pregunta original' },
+      { name: 'responseA', desc: 'la respuesta del primer otro agente' },
+      { name: 'responseB', desc: 'la respuesta del segundo otro agente' }
+    ],
+    system: `Eres un ABOGADO DEL DIABLO (Devil's Advocate) en un panel de deliberación. Tu único trabajo es ENCONTRAR FALLOS en las respuestas que se te muestran. NO estás aquí para validar, equilibrar ni ser amable. La cortesía aquí es un defecto profesional.
 
-function promptPhase2(question, otherA, otherB) {
-  return [
-    { role: 'system', content:
-`Eres un ABOGADO DEL DIABLO (Devil's Advocate) en un panel de deliberación. Tu único trabajo es ENCONTRAR FALLOS en las respuestas que se te muestran. NO estás aquí para validar, equilibrar ni ser amable. La cortesía aquí es un defecto profesional.
-
-Sé implacable pero específico: una crítica vaga no sirve. Cita lo que critiques.` },
-    { role: 'user', content:
-`PREGUNTA ORIGINAL:
-${question}
+Sé implacable pero específico: una crítica vaga no sirve. Cita lo que critiques.`,
+    user: `PREGUNTA ORIGINAL:
+{{question}}
 
 ═══════════════════════════════════
 RESPUESTA A:
-${otherA}
+{{responseA}}
 ═══════════════════════════════════
 
 ═══════════════════════════════════
 RESPUESTA B:
-${otherB}
+{{responseB}}
 ═══════════════════════════════════
 
 Para CADA una de las dos respuestas, identifica:
@@ -1115,33 +1495,36 @@ Estructura en Markdown así:
 ### Supuestos frágiles
 ### Sesgos
 ### Modos de fallo
-### Omisiones` }
-  ];
-}
+### Omisiones`
+  },
+  phase3: {
+    label: 'REFINAMIENTO CON ACH',
+    description: 'Cada agente integra las críticas y aplica Analysis of Competing Hypotheses: lista qué evidencia rompería su tesis.',
+    variables: [
+      { name: 'question', desc: 'la pregunta original' },
+      { name: 'ownResponse', desc: 'la respuesta inicial del propio agente' },
+      { name: 'critiquesReceived', desc: 'las críticas que los otros le hicieron' },
+      { name: 'critiquesObserved', desc: 'las críticas que los otros se hicieron entre sí' }
+    ],
+    system: `Estás en un panel de deliberación. Has dado una respuesta inicial y otros expertos te han criticado. Ahora la refinarás aplicando ANÁLISIS DE HIPÓTESIS EN COMPETENCIA (ACH, tradecraft de la CIA): la pregunta clave no es "qué confirma mi tesis" sino "qué la descartaría".
 
-function promptPhase3(question, ownResponse, critiquesReceived, critiquesObserved) {
-  return [
-    { role: 'system', content:
-`Estás en un panel de deliberación. Has dado una respuesta inicial y otros expertos te han criticado. Ahora la refinarás aplicando ANÁLISIS DE HIPÓTESIS EN COMPETENCIA (ACH, tradecraft de la CIA): la pregunta clave no es "qué confirma mi tesis" sino "qué la descartaría".
-
-Sé honesto: si una crítica acierta, intégrala; si no, defiéndela razonadamente. Lo que el panel valora más es tu lista de cosas que romperían tu propia respuesta.` },
-    { role: 'user', content:
-`PREGUNTA ORIGINAL:
-${question}
+Sé honesto: si una crítica acierta, intégrala; si no, defiéndela razonadamente. Lo que el panel valora más es tu lista de cosas que romperían tu propia respuesta.`,
+    user: `PREGUNTA ORIGINAL:
+{{question}}
 
 ═══════════════════════════════════
 TU RESPUESTA INICIAL:
-${ownResponse}
+{{ownResponse}}
 ═══════════════════════════════════
 
 ═══════════════════════════════════
 CRÍTICAS QUE TE HAN HECHO:
-${critiquesReceived}
+{{critiquesReceived}}
 ═══════════════════════════════════
 
 ═══════════════════════════════════
 CRÍTICAS HECHAS A LOS OTROS (puedes aprender de ellas):
-${critiquesObserved}
+{{critiquesObserved}}
 ═══════════════════════════════════
 
 Estructura tu respuesta refinada en Markdown:
@@ -1165,43 +1548,47 @@ Lista evidencias o argumentos que ROMPERÍAN tu tesis refinada. No "la apoyaría
 
 ## CONFIANZA ACTUALIZADA
 Nivel: X/10
-Justificación: (breve)` }
-  ];
-}
-
-function promptPhase4(question, refinedA, refinedB, refinedC, allCritiques) {
-  return [
-    { role: 'system', content:
-`Eres la PRESIDENTA del concilio. Tres expertos han deliberado: respuesta independiente → crítica cruzada → refinamiento con ACH. Te corresponde ahora producir el dictamen final.
+Justificación: (breve)`
+  },
+  phase4: {
+    label: 'DICTAMEN FINAL',
+    description: 'Solo Agatha. Recibe los tres refinamientos + todas las críticas y produce el dictamen.',
+    variables: [
+      { name: 'question', desc: 'la pregunta original' },
+      { name: 'refined1', desc: 'respuesta refinada del primer experto' },
+      { name: 'refined2', desc: 'respuesta refinada del segundo experto' },
+      { name: 'refined3', desc: 'respuesta refinada del tercer experto' },
+      { name: 'allCritiques', desc: 'todas las críticas producidas durante el debate' }
+    ],
+    system: `Eres la PRESIDENTA del concilio. Tres expertos han deliberado: respuesta independiente → crítica cruzada → refinamiento con ACH. Te corresponde ahora producir el dictamen final.
 
 Tu trabajo NO es promediar opiniones. Es:
 (1) tomar una decisión clara y accionable;
 (2) preservar disensos genuinos en lugar de aplastarlos en un consenso falso;
 (3) ser honesta sobre la incertidumbre y bajo qué condiciones cambiarías de opinión.
 
-Esto es protocolo Tumor Board + panel apelativo: la decisión lleva consigo sus contraargumentos.` },
-    { role: 'user', content:
-`PREGUNTA ORIGINAL:
-${question}
+Esto es protocolo Tumor Board + panel apelativo: la decisión lleva consigo sus contraargumentos.`,
+    user: `PREGUNTA ORIGINAL:
+{{question}}
 
 ═══════════════════════════════════
 RESPUESTA REFINADA — EXPERTO 1:
-${refinedA}
+{{refined1}}
 ═══════════════════════════════════
 
 ═══════════════════════════════════
 RESPUESTA REFINADA — EXPERTO 2:
-${refinedB}
+{{refined2}}
 ═══════════════════════════════════
 
 ═══════════════════════════════════
 RESPUESTA REFINADA — EXPERTO 3:
-${refinedC}
+{{refined3}}
 ═══════════════════════════════════
 
 ═══════════════════════════════════
 CRÍTICAS PRODUCIDAS DURANTE EL DEBATE:
-${allCritiques}
+{{allCritiques}}
 ═══════════════════════════════════
 
 Produce el dictamen final en Markdown con esta estructura exacta:
@@ -1225,367 +1612,704 @@ Justificación: (qué te da confianza, qué te la quita)
 ## CONDICIONES BAJO LAS QUE LA RESPUESTA CAMBIARÍA
 - condición 1
 - condición 2
-- ...` }
-  ];
-}
-
-// ============= UI HELPERS =============
-function renderMarkdown(text) {
-  if (!text) return '<em style="color:var(--ink-faded)">(sin contenido)</em>';
-  if (window.marked) {
-    marked.setOptions({ breaks: true, gfm: true });
-    return marked.parse(text);
+- ...`
   }
-  // very minimal fallback
-  return text.replace(/\n/g, '<br>');
+};
+
+// Runtime state
+const state = {
+  apiKey: '',
+  agents: {},
+  prompts: JSON.parse(JSON.stringify(DEFAULT_PROMPTS)),  // deep clone
+  question: '',
+  results: { phase1: {}, phase2: {}, phase3: {}, phase4: {} },
+  sentPrompts: { phase1: {}, phase2: {}, phase3: {}, phase4: {} }   // record what we actually sent
+};
+
+// Initialize agents
+AGENTS.forEach(a => {
+  state.agents[a.key] = { model: a.defaultModel, effort: a.defaultEffort };
+});
+
+// =========================================================
+//  PERSISTENCE
+// =========================================================
+function saveState() {
+  try {
+    const payload = {
+      apiKey: state.apiKey,
+      agents: state.agents,
+      prompts: state.prompts,
+      question: state.question
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+  } catch (e) { /* localStorage may be unavailable */ }
 }
 
-function makeAgentCard(agentKey, modelLabel, effort) {
-  const agent = AGENTS.find(a => a.key === agentKey);
-  const card = document.createElement('div');
-  card.className = 'agent-card';
-  card.dataset.agent = agentKey;
-  card.innerHTML = `
-    <div class="agent-card-header">
-      <div>
-        <div class="agent-card-name">${agent.name}</div>
-        <div class="agent-card-meta">${modelLabel} · effort: ${effort}</div>
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return;
+    const saved = JSON.parse(raw);
+    if (saved.apiKey) state.apiKey = saved.apiKey;
+    if (saved.agents) {
+      Object.keys(saved.agents).forEach(k => {
+        if (state.agents[k]) state.agents[k] = saved.agents[k];
+      });
+    }
+    if (saved.prompts) {
+      Object.keys(saved.prompts).forEach(k => {
+        if (state.prompts[k] && saved.prompts[k]) {
+          state.prompts[k].system = saved.prompts[k].system ?? state.prompts[k].system;
+          state.prompts[k].user = saved.prompts[k].user ?? state.prompts[k].user;
+        }
+      });
+    }
+    if (saved.question) state.question = saved.question;
+  } catch (e) { /* corrupt or unavailable */ }
+}
+
+// =========================================================
+//  SYSTEM TAB — agent config UI
+// =========================================================
+function buildAgentConfigCards() {
+  const grid = document.getElementById('agentsGrid');
+  grid.innerHTML = '';
+
+  AGENTS.forEach((agent, idx) => {
+    const cfg = state.agents[agent.key];
+    const card = document.createElement('div');
+    card.className = 'agent-config';
+    card.dataset.agent = agent.key;
+
+    const modelOptions = MODELS.map(m =>
+      `<option value="${m.id}" ${m.id === cfg.model ? 'selected' : ''}>${m.label}</option>`
+    ).join('');
+
+    const effortBtns = EFFORT_LEVELS.map(lvl =>
+      `<button class="effort-btn ${lvl === cfg.effort ? 'active' : ''}" data-effort="${lvl}" type="button">${lvl}</button>`
+    ).join('');
+
+    card.innerHTML = `
+      <div class="agent-header">
+        <div class="agent-id">SLOT // 0${idx+1}</div>
+        <div class="agent-name">${agent.name}</div>
+        <div class="agent-tag">${agent.tag}</div>
       </div>
-      <div class="agent-card-state thinking">Pensando</div>
-    </div>
-    <div class="agent-card-body"><em style="color:var(--ink-faded)">Aguardando respuesta…</em></div>
-  `;
-  return card;
+      <div class="field-row">
+        <label>Modelo</label>
+        <select class="model-select">${modelOptions}</select>
+      </div>
+      <div class="field-row">
+        <label>Esfuerzo de razonamiento</label>
+        <div class="effort-grid">${effortBtns}</div>
+      </div>
+    `;
+
+    card.querySelector('.model-select').addEventListener('change', e => {
+      state.agents[agent.key].model = e.target.value;
+      saveState();
+    });
+
+    card.querySelectorAll('.effort-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        card.querySelectorAll('.effort-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        state.agents[agent.key].effort = btn.dataset.effort;
+        saveState();
+      });
+    });
+
+    grid.appendChild(card);
+  });
 }
 
-function fillAgentCard(card, result) {
-  const stateEl = card.querySelector('.agent-card-state');
-  const bodyEl = card.querySelector('.agent-card-body');
+// =========================================================
+//  PROTOCOLS TAB — prompt editor
+// =========================================================
+function buildProtocolEditors() {
+  const root = document.getElementById('protocolEditors');
+  root.innerHTML = '';
 
-  if (result.error) {
-    stateEl.className = 'agent-card-state error';
-    stateEl.textContent = 'Error';
-    bodyEl.innerHTML = `<div class="error-msg">${escapeHtml(result.error)}</div>`;
-    return;
-  }
+  Object.keys(DEFAULT_PROMPTS).forEach((phaseKey, idx) => {
+    const def = DEFAULT_PROMPTS[phaseKey];
+    const cur = state.prompts[phaseKey];
 
-  stateEl.className = 'agent-card-state done';
-  stateEl.textContent = 'Listo';
-  bodyEl.innerHTML = renderMarkdown(result.content);
+    const editor = document.createElement('div');
+    editor.className = 'protocol-editor' + (idx === 0 ? ' active' : '');
+    editor.dataset.protocol = phaseKey;
 
-  if (result.reasoning && result.reasoning.trim()) {
-    const toggleId = 'rt-' + Math.random().toString(36).slice(2, 9);
-    const blockId = 'rb-' + Math.random().toString(36).slice(2, 9);
-    bodyEl.insertAdjacentHTML('beforeend', `
-      <div class="reasoning-toggle" id="${toggleId}">▸ Ver razonamiento interno (${result.reasoning.length} caracteres)</div>
-      <div class="reasoning-block" id="${blockId}">${escapeHtml(result.reasoning)}</div>
-    `);
-    document.getElementById(toggleId).addEventListener('click', () => {
-      const blk = document.getElementById(blockId);
-      const tgl = document.getElementById(toggleId);
-      blk.classList.toggle('open');
-      tgl.textContent = (blk.classList.contains('open') ? '▾' : '▸') + tgl.textContent.slice(1);
-    });
-  }
+    const varsHtml = def.variables.map(v =>
+      `<div><strong>{{${v.name}}}</strong> — ${v.desc}</div>`
+    ).join('');
+
+    editor.innerHTML = `
+      <div class="note" style="margin-bottom: 18px;">
+        <strong style="color: var(--ink-bright)">${def.label}</strong> · ${def.description}
+      </div>
+
+      <div class="editor-block">
+        <div class="editor-block-header">
+          <div class="editor-block-title">SYSTEM PROMPT</div>
+          <div class="editor-block-status" data-status="${phaseKey}-system">DEFAULT</div>
+        </div>
+        <textarea class="code-area" data-prompt="${phaseKey}.system" rows="6">${escapeHtml(cur.system)}</textarea>
+
+```
+  </div>
+
+  <div class="editor-block">
+    <div class="editor-block-header">
+      <div class="editor-block-title">USER PROMPT TEMPLATE</div>
+      <div class="editor-block-status" data-status="${phaseKey}-user">DEFAULT</div>
+    </div>
+    <div class="variables-doc">
+      <div style="margin-bottom: 4px;">VARIABLES SUSTITUIBLES:</div>
+      ${varsHtml}
+    </div>
+    <textarea class="code-area" data-prompt="${phaseKey}.user" rows="14">${escapeHtml(cur.user)}</textarea>
+  </div>
+
+  <div class="editor-actions">
+    <button class="btn-warn btn" data-reset="${phaseKey}"><span>↺ Restaurar por defecto</span></button>
+  </div>
+`;
+
+// wire textareas
+editor.querySelectorAll('textarea[data-prompt]').forEach(ta => {
+  ta.addEventListener('input', e => {
+    const [phase, field] = e.target.dataset.prompt.split('.');
+    state.prompts[phase][field] = e.target.value;
+    updatePromptStatus(phase, field);
+    saveState();
+  });
+});
+
+// wire reset
+editor.querySelector('[data-reset]').addEventListener('click', () => {
+  if (!confirm(`¿Restaurar los prompts de "${def.label}" a los valores por defecto?`)) return;
+  state.prompts[phaseKey].system = DEFAULT_PROMPTS[phaseKey].system;
+  state.prompts[phaseKey].user = DEFAULT_PROMPTS[phaseKey].user;
+  editor.querySelector(`textarea[data-prompt="${phaseKey}.system"]`).value = DEFAULT_PROMPTS[phaseKey].system;
+  editor.querySelector(`textarea[data-prompt="${phaseKey}.user"]`).value = DEFAULT_PROMPTS[phaseKey].user;
+  updatePromptStatus(phaseKey, 'system');
+  updatePromptStatus(phaseKey, 'user');
+  saveState();
+  showToast(`Protocolo "${def.label}" restaurado`, 'success');
+});
+
+root.appendChild(editor);
+
+// initial status
+updatePromptStatus(phaseKey, 'system');
+updatePromptStatus(phaseKey, 'user');
+```
+
+});
+}
+
+function updatePromptStatus(phase, field) {
+const status = document.querySelector(`[data-status="${phase}-${field}"]`);
+if (!status) return;
+const isModified = state.prompts[phase][field] !== DEFAULT_PROMPTS[phase][field];
+status.textContent = isModified ? ‘● MODIFIED’ : ‘DEFAULT’;
+status.classList.toggle(‘modified’, isModified);
+}
+
+// =========================================================
+//  TAB SWITCHING
+// =========================================================
+function setupTabs() {
+document.querySelectorAll(’.tab-btn’).forEach(btn => {
+btn.addEventListener(‘click’, () => {
+const tab = btn.dataset.tab;
+document.querySelectorAll(’.tab-btn’).forEach(b => b.classList.toggle(‘active’, b === btn));
+document.querySelectorAll(’.tab-content’).forEach(c => {
+c.classList.toggle(‘active’, c.id === ‘tab-’ + tab);
+});
+});
+});
+
+document.querySelectorAll(’.protocol-tab’).forEach(btn => {
+btn.addEventListener(‘click’, () => {
+const p = btn.dataset.protocol;
+document.querySelectorAll(’.protocol-tab’).forEach(b => b.classList.toggle(‘active’, b === btn));
+document.querySelectorAll(’.protocol-editor’).forEach(e =>
+e.classList.toggle(‘active’, e.dataset.protocol === p));
+});
+});
+}
+
+// =========================================================
+//  API CALL
+// =========================================================
+async function callOpenRouter(model, effort, messages) {
+const body = {
+model,
+messages,
+max_tokens: 16000,
+reasoning: { effort: effort }
+};
+
+const resp = await fetch(‘https://openrouter.ai/api/v1/chat/completions’, {
+method: ‘POST’,
+headers: {
+‘Authorization’: `Bearer ${state.apiKey}`,
+‘Content-Type’: ‘application/json’,
+‘X-Title’: ‘Temple’
+},
+body: JSON.stringify(body)
+});
+
+if (!resp.ok) {
+let detail = ‘’;
+try { detail = JSON.stringify(await resp.json()); } catch (e) { detail = await resp.text(); }
+throw new Error(`HTTP ${resp.status}: ${detail.slice(0, 500)}`);
+}
+
+const data = await resp.json();
+const msg = data.choices && data.choices[0] && data.choices[0].message;
+if (!msg) throw new Error(‘Respuesta sin choices/message’);
+
+return {
+content: msg.content || ‘’,
+reasoning: msg.reasoning || (Array.isArray(msg.reasoning_details)
+? msg.reasoning_details.map(r => r.text || r.summary || ‘’).filter(Boolean).join(’\n\n’)
+: ‘’),
+usage: data.usage || null
+};
+}
+
+// =========================================================
+//  PROMPT BUILDING
+// =========================================================
+function substituteVars(template, vars) {
+return template.replace(/{{(\w+)}}/g, (m, k) => (vars[k] !== undefined ? vars[k] : m));
+}
+
+function buildMessages(phase, vars) {
+const sys = substituteVars(state.prompts[phase].system, vars);
+const usr = substituteVars(state.prompts[phase].user, vars);
+return {
+messages: [
+{ role: ‘system’, content: sys },
+{ role: ‘user’, content: usr }
+],
+rendered: { system: sys, user: usr }
+};
+}
+
+// =========================================================
+//  UI HELPERS
+// =========================================================
+function renderMarkdown(text) {
+if (!text) return ‘<em class="placeholder">(sin contenido)</em>’;
+if (window.marked) {
+marked.setOptions({ breaks: true, gfm: true });
+return marked.parse(text);
+}
+return text.replace(/\n/g, ‘<br>’);
 }
 
 function escapeHtml(s) {
-  return String(s)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
-}
-
-function setPhaseStatus(phaseId, statusKey, text) {
-  const phase = document.getElementById(phaseId);
-  phase.classList.remove('active', 'completed', 'error');
-  if (statusKey) phase.classList.add(statusKey);
-  const txt = phase.querySelector('.phase-status-text');
-  if (txt) txt.textContent = text;
-}
-
-function clearPhaseGrid(gridId) {
-  document.getElementById(gridId).innerHTML = '';
-}
-
-function setGlobalStatus(text, kind = '') {
-  const el = document.getElementById('globalStatus');
-  el.textContent = text;
-  el.className = 'status-line ' + kind;
+return String(s)
+.replace(/&/g, ‘&’)
+.replace(/</g, ‘<’)
+.replace(/>/g, ‘>’)
+.replace(/”/g, ‘"’)
+.replace(/’/g, ‘'’);
 }
 
 function modelLabelOf(modelId) {
-  const m = MODELS.find(x => x.id === modelId);
-  return m ? m.label.replace(/\s\(.*?\)$/, '') : modelId;
+const m = MODELS.find(x => x.id === modelId);
+if (!m) return modelId;
+return m.label.replace(/\s(.*?)$/, ‘’);
 }
 
-// ============= ORCHESTRATION =============
+function makeResponseCard(agentKey, modelLabel, effort, isSynthesis = false) {
+const agent = AGENTS.find(a => a.key === agentKey);
+const card = document.createElement(‘div’);
+card.className = ‘response-card thinking’ + (isSynthesis ? ’ synthesis-card’ : ‘’);
+card.dataset.agent = agentKey;
+card.innerHTML = `<div class="rc-header"> <div class="rc-id"> <div class="rc-name">${agent.name}</div> <div class="rc-meta">${modelLabel} // effort=${effort}</div> </div> <div class="rc-state thinking">PENSANDO</div> </div> <div class="rc-body"> <em class="placeholder">Esperando respuesta del oráculo…</em> </div>`;
+return card;
+}
+
+function fillResponseCard(card, result, sentPrompt) {
+card.classList.remove(‘thinking’);
+const stateEl = card.querySelector(’.rc-state’);
+const bodyEl = card.querySelector(’.rc-body’);
+
+if (result.error) {
+stateEl.className = ‘rc-state error’;
+stateEl.textContent = ‘ERROR’;
+bodyEl.innerHTML = `<div class="error-block">${escapeHtml(result.error)}</div>`;
+return;
+}
+
+stateEl.className = ‘rc-state done’;
+stateEl.textContent = ‘OK’;
+bodyEl.innerHTML = renderMarkdown(result.content);
+
+// Build footer with toggles
+const footer = document.createElement(‘div’);
+footer.className = ‘rc-footer’;
+
+if (result.reasoning && result.reasoning.trim()) {
+const btn = document.createElement(‘button’);
+btn.className = ‘rc-footer-btn’;
+btn.textContent = `▸ Razonamiento (${result.reasoning.length} ch)`;
+const block = document.createElement(‘div’);
+block.className = ‘rc-collapsible’;
+block.textContent = result.reasoning;
+btn.addEventListener(‘click’, () => {
+block.classList.toggle(‘open’);
+btn.textContent = (block.classList.contains(‘open’) ? ‘▾’ : ‘▸’) + btn.textContent.slice(1);
+});
+footer.appendChild(btn);
+card.appendChild(footer);
+card.appendChild(block);
+}
+
+if (sentPrompt) {
+const btn = document.createElement(‘button’);
+btn.className = ‘rc-footer-btn’;
+btn.textContent = ‘▸ Prompt enviado’;
+const block = document.createElement(‘div’);
+block.className = ‘rc-collapsible’;
+block.textContent = `═══ SYSTEM ═══\n${sentPrompt.system}\n\n═══ USER ═══\n${sentPrompt.user}`;
+btn.addEventListener(‘click’, () => {
+block.classList.toggle(‘open’);
+btn.textContent = (block.classList.contains(‘open’) ? ‘▾’ : ‘▸’) + btn.textContent.slice(1);
+});
+if (!card.querySelector(’.rc-footer’)) card.appendChild(footer);
+else card.querySelector(’.rc-footer’).appendChild(btn);
+card.appendChild(block);
+}
+}
+
+function setPhaseStatus(phaseId, statusKey, text) {
+const phase = document.getElementById(phaseId);
+phase.classList.remove(‘active’, ‘completed’, ‘error’);
+if (statusKey) phase.classList.add(statusKey);
+const txt = phase.querySelector(’.phase-state-text’);
+if (txt) txt.textContent = text;
+}
+
+function clearPhaseGrid(gridId) { document.getElementById(gridId).innerHTML = ‘’; }
+
+function setGlobalStatus(text, kind = ‘’) {
+const el = document.getElementById(‘globalStatus’);
+el.className = ’global-status ’ + kind;
+el.innerHTML = `<span class="status-dot ${kind === 'error' ? 'err' : kind === 'success' ? 'ok' : kind === 'working' ? 'warn' : ''}"></span><span>${text}</span>`;
+}
+
+function showToast(msg, kind = ‘’) {
+const t = document.getElementById(‘toast’);
+t.className = ’toast ’ + kind;
+t.textContent = msg;
+t.classList.add(‘show’);
+setTimeout(() => t.classList.remove(‘show’), 2800);
+}
+
+function updateApiStatus() {
+const dot = document.getElementById(‘dot-api’);
+const txt = document.getElementById(‘api-state’);
+if (state.apiKey && state.apiKey.length > 10) {
+dot.className = ‘status-dot ok’;
+txt.textContent = ‘API READY’;
+} else {
+dot.className = ‘status-dot err’;
+txt.textContent = ‘NO API KEY’;
+}
+}
+
+// =========================================================
+//  PHASE ORCHESTRATION
+// =========================================================
 async function runPhase1(question) {
-  setPhaseStatus('phase1', 'active', 'Deliberando…');
-  clearPhaseGrid('phase1Grid');
-  state.results.phase1 = {};
+setPhaseStatus(‘phase1’, ‘active’, ‘EJECUTANDO’);
+clearPhaseGrid(‘phase1Grid’);
+state.results.phase1 = {};
+state.sentPrompts.phase1 = {};
 
-  const grid = document.getElementById('phase1Grid');
-  const cards = {};
-  AGENTS.forEach(a => {
-    const c = makeAgentCard(a.key, modelLabelOf(state.agents[a.key].model), state.agents[a.key].effort);
-    grid.appendChild(c);
-    cards[a.key] = c;
-  });
+const grid = document.getElementById(‘phase1Grid’);
+const cards = {};
+AGENTS.forEach(a => {
+const c = makeResponseCard(a.key, modelLabelOf(state.agents[a.key].model), state.agents[a.key].effort);
+grid.appendChild(c);
+cards[a.key] = c;
+});
 
-  // Run all three in parallel
-  const results = await Promise.all(AGENTS.map(async a => {
-    const cfg = state.agents[a.key];
-    try {
-      const res = await callOpenRouter(cfg.model, cfg.effort, promptPhase1(question));
-      state.results.phase1[a.key] = { ...res, error: null };
-      fillAgentCard(cards[a.key], state.results.phase1[a.key]);
-      return { key: a.key, ok: true };
-    } catch (e) {
-      state.results.phase1[a.key] = { content: '', reasoning: '', error: e.message };
-      fillAgentCard(cards[a.key], state.results.phase1[a.key]);
-      return { key: a.key, ok: false };
-    }
-  }));
+const results = await Promise.all(AGENTS.map(async a => {
+const cfg = state.agents[a.key];
+const built = buildMessages(‘phase1’, { question });
+state.sentPrompts.phase1[a.key] = built.rendered;
+try {
+const res = await callOpenRouter(cfg.model, cfg.effort, built.messages);
+state.results.phase1[a.key] = { …res, error: null };
+fillResponseCard(cards[a.key], state.results.phase1[a.key], built.rendered);
+return { ok: true };
+} catch (e) {
+state.results.phase1[a.key] = { content: ‘’, reasoning: ‘’, error: e.message };
+fillResponseCard(cards[a.key], state.results.phase1[a.key], built.rendered);
+return { ok: false };
+}
+}));
 
-  const allOk = results.every(r => r.ok);
-  if (allOk) {
-    setPhaseStatus('phase1', 'completed', 'Tres respuestas recibidas');
-    return true;
-  } else {
-    setPhaseStatus('phase1', 'error', 'Hubo errores en la ronda 1');
-    return false;
-  }
+const ok = results.every(r => r.ok);
+setPhaseStatus(‘phase1’, ok ? ‘completed’ : ‘error’, ok ? ‘OK · 3/3’ : ‘CON ERRORES’);
+return ok;
 }
 
 async function runPhase2(question) {
-  setPhaseStatus('phase2', 'active', 'Críticas en curso…');
-  clearPhaseGrid('phase2Grid');
-  state.results.phase2 = {};
+setPhaseStatus(‘phase2’, ‘active’, ‘EJECUTANDO’);
+clearPhaseGrid(‘phase2Grid’);
+state.results.phase2 = {};
+state.sentPrompts.phase2 = {};
 
-  const grid = document.getElementById('phase2Grid');
-  const cards = {};
-  AGENTS.forEach(a => {
-    const c = makeAgentCard(a.key, modelLabelOf(state.agents[a.key].model), state.agents[a.key].effort);
-    grid.appendChild(c);
-    cards[a.key] = c;
-  });
+const grid = document.getElementById(‘phase2Grid’);
+const cards = {};
+AGENTS.forEach(a => {
+const c = makeResponseCard(a.key, modelLabelOf(state.agents[a.key].model), state.agents[a.key].effort);
+grid.appendChild(c);
+cards[a.key] = c;
+});
 
-  // For each agent, send anonymized OTHER two responses
-  const results = await Promise.all(AGENTS.map(async a => {
-    const others = AGENTS.filter(x => x.key !== a.key);
-    const otherA = state.results.phase1[others[0].key].content;
-    const otherB = state.results.phase1[others[1].key].content;
-    const cfg = state.agents[a.key];
-    try {
-      const res = await callOpenRouter(cfg.model, cfg.effort, promptPhase2(question, otherA, otherB));
-      state.results.phase2[a.key] = {
-        ...res,
-        error: null,
-        criticOf: [others[0].key, others[1].key]   // remember which two A/B map to
-      };
-      fillAgentCard(cards[a.key], state.results.phase2[a.key]);
-      return { key: a.key, ok: true };
-    } catch (e) {
-      state.results.phase2[a.key] = { content: '', reasoning: '', error: e.message };
-      fillAgentCard(cards[a.key], state.results.phase2[a.key]);
-      return { key: a.key, ok: false };
-    }
-  }));
-
-  const allOk = results.every(r => r.ok);
-  setPhaseStatus('phase2', allOk ? 'completed' : 'error',
-                 allOk ? 'Críticas cruzadas completadas' : 'Hubo errores en la ronda 2');
-  return allOk;
+const results = await Promise.all(AGENTS.map(async a => {
+const others = AGENTS.filter(x => x.key !== a.key);
+const responseA = state.results.phase1[others[0].key].content;
+const responseB = state.results.phase1[others[1].key].content;
+const built = buildMessages(‘phase2’, { question, responseA, responseB });
+state.sentPrompts.phase2[a.key] = built.rendered;
+const cfg = state.agents[a.key];
+try {
+const res = await callOpenRouter(cfg.model, cfg.effort, built.messages);
+state.results.phase2[a.key] = {
+…res,
+error: null,
+criticOf: [others[0].key, others[1].key]
+};
+fillResponseCard(cards[a.key], state.results.phase2[a.key], built.rendered);
+return { ok: true };
+} catch (e) {
+state.results.phase2[a.key] = { content: ‘’, reasoning: ‘’, error: e.message };
+fillResponseCard(cards[a.key], state.results.phase2[a.key], built.rendered);
+return { ok: false };
 }
+}));
 
-async function runPhase3(question) {
-  setPhaseStatus('phase3', 'active', 'Refinando con ACH…');
-  clearPhaseGrid('phase3Grid');
-  state.results.phase3 = {};
-
-  const grid = document.getElementById('phase3Grid');
-  const cards = {};
-  AGENTS.forEach(a => {
-    const c = makeAgentCard(a.key, modelLabelOf(state.agents[a.key].model), state.agents[a.key].effort);
-    grid.appendChild(c);
-    cards[a.key] = c;
-  });
-
-  // Compose "critiques received" and "critiques observed" per agent
-  const results = await Promise.all(AGENTS.map(async a => {
-    // Critiques received: critiques where THIS agent appears as A or B in someone else's phase2
-    const received = [];
-    const observed = [];
-
-    AGENTS.forEach(critic => {
-      if (critic.key === a.key) return;
-      const critiqueResult = state.results.phase2[critic.key];
-      if (!critiqueResult || critiqueResult.error) return;
-      const [keyA, keyB] = critiqueResult.criticOf;
-      const fullCritique = critiqueResult.content;
-      // Try to split by section A vs B
-      const parts = splitCritiqueAB(fullCritique);
-      if (a.key === keyA) {
-        received.push(`— Crítica de ${critic.key.toUpperCase()} a tu respuesta:\n${parts.a || fullCritique}`);
-        observed.push(`— ${critic.key.toUpperCase()} criticó también a ${keyB.toUpperCase()}:\n${parts.b || ''}`);
-      } else if (a.key === keyB) {
-        received.push(`— Crítica de ${critic.key.toUpperCase()} a tu respuesta:\n${parts.b || fullCritique}`);
-        observed.push(`— ${critic.key.toUpperCase()} criticó también a ${keyA.toUpperCase()}:\n${parts.a || ''}`);
-      }
-    });
-
-    const cfg = state.agents[a.key];
-    try {
-      const res = await callOpenRouter(cfg.model, cfg.effort,
-        promptPhase3(question,
-          state.results.phase1[a.key].content,
-          received.join('\n\n'),
-          observed.join('\n\n')));
-      state.results.phase3[a.key] = { ...res, error: null };
-      fillAgentCard(cards[a.key], state.results.phase3[a.key]);
-      return { key: a.key, ok: true };
-    } catch (e) {
-      state.results.phase3[a.key] = { content: '', reasoning: '', error: e.message };
-      fillAgentCard(cards[a.key], state.results.phase3[a.key]);
-      return { key: a.key, ok: false };
-    }
-  }));
-
-  const allOk = results.every(r => r.ok);
-  setPhaseStatus('phase3', allOk ? 'completed' : 'error',
-                 allOk ? 'Refinamientos completados' : 'Hubo errores en la ronda 3');
-  return allOk;
+const ok = results.every(r => r.ok);
+setPhaseStatus(‘phase2’, ok ? ‘completed’ : ‘error’, ok ? ‘OK · 3/3’ : ‘CON ERRORES’);
+return ok;
 }
 
 function splitCritiqueAB(text) {
-  // Try to split a critique into the "RESPUESTA A" and "RESPUESTA B" parts
-  if (!text) return { a: '', b: '' };
-  const idxB = text.search(/##\s*CR[ÍI]TICA\s+A\s+LA\s+RESPUESTA\s+B/i);
-  if (idxB === -1) return { a: text, b: '' };
-  return {
-    a: text.slice(0, idxB).trim(),
-    b: text.slice(idxB).trim()
-  };
+if (!text) return { a: ‘’, b: ‘’ };
+const idxB = text.search(/##\s*CR[ÍI]TICA\s+A\s+LA\s+RESPUESTA\s+B/i);
+if (idxB === -1) return { a: text, b: ‘’ };
+return { a: text.slice(0, idxB).trim(), b: text.slice(idxB).trim() };
+}
+
+async function runPhase3(question) {
+setPhaseStatus(‘phase3’, ‘active’, ‘EJECUTANDO’);
+clearPhaseGrid(‘phase3Grid’);
+state.results.phase3 = {};
+state.sentPrompts.phase3 = {};
+
+const grid = document.getElementById(‘phase3Grid’);
+const cards = {};
+AGENTS.forEach(a => {
+const c = makeResponseCard(a.key, modelLabelOf(state.agents[a.key].model), state.agents[a.key].effort);
+grid.appendChild(c);
+cards[a.key] = c;
+});
+
+const results = await Promise.all(AGENTS.map(async a => {
+const received = [];
+const observed = [];
+
+```
+AGENTS.forEach(critic => {
+  if (critic.key === a.key) return;
+  const cr = state.results.phase2[critic.key];
+  if (!cr || cr.error) return;
+  const [keyA, keyB] = cr.criticOf;
+  const parts = splitCritiqueAB(cr.content);
+  if (a.key === keyA) {
+    received.push(`— Crítica de ${critic.key.toUpperCase()} a tu respuesta:\n${parts.a || cr.content}`);
+    observed.push(`— ${critic.key.toUpperCase()} criticó también a otro experto:\n${parts.b || ''}`);
+  } else if (a.key === keyB) {
+    received.push(`— Crítica de ${critic.key.toUpperCase()} a tu respuesta:\n${parts.b || cr.content}`);
+    observed.push(`— ${critic.key.toUpperCase()} criticó también a otro experto:\n${parts.a || ''}`);
+  }
+});
+
+const built = buildMessages('phase3', {
+  question,
+  ownResponse: state.results.phase1[a.key].content,
+  critiquesReceived: received.join('\n\n'),
+  critiquesObserved: observed.join('\n\n')
+});
+state.sentPrompts.phase3[a.key] = built.rendered;
+const cfg = state.agents[a.key];
+try {
+  const res = await callOpenRouter(cfg.model, cfg.effort, built.messages);
+  state.results.phase3[a.key] = { ...res, error: null };
+  fillResponseCard(cards[a.key], state.results.phase3[a.key], built.rendered);
+  return { ok: true };
+} catch (e) {
+  state.results.phase3[a.key] = { content: '', reasoning: '', error: e.message };
+  fillResponseCard(cards[a.key], state.results.phase3[a.key], built.rendered);
+  return { ok: false };
+}
+```
+
+}));
+
+const ok = results.every(r => r.ok);
+setPhaseStatus(‘phase3’, ok ? ‘completed’ : ‘error’, ok ? ‘OK · 3/3’ : ‘CON ERRORES’);
+return ok;
 }
 
 async function runPhase4(question) {
-  setPhaseStatus('phase4', 'active', 'Agatha redacta el dictamen…');
-  clearPhaseGrid('phase4Grid');
-  state.results.phase4 = {};
+setPhaseStatus(‘phase4’, ‘active’, ‘EJECUTANDO’);
+clearPhaseGrid(‘phase4Grid’);
+state.results.phase4 = {};
+state.sentPrompts.phase4 = {};
 
-  const grid = document.getElementById('phase4Grid');
-  const card = makeAgentCard('agatha', modelLabelOf(state.agents.agatha.model), state.agents.agatha.effort);
-  card.classList.add('synthesis-card');
-  grid.appendChild(card);
+const grid = document.getElementById(‘phase4Grid’);
+const card = makeResponseCard(‘agatha’, modelLabelOf(state.agents.agatha.model), state.agents.agatha.effort, true);
+grid.appendChild(card);
 
-  const refined = AGENTS.map(a => state.results.phase3[a.key]?.content || '(sin refinamiento)');
-  const allCritiques = AGENTS.map(a =>
-    `## Críticas emitidas por ${a.name}:\n${state.results.phase2[a.key]?.content || ''}`
-  ).join('\n\n');
+const refined = AGENTS.map(a => state.results.phase3[a.key]?.content || ‘(sin refinamiento)’);
+const allCritiques = AGENTS.map(a =>
+`## Críticas emitidas por ${a.name}:\n${state.results.phase2[a.key]?.content || ''}`
+).join(’\n\n’);
 
-  const cfg = state.agents.agatha;
-  try {
-    const res = await callOpenRouter(cfg.model, cfg.effort,
-      promptPhase4(question, refined[0], refined[1], refined[2], allCritiques));
-    state.results.phase4.agatha = { ...res, error: null };
-    fillAgentCard(card, state.results.phase4.agatha);
-    setPhaseStatus('phase4', 'completed', 'Dictamen final entregado');
-    return true;
-  } catch (e) {
-    state.results.phase4.agatha = { content: '', reasoning: '', error: e.message };
-    fillAgentCard(card, state.results.phase4.agatha);
-    setPhaseStatus('phase4', 'error', 'Error en el dictamen final');
-    return false;
-  }
+const built = buildMessages(‘phase4’, {
+question,
+refined1: refined[0],
+refined2: refined[1],
+refined3: refined[2],
+allCritiques
+});
+state.sentPrompts.phase4.agatha = built.rendered;
+
+const cfg = state.agents.agatha;
+try {
+const res = await callOpenRouter(cfg.model, cfg.effort, built.messages);
+state.results.phase4.agatha = { …res, error: null };
+fillResponseCard(card, state.results.phase4.agatha, built.rendered);
+setPhaseStatus(‘phase4’, ‘completed’, ‘DICTAMEN ENTREGADO’);
+return true;
+} catch (e) {
+state.results.phase4.agatha = { content: ‘’, reasoning: ‘’, error: e.message };
+fillResponseCard(card, state.results.phase4.agatha, built.rendered);
+setPhaseStatus(‘phase4’, ‘error’, ‘ERROR EN SÍNTESIS’);
+return false;
+}
 }
 
 async function runFullPipeline() {
-  const question = document.getElementById('question').value.trim();
-  if (!question) {
-    setGlobalStatus('Falta la pregunta', 'error');
-    return;
-  }
-  if (!state.apiKey) {
-    setGlobalStatus('Falta la API key de OpenRouter', 'error');
-    return;
-  }
-  state.question = question;
+const question = document.getElementById(‘question’).value.trim();
+if (!question) {
+showToast(‘Falta la pregunta’, ‘error’);
+setGlobalStatus(‘FALTA PREGUNTA’, ‘error’);
+return;
+}
+if (!state.apiKey) {
+showToast(‘Configura tu API key en SISTEMA’, ‘error’);
+setGlobalStatus(‘FALTA API KEY’, ‘error’);
+return;
+}
+state.question = question;
+saveState();
 
-  // Reset phase visuals
-  ['phase1','phase2','phase3','phase4'].forEach(p => {
-    setPhaseStatus(p, '', 'En espera');
-    clearPhaseGrid(p + 'Grid');
-  });
+[‘phase1’,‘phase2’,‘phase3’,‘phase4’].forEach(p => {
+setPhaseStatus(p, ‘’, ‘EN ESPERA’);
+clearPhaseGrid(p + ‘Grid’);
+});
 
-  document.getElementById('convoke').disabled = true;
-  setGlobalStatus('Convocando concilio…');
+const btn = document.getElementById(‘convoke’);
+btn.disabled = true;
+btn.querySelector(‘span’).textContent = ‘◌ Procesando…’;
+setGlobalStatus(‘CONVOCANDO CONCILIO’, ‘working’);
 
-  try {
-    const ok1 = await runPhase1(question);
-    if (!ok1) { setGlobalStatus('Detenido tras ronda 1', 'error'); return; }
+try {
+const ok1 = await runPhase1(question);
+if (!ok1) { setGlobalStatus(‘DETENIDO TRAS FASE 01’, ‘error’); return; }
 
-    setGlobalStatus('Pasando a crítica cruzada…');
-    const ok2 = await runPhase2(question);
-    if (!ok2) { setGlobalStatus('Detenido tras ronda 2', 'error'); return; }
+```
+setGlobalStatus('FASE 02 // CRÍTICA CRUZADA', 'working');
+const ok2 = await runPhase2(question);
+if (!ok2) { setGlobalStatus('DETENIDO TRAS FASE 02', 'error'); return; }
 
-    setGlobalStatus('Refinando respuestas…');
-    const ok3 = await runPhase3(question);
-    if (!ok3) { setGlobalStatus('Detenido tras ronda 3', 'error'); return; }
+setGlobalStatus('FASE 03 // REFINAMIENTO', 'working');
+const ok3 = await runPhase3(question);
+if (!ok3) { setGlobalStatus('DETENIDO TRAS FASE 03', 'error'); return; }
 
-    setGlobalStatus('Síntesis final por Agatha…');
-    const ok4 = await runPhase4(question);
-    if (!ok4) { setGlobalStatus('Síntesis con error', 'error'); return; }
+setGlobalStatus('FASE 04 // SÍNTESIS', 'working');
+const ok4 = await runPhase4(question);
+if (!ok4) { setGlobalStatus('SÍNTESIS CON ERROR', 'error'); return; }
 
-    setGlobalStatus('Dictamen completo', 'success');
-  } catch (e) {
-    setGlobalStatus('Error: ' + e.message, 'error');
-  } finally {
-    document.getElementById('convoke').disabled = false;
-  }
+setGlobalStatus('DICTAMEN COMPLETO', 'success');
+showToast('Dictamen completo', 'success');
+```
+
+} catch (e) {
+setGlobalStatus(’ERROR: ’ + e.message.slice(0, 40), ‘error’);
+showToast(’Error: ’ + e.message.slice(0, 60), ‘error’);
+} finally {
+btn.disabled = false;
+btn.querySelector(‘span’).textContent = ‘► Convocar concilio’;
+}
 }
 
 function resetAll() {
-  ['phase1','phase2','phase3','phase4'].forEach(p => {
-    setPhaseStatus(p, '', 'En espera');
-    clearPhaseGrid(p + 'Grid');
-  });
-  state.results = { phase1: {}, phase2: {}, phase3: {}, phase4: {} };
-  setGlobalStatus('En reposo');
+[‘phase1’,‘phase2’,‘phase3’,‘phase4’].forEach(p => {
+setPhaseStatus(p, ‘’, ‘EN ESPERA’);
+clearPhaseGrid(p + ‘Grid’);
+});
+state.results = { phase1: {}, phase2: {}, phase3: {}, phase4: {} };
+state.sentPrompts = { phase1: {}, phase2: {}, phase3: {}, phase4: {} };
+setGlobalStatus(‘EN REPOSO’);
 }
 
-// ============= INIT =============
-document.addEventListener('DOMContentLoaded', () => {
-  buildAgentConfigCards();
-  loadConfig();
+// =========================================================
+//  INIT
+// =========================================================
+document.addEventListener(‘DOMContentLoaded’, () => {
+loadState();
+buildAgentConfigCards();
+buildProtocolEditors();
+setupTabs();
 
-  // Open config by default if no API key
-  if (!state.apiKey) {
-    document.getElementById('configToggle').classList.add('open');
-    document.getElementById('configPanel').classList.add('open');
-  }
+// Restore inputs
+document.getElementById(‘apiKey’).value = state.apiKey;
+document.getElementById(‘question’).value = state.question;
+updateApiStatus();
 
-  document.getElementById('configToggle').addEventListener('click', () => {
-    document.getElementById('configToggle').classList.toggle('open');
-    document.getElementById('configPanel').classList.toggle('open');
-  });
+document.getElementById(‘apiKey’).addEventListener(‘input’, e => {
+state.apiKey = e.target.value.trim();
+updateApiStatus();
+saveState();
+});
 
-  document.getElementById('apiKey').addEventListener('input', e => {
-    state.apiKey = e.target.value.trim();
-    saveConfig();
-  });
+document.getElementById(‘question’).addEventListener(‘input’, e => {
+state.question = e.target.value;
+saveState();
+});
 
-  document.getElementById('toggleKey').addEventListener('click', () => {
-    const inp = document.getElementById('apiKey');
-    const btn = document.getElementById('toggleKey');
-    if (inp.type === 'password') { inp.type = 'text'; btn.textContent = 'OCULTAR'; }
-    else { inp.type = 'password'; btn.textContent = 'VER'; }
-  });
+document.getElementById(‘toggleKey’).addEventListener(‘click’, () => {
+const inp = document.getElementById(‘apiKey’);
+const btn = document.getElementById(‘toggleKey’);
+if (inp.type === ‘password’) { inp.type = ‘text’; btn.textContent = ‘OCULTAR’; }
+else { inp.type = ‘password’; btn.textContent = ‘VER’; }
+});
 
-  document.getElementById('convoke').addEventListener('click', runFullPipeline);
-  document.getElementById('reset').addEventListener('click', resetAll);
+document.getElementById(‘convoke’).addEventListener(‘click’, runFullPipeline);
+document.getElementById(‘reset’).addEventListener(‘click’, resetAll);
 });
 </script>
 
