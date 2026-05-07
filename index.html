@@ -4,1436 +4,1036 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TEMPLE // Concilium System</title>
+<title>TEMPLE // CONCILIUM</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/11.1.1/marked.min.js"></script>
 <style>
-/* ================================================================
-   TEMPLE — Concilium Decision System
-   Minority Report inspired HUD aesthetic
-   ================================================================ */
-
 :root {
-–bg-void: #04070d;
-–bg-deep: #070c16;
-–bg-panel: rgba(10, 22, 40, 0.55);
-–bg-panel-solid: #0a1628;
-–bg-elevated: rgba(15, 30, 55, 0.85);
-
-–line: rgba(0, 200, 255, 0.14);
-–line-strong: rgba(0, 220, 255, 0.32);
-–line-bright: rgba(0, 230, 255, 0.7);
-
-–cyan: #00e5ff;
-–cyan-dim: #00a8c9;
-–cyan-glow: rgba(0, 229, 255, 0.5);
-
-–amber: #ffb340;
-–magenta: #ff3d97;
-–green: #00ff95;
-–red: #ff4565;
-
-–agatha: #ff6b9d;
-–arthur: #00e5ff;
-–dashiell: #ffb340;
-
-–ink: #e8f1fb;
-–ink-bright: #ffffff;
-–ink-dim: #8090a8;
-–ink-faded: #4a5970;
-
-–grid-size: 32px;
+  --bg-0: #050a12;
+  --bg-1: #0a121e;
+  --bg-2: #0f1a2c;
+  --bg-3: #142440;
+  --line: #1f3354;
+  --line-bright: #2d4d7a;
+  --ink: #c8e1ff;
+  --ink-dim: #6b8db5;
+  --ink-faded: #3d5a82;
+  --cyan: #00e5ff;
+  --cyan-dim: #0099b3;
+  --cyan-glow: rgba(0, 229, 255, 0.5);
+  --amber: #ffb547;
+  --red: #ff4d6d;
+  --green: #5eea8d;
+  --magenta: #ff5ee7;
+  --agatha: #ffd166;
+  --arthur:  #5eead4;
+  --dashiell: #ff7eb6;
 }
 
 - { box-sizing: border-box; margin: 0; padding: 0; }
 
 html, body {
-background: var(–bg-void);
+height: 100%;
+overflow: hidden;
+background: var(–bg-0);
 color: var(–ink);
-font-family: ‘IBM Plex Sans’, sans-serif;
-font-size: 15px;
-line-height: 1.5;
-min-height: 100vh;
-overflow-x: hidden;
+font-family: ‘JetBrains Mono’, ‘Courier New’, monospace;
+font-size: 12px;
+line-height: 1.45;
+font-weight: 400;
 -webkit-font-smoothing: antialiased;
 }
 
-/* ===== ATMOSPHERIC BACKGROUND ===== */
 body {
 background-image:
-radial-gradient(ellipse 90% 60% at 20% 0%, rgba(0, 100, 180, 0.25) 0%, transparent 60%),
-radial-gradient(ellipse 80% 50% at 80% 100%, rgba(120, 30, 100, 0.15) 0%, transparent 60%),
-linear-gradient(180deg, var(–bg-void) 0%, var(–bg-deep) 100%);
-background-attachment: fixed;
+radial-gradient(ellipse at 15% 0%, rgba(0, 229, 255, 0.06) 0%, transparent 45%),
+radial-gradient(ellipse at 85% 100%, rgba(255, 94, 231, 0.04) 0%, transparent 50%),
+linear-gradient(180deg, var(–bg-0) 0%, #030609 100%);
+position: relative;
 }
 
 body::before {
 content: ‘’;
 position: fixed;
 inset: 0;
+pointer-events: none;
 background-image:
-linear-gradient(rgba(0, 200, 255, 0.025) 1px, transparent 1px),
-linear-gradient(90deg, rgba(0, 200, 255, 0.025) 1px, transparent 1px);
-background-size: var(–grid-size) var(–grid-size);
-pointer-events: none;
+linear-gradient(rgba(0, 229, 255, 0.025) 1px, transparent 1px),
+linear-gradient(90deg, rgba(0, 229, 255, 0.025) 1px, transparent 1px);
+background-size: 40px 40px;
+z-index: 0;
+}
+
+button { font-family: inherit; cursor: pointer; }
+input, textarea, select { font-family: inherit; }
+
+/* ========== APP LAYOUT ========== */
+.app {
+position: relative;
 z-index: 1;
-mask-image: radial-gradient(ellipse at center, black 30%, transparent 90%);
-}
-
-body::after {
-content: ‘’;
-position: fixed;
-inset: 0;
-background: repeating-linear-gradient(
-0deg,
-transparent 0,
-transparent 2px,
-rgba(0, 200, 255, 0.012) 2px,
-rgba(0, 200, 255, 0.012) 4px
-);
-pointer-events: none;
-z-index: 1;
-}
-
-/* ===== HEADER ===== */
-.topbar {
-position: sticky;
-top: 0;
-z-index: 100;
-background: rgba(4, 8, 16, 0.85);
-backdrop-filter: blur(12px);
--webkit-backdrop-filter: blur(12px);
-border-bottom: 1px solid var(–line);
-padding: 14px 28px;
 display: grid;
-grid-template-columns: 1fr auto 1fr;
-align-items: center;
-gap: 24px;
+grid-template-rows: 44px 38px 64px 1fr 24px;
+height: 100vh;
+padding: 12px;
+gap: 10px;
 }
 
-.brand {
-display: flex;
-align-items: center;
-gap: 14px;
-}
-
-.brand-mark {
-width: 36px;
-height: 36px;
-position: relative;
-display: grid;
-place-items: center;
-}
-
-.brand-mark::before, .brand-mark::after {
-content: ‘’;
-position: absolute;
-inset: 0;
-border: 1px solid var(–cyan);
-}
-.brand-mark::before { transform: rotate(45deg); opacity: 0.5; }
-.brand-mark::after { animation: rotate 12s linear infinite; opacity: 0.8; }
-
-.brand-mark-inner {
-width: 8px;
-height: 8px;
-background: var(–cyan);
-box-shadow: 0 0 12px var(–cyan-glow);
-z-index: 2;
-}
-
-@keyframes rotate {
-from { transform: rotate(0deg); }
-to { transform: rotate(360deg); }
-}
-
-.brand-text {
-display: flex;
-flex-direction: column;
-line-height: 1;
-}
-.brand-name {
-font-family: ‘Rajdhani’, sans-serif;
-font-size: 24px;
-font-weight: 600;
-letter-spacing: 0.32em;
-color: var(–ink-bright);
-}
-.brand-tagline {
-font-family: ‘JetBrains Mono’, monospace;
-font-size: 9px;
-letter-spacing: 0.28em;
-color: var(–cyan);
-margin-top: 4px;
-text-transform: uppercase;
-}
-
-/* Tabs in topbar center */
-.tabs {
-display: flex;
-gap: 0;
-border: 1px solid var(–line-strong);
-background: rgba(0, 0, 0, 0.3);
-}
-
-.tab-btn {
-background: transparent;
-border: none;
-color: var(–ink-dim);
-padding: 10px 22px;
-font-family: ‘Rajdhani’, sans-serif;
-font-size: 13px;
-font-weight: 600;
-letter-spacing: 0.18em;
-text-transform: uppercase;
-cursor: pointer;
-transition: all 0.2s;
-position: relative;
-border-right: 1px solid var(–line);
-}
-.tab-btn:last-child { border-right: none; }
-.tab-btn:hover { color: var(–ink); background: rgba(0, 229, 255, 0.05); }
-.tab-btn.active {
-color: var(–cyan);
-background: rgba(0, 229, 255, 0.1);
-text-shadow: 0 0 8px var(–cyan-glow);
-}
-.tab-btn.active::after {
-content: ‘’;
-position: absolute;
-left: 0; right: 0; bottom: -1px;
-height: 2px;
-background: var(–cyan);
-box-shadow: 0 0 8px var(–cyan);
-}
-
-.tab-num {
-font-family: ‘JetBrains Mono’, monospace;
-font-size: 10px;
-color: var(–ink-faded);
-margin-right: 6px;
-}
-.tab-btn.active .tab-num { color: var(–cyan-dim); }
-
-/* Right side status */
-.system-status {
-display: flex;
-align-items: center;
-justify-content: flex-end;
-gap: 18px;
-font-family: ‘JetBrains Mono’, monospace;
-font-size: 10px;
-letter-spacing: 0.16em;
-text-transform: uppercase;
-color: var(–ink-dim);
-}
-
-.status-pill {
-display: flex;
-align-items: center;
-gap: 8px;
-}
-
-.status-dot {
-width: 8px;
-height: 8px;
-border-radius: 50%;
-background: var(–ink-faded);
-position: relative;
-}
-.status-dot.ok { background: var(–green); box-shadow: 0 0 8px rgba(0, 255, 149, 0.6); }
-.status-dot.ok::before {
-content: ‘’;
-position: absolute;
-inset: -3px;
-border-radius: 50%;
-border: 1px solid var(–green);
-opacity: 0.4;
-animation: pulse-ring 2s ease-out infinite;
-}
-.status-dot.warn { background: var(–amber); }
-.status-dot.err { background: var(–red); }
-
-@keyframes pulse-ring {
-0% { transform: scale(0.8); opacity: 0.6; }
-100% { transform: scale(2); opacity: 0; }
-}
-
-/* ===== MAIN ===== */
-.main {
-position: relative;
-z-index: 2;
-max-width: 1400px;
-margin: 0 auto;
-padding: 36px 28px 80px;
-}
-
-.tab-content {
-display: none;
-animation: fadeIn 0.4s ease;
-}
-.tab-content.active { display: block; }
-
-@keyframes fadeIn {
-from { opacity: 0; transform: translateY(8px); }
-to { opacity: 1; transform: translateY(0); }
-}
-
-/* ===== PANELS ===== */
-.panel {
-background: var(–bg-panel);
-backdrop-filter: blur(8px);
--webkit-backdrop-filter: blur(8px);
-border: 1px solid var(–line);
-position: relative;
-padding: 28px;
-}
-
-.panel.with-corners::before,
-.panel.with-corners::after {
-content: ‘’;
-position: absolute;
-width: 16px;
-height: 16px;
-border: 1px solid var(–cyan);
-pointer-events: none;
-}
-.panel.with-corners::before {
-top: -1px; left: -1px;
-border-right: none;
-border-bottom: none;
-}
-.panel.with-corners::after {
-bottom: -1px; right: -1px;
-border-left: none;
-border-top: none;
-}
-
-.panel-corner-tr,
-.panel-corner-bl {
-position: absolute;
-width: 16px;
-height: 16px;
-border: 1px solid var(–cyan);
-pointer-events: none;
-}
-.panel-corner-tr {
-top: -1px; right: -1px;
-border-left: none;
-border-bottom: none;
-}
-.panel-corner-bl {
-bottom: -1px; left: -1px;
-border-right: none;
-border-top: none;
-}
-
-.panel-header {
+/* ========== HEADER ========== */
+.head {
 display: flex;
 align-items: center;
 justify-content: space-between;
-gap: 16px;
-margin-bottom: 20px;
-padding-bottom: 14px;
-border-bottom: 1px solid var(–line);
+padding: 0 14px;
+border: 1px solid var(–line);
+background: linear-gradient(90deg, rgba(0,229,255,0.04) 0%, transparent 100%);
+position: relative;
 }
+.head::before, .head::after,
+.bracketed::before, .bracketed::after {
+content: ‘’;
+position: absolute;
+width: 8px; height: 8px;
+border: 1px solid var(–cyan);
+}
+.head::before, .bracketed::before { top: -1px; left: -1px; border-right: none; border-bottom: none; }
+.head::after,  .bracketed::after  { bottom: -1px; right: -1px; border-left: none; border-top: none; }
 
-.panel-title {
-font-family: ‘Rajdhani’, sans-serif;
-font-size: 18px;
-font-weight: 600;
-letter-spacing: 0.18em;
-color: var(–ink-bright);
-text-transform: uppercase;
+.brand {
 display: flex;
-align-items: center;
-gap: 10px;
+align-items: baseline;
+gap: 14px;
 }
-
-.panel-title .marker {
-display: inline-block;
-width: 4px;
-height: 18px;
-background: var(–cyan);
-box-shadow: 0 0 8px var(–cyan-glow);
+.brand-name {
+font-size: 16px;
+font-weight: 700;
+letter-spacing: 0.32em;
+color: var(–cyan);
+text-shadow: 0 0 12px var(–cyan-glow);
 }
-
-.panel-meta {
-font-family: ‘JetBrains Mono’, monospace;
-font-size: 10px;
-letter-spacing: 0.18em;
-text-transform: uppercase;
+.brand-sub {
+font-size: 9px;
+letter-spacing: 0.4em;
 color: var(–ink-faded);
 }
-
-.panel-section {
-margin-bottom: 32px;
-}
-.panel-section:last-child { margin-bottom: 0; }
-
-.section-label {
-font-family: ‘JetBrains Mono’, monospace;
-font-size: 10px;
-letter-spacing: 0.24em;
-text-transform: uppercase;
-color: var(–cyan);
-margin-bottom: 12px;
+.head-status {
 display: flex;
 align-items: center;
 gap: 10px;
+font-size: 10px;
+letter-spacing: 0.18em;
+color: var(–ink-dim);
 }
-
-.section-label::before {
-content: ‘’;
-width: 12px;
-height: 1px;
+.head-status .blink {
+width: 6px; height: 6px;
 background: var(–cyan);
+box-shadow: 0 0 8px var(–cyan);
+animation: blink 1.6s ease-in-out infinite;
+}
+@keyframes blink {
+0%, 100% { opacity: 1; }
+50% { opacity: 0.25; }
+}
+.head-actions { display: flex; gap: 6px; }
+
+.btn {
+background: transparent;
+border: 1px solid var(–line-bright);
+color: var(–ink-dim);
+padding: 6px 12px;
+font-size: 10px;
+letter-spacing: 0.18em;
+font-weight: 500;
+text-transform: uppercase;
+transition: all 0.15s;
+position: relative;
+}
+.btn:hover {
+color: var(–cyan);
+border-color: var(–cyan);
+background: rgba(0, 229, 255, 0.06);
+}
+.btn:active { transform: translateY(1px); }
+.btn-cta {
+background: rgba(0, 229, 255, 0.1);
+border-color: var(–cyan);
+color: var(–cyan);
+font-weight: 700;
+letter-spacing: 0.22em;
+}
+.btn-cta:hover {
+background: var(–cyan);
+color: var(–bg-0);
+box-shadow: 0 0 18px var(–cyan-glow);
+}
+.btn-cta:disabled {
+opacity: 0.35; cursor: not-allowed; box-shadow: none;
+background: transparent; color: var(–ink-faded); border-color: var(–line);
 }
 
-.section-label::after {
-content: ‘’;
-flex: 1;
-height: 1px;
-background: linear-gradient(90deg, var(–line) 0%, transparent 100%);
+/* ========== PROGRESS BAR ========== */
+.progress {
+display: grid;
+grid-template-columns: repeat(4, 1fr);
+gap: 8px;
+padding: 0;
 }
-
-/* ===== INPUTS ===== */
-label {
-display: block;
+.progress-step {
+display: flex;
+align-items: center;
+gap: 10px;
+padding: 0 14px;
+border: 1px solid var(–line);
+background: var(–bg-1);
+font-size: 10px;
+letter-spacing: 0.16em;
+color: var(–ink-faded);
+position: relative;
+overflow: hidden;
+transition: all 0.3s;
+}
+.progress-step .num {
+font-size: 14px; font-weight: 700;
+color: var(–ink-dim);
 font-family: ‘JetBrains Mono’, monospace;
+min-width: 24px;
+}
+.progress-step .label { font-weight: 500; }
+.progress-step .meta {
+margin-left: auto;
+font-size: 9px;
+color: var(–ink-faded);
+}
+.progress-step.active {
+border-color: var(–cyan);
+color: var(–cyan);
+background: linear-gradient(90deg, rgba(0,229,255,0.12) 0%, var(–bg-1) 100%);
+}
+.progress-step.active .num { color: var(–cyan); text-shadow: 0 0 8px var(–cyan-glow); }
+.progress-step.active::after {
+content: ‘’; position: absolute; left: 0; top: 0; bottom: 0; width: 2px;
+background: var(–cyan); box-shadow: 0 0 8px var(–cyan);
+animation: scan 1.4s ease-in-out infinite;
+}
+@keyframes scan {
+0%, 100% { opacity: 1; }
+50% { opacity: 0.3; }
+}
+.progress-step.done {
+border-color: var(–green);
+color: var(–green);
+}
+.progress-step.done .num { color: var(–green); }
+.progress-step.error { border-color: var(–red); color: var(–red); }
+.progress-step.error .num { color: var(–red); }
+
+/* ========== QUESTION BAR ========== */
+.question-bar {
+display: grid;
+grid-template-columns: 1fr auto;
+gap: 8px;
+border: 1px solid var(–line);
+background: var(–bg-1);
+padding: 8px;
+position: relative;
+}
+.question-bar .prompt-tag {
+position: absolute;
+top: -1px; left: 12px;
+background: var(–bg-0);
+padding: 0 8px;
+font-size: 9px;
+letter-spacing: 0.3em;
+color: var(–cyan);
+transform: translateY(-50%);
+}
+textarea#question {
+width: 100%;
+height: 100%;
+background: transparent;
+border: none;
+color: var(–ink);
+font-size: 13px;
+padding: 8px 12px;
+resize: none;
+outline: none;
+}
+textarea#question::placeholder { color: var(–ink-faded); }
+.question-bar .btn-cta {
+padding: 0 28px;
+height: 100%;
+font-size: 11px;
+}
+
+/* ========== MAIN GRID ========== */
+.grid {
+display: grid;
+grid-template-columns: 1fr 1fr 1fr 1.4fr;
+grid-template-rows: 1fr 1fr 1fr;
+gap: 8px;
+min-height: 0;
+}
+
+.cell {
+position: relative;
+border: 1px solid var(–line);
+background: var(–bg-1);
+display: flex;
+flex-direction: column;
+overflow: hidden;
+min-height: 0;
+transition: border-color 0.2s;
+}
+.cell:not(.empty):hover { border-color: var(–line-bright); cursor: pointer; }
+.cell.thinking { border-color: var(–cyan); animation: thinkingBox 2s ease-in-out infinite; }
+.cell.done { border-color: var(–green); }
+.cell.error { border-color: var(–red); }
+
+@keyframes thinkingBox {
+0%, 100% { box-shadow: 0 0 0 0 rgba(0, 229, 255, 0); }
+50% { box-shadow: inset 0 0 18px rgba(0, 229, 255, 0.15); }
+}
+
+.cell-head {
+display: flex;
+align-items: center;
+gap: 8px;
+padding: 6px 10px;
+border-bottom: 1px solid var(–line);
+background: var(–bg-2);
+font-size: 10px;
+letter-spacing: 0.12em;
+flex-shrink: 0;
+}
+.cell-head .agent-tag {
+font-weight: 700;
+letter-spacing: 0.2em;
+}
+.cell-head .agent-tag[data-agent=“agatha”] { color: var(–agatha); }
+.cell-head .agent-tag[data-agent=“arthur”] { color: var(–arthur); }
+.cell-head .agent-tag[data-agent=“dashiell”] { color: var(–dashiell); }
+
+.cell-head .round-tag {
+color: var(–ink-faded);
+font-size: 9px;
+letter-spacing: 0.18em;
+}
+.cell-head .status-pill {
+margin-left: auto;
+font-size: 8.5px;
+letter-spacing: 0.18em;
+padding: 2px 6px;
+border: 1px solid currentColor;
+color: var(–ink-faded);
+}
+.cell.thinking .status-pill { color: var(–cyan); }
+.cell.done .status-pill { color: var(–green); }
+.cell.error .status-pill { color: var(–red); }
+
+.confidence-pill {
+font-size: 8.5px;
+letter-spacing: 0.12em;
+padding: 2px 5px;
+background: var(–bg-3);
+color: var(–amber);
+margin-left: 4px;
+}
+
+.cell-body {
+flex: 1;
+position: relative;
+overflow: hidden;
+padding: 10px 12px;
+font-size: 11px;
+line-height: 1.55;
+color: var(–ink);
+min-height: 0;
+}
+.cell-body.empty {
+color: var(–ink-faded);
+font-style: italic;
+display: flex;
+align-items: center;
+justify-content: center;
+text-align: center;
+}
+.cell-body::after {
+content: ‘’;
+position: absolute;
+bottom: 0; left: 0; right: 0;
+height: 28px;
+background: linear-gradient(180deg, transparent, var(–bg-1));
+pointer-events: none;
+}
+
+.cell-body h1, .cell-body h2, .cell-body h3 {
+font-size: 11px;
+font-weight: 700;
+letter-spacing: 0.15em;
+text-transform: uppercase;
+margin: 8px 0 4px;
+color: var(–cyan);
+}
+.cell-body h1:first-child, .cell-body h2:first-child, .cell-body h3:first-child { margin-top: 0; }
+.cell-body p { margin-bottom: 6px; }
+.cell-body ul, .cell-body ol { margin: 4px 0 6px 16px; }
+.cell-body li { margin-bottom: 2px; }
+.cell-body strong { color: var(–cyan); font-weight: 600; }
+.cell-body em { color: var(–ink-dim); }
+.cell-body code {
+background: var(–bg-3);
+padding: 0 4px;
+font-size: 10px;
+color: var(–amber);
+}
+
+.thinking-loader {
+display: flex;
+align-items: center;
+justify-content: center;
+gap: 8px;
+height: 100%;
 font-size: 10px;
 letter-spacing: 0.22em;
-color: var(–ink-dim);
+color: var(–cyan);
 text-transform: uppercase;
-margin-bottom: 8px;
+}
+.thinking-loader .dot {
+width: 4px; height: 4px;
+background: var(–cyan);
+border-radius: 50%;
+animation: dotpulse 1s ease-in-out infinite;
+}
+.thinking-loader .dot:nth-child(2) { animation-delay: 0.15s; }
+.thinking-loader .dot:nth-child(3) { animation-delay: 0.3s; }
+.thinking-loader .dot:nth-child(4) { animation-delay: 0.45s; }
+@keyframes dotpulse {
+0%, 100% { opacity: 0.3; transform: scale(1); }
+50% { opacity: 1; transform: scale(1.4); box-shadow: 0 0 6px var(–cyan); }
 }
 
-input[type=“text”], input[type=“password”], textarea, select {
-width: 100%;
-background: rgba(0, 10, 25, 0.6);
-border: 1px solid var(–line-strong);
-color: var(–ink);
-padding: 12px 14px;
-font-family: ‘JetBrains Mono’, monospace;
-font-size: 13px;
-letter-spacing: 0.02em;
-outline: none;
-transition: all 0.2s;
-border-radius: 0;
-}
-
-textarea {
-font-family: ‘IBM Plex Sans’, sans-serif;
-font-size: 14.5px;
-line-height: 1.55;
-resize: vertical;
-min-height: 100px;
-}
-
-textarea.code-area {
-font-family: ‘JetBrains Mono’, monospace;
-font-size: 12.5px;
+.cell-error {
+padding: 10px 12px;
+font-size: 10px;
+color: var(–red);
 line-height: 1.5;
-background: rgba(0, 5, 12, 0.7);
+word-break: break-word;
 }
 
-input:focus, textarea:focus, select:focus {
+/* Verdict cell — special */
+.cell.verdict {
+grid-column: 4;
+grid-row: 1 / -1;
+border-color: var(–amber);
+background: linear-gradient(180deg, rgba(255, 181, 71, 0.04) 0%, var(–bg-1) 100%);
+}
+.cell.verdict .cell-head {
+background: linear-gradient(90deg, rgba(255, 181, 71, 0.08) 0%, var(–bg-2) 100%);
+border-bottom-color: var(–amber);
+}
+.cell.verdict .cell-head .agent-tag { color: var(–amber); }
+.cell.verdict.thinking { border-color: var(–amber); }
+.cell.verdict.thinking .status-pill { color: var(–amber); }
+.cell.verdict .cell-body h1, .cell.verdict .cell-body h2, .cell.verdict .cell-body h3 {
+color: var(–amber);
+}
+.cell.verdict .cell-body strong { color: var(–amber); }
+.cell.verdict .cell-body { font-size: 12px; }
+
+/* ========== FOOTER ========== */
+.foot {
+display: flex;
+align-items: center;
+justify-content: space-between;
+padding: 0 12px;
+font-size: 9px;
+letter-spacing: 0.22em;
+color: var(–ink-faded);
+}
+.foot .signal {
+display: inline-flex;
+align-items: center;
+gap: 6px;
+}
+.foot .signal::before {
+content: ‘’;
+width: 4px; height: 4px;
+background: var(–green);
+border-radius: 50%;
+box-shadow: 0 0 6px var(–green);
+}
+
+/* ========== MODAL ========== */
+.modal-backdrop {
+position: fixed;
+inset: 0;
+background: rgba(3, 6, 9, 0.85);
+backdrop-filter: blur(6px);
+display: none;
+align-items: center;
+justify-content: center;
+z-index: 100;
+padding: 28px;
+}
+.modal-backdrop.open { display: flex; }
+
+.modal {
+background: var(–bg-1);
+border: 1px solid var(–cyan);
+width: 100%;
+max-width: 1100px;
+max-height: 90vh;
+display: flex;
+flex-direction: column;
+position: relative;
+box-shadow: 0 0 40px rgba(0, 229, 255, 0.15);
+}
+.modal::before, .modal::after {
+content: ‘’;
+position: absolute;
+width: 16px; height: 16px;
+border: 1px solid var(–cyan);
+}
+.modal::before { top: -1px; left: -1px; border-right: none; border-bottom: none; }
+.modal::after { bottom: -1px; right: -1px; border-left: none; border-top: none; }
+
+.modal-head {
+display: flex;
+align-items: center;
+padding: 14px 22px;
+border-bottom: 1px solid var(–line);
+background: var(–bg-2);
+}
+.modal-title {
+font-size: 12px;
+letter-spacing: 0.32em;
+color: var(–cyan);
+font-weight: 600;
+text-shadow: 0 0 8px var(–cyan-glow);
+flex: 1;
+}
+.modal-close {
+background: transparent;
+border: 1px solid var(–line-bright);
+color: var(–ink-dim);
+width: 28px; height: 28px;
+font-size: 14px;
+display: flex;
+align-items: center;
+justify-content: center;
+}
+.modal-close:hover { color: var(–red); border-color: var(–red); }
+
+.modal-body {
+flex: 1;
+overflow-y: auto;
+padding: 20px 26px;
+}
+.modal-foot {
+display: flex;
+justify-content: flex-end;
+gap: 8px;
+padding: 12px 22px;
+border-top: 1px solid var(–line);
+background: var(–bg-2);
+}
+
+/* Markdown rendering inside modal */
+.md-content {
+font-size: 13px;
+line-height: 1.65;
+color: var(–ink);
+}
+.md-content h1, .md-content h2, .md-content h3 {
+font-size: 13px;
+font-weight: 700;
+letter-spacing: 0.16em;
+text-transform: uppercase;
+color: var(–cyan);
+margin: 16px 0 8px;
+border-bottom: 1px solid var(–line);
+padding-bottom: 4px;
+}
+.md-content h1 { font-size: 14px; }
+.md-content h3 { font-size: 12px; color: var(–amber); border-bottom: none; }
+.md-content h1:first-child, .md-content h2:first-child, .md-content h3:first-child { margin-top: 0; }
+.md-content p { margin-bottom: 10px; }
+.md-content ul, .md-content ol { margin: 6px 0 10px 22px; }
+.md-content li { margin-bottom: 4px; }
+.md-content strong { color: var(–cyan); }
+.md-content em { color: var(–ink-dim); font-style: italic; }
+.md-content code { background: var(–bg-3); padding: 1px 5px; color: var(–amber); }
+.md-content pre {
+background: var(–bg-3);
+padding: 10px 14px;
+border-left: 2px solid var(–cyan);
+margin: 10px 0;
+overflow-x: auto;
+white-space: pre-wrap;
+word-break: break-word;
+}
+.md-content blockquote {
+border-left: 2px solid var(–ink-faded);
+padding-left: 12px;
+color: var(–ink-dim);
+margin: 8px 0;
+font-style: italic;
+}
+
+/* Modal: settings */
+.section-block {
+margin-bottom: 22px;
+}
+.section-block:last-child { margin-bottom: 0; }
+.section-block-title {
+font-size: 10px;
+letter-spacing: 0.28em;
+color: var(–cyan);
+margin-bottom: 10px;
+padding-bottom: 6px;
+border-bottom: 1px solid var(–line);
+}
+.field {
+margin-bottom: 14px;
+}
+.field:last-child { margin-bottom: 0; }
+.field-label {
+display: block;
+font-size: 9.5px;
+letter-spacing: 0.22em;
+color: var(–ink-dim);
+margin-bottom: 6px;
+text-transform: uppercase;
+}
+.field-input,
+.field-textarea,
+.field-select {
+width: 100%;
+background: var(–bg-0);
+border: 1px solid var(–line);
+color: var(–ink);
+padding: 9px 12px;
+font-size: 12px;
+outline: none;
+transition: border-color 0.15s;
+}
+.field-textarea {
+resize: vertical;
+min-height: 140px;
+font-size: 12px;
+line-height: 1.55;
+}
+.field-input:focus, .field-textarea:focus, .field-select:focus {
 border-color: var(–cyan);
-box-shadow: 0 0 0 1px var(–cyan), 0 0 16px rgba(0, 229, 255, 0.2);
-background: rgba(0, 15, 35, 0.7);
 }
-
-select {
+.field-select {
 appearance: none;
-background-image: url(“data:image/svg+xml,%3Csvg width=‘10’ height=‘6’ xmlns=‘http://www.w3.org/2000/svg’%3E%3Cpath d=‘M0 0l5 6 5-6z’ fill=’%2300e5ff’/%3E%3C/svg%3E”);
+background-image: url(“data:image/svg+xml,%3Csvg width=‘10’ height=‘6’ xmlns=‘http://www.w3.org/2000/svg’%3E%3Cpath d=‘M1 1l4 4 4-4’ stroke=’%2300e5ff’ stroke-width=‘1.2’ fill=‘none’/%3E%3C/svg%3E”);
 background-repeat: no-repeat;
 background-position: right 14px center;
 padding-right: 36px;
 cursor: pointer;
 }
-
-select option {
-background: var(–bg-panel-solid);
-color: var(–ink);
-}
-
-.api-key-wrap {
-position: relative;
-}
-
-.toggle-vis {
-position: absolute;
-right: 8px;
-top: 50%;
-transform: translateY(-50%);
-background: transparent;
-border: 1px solid var(–line);
-color: var(–ink-dim);
-font-family: ‘JetBrains Mono’, monospace;
-font-size: 9px;
-letter-spacing: 0.18em;
-padding: 5px 10px;
-cursor: pointer;
-transition: all 0.2s;
-}
-.toggle-vis:hover { color: var(–cyan); border-color: var(–cyan); }
-
-.note {
-font-family: ‘IBM Plex Sans’, sans-serif;
-font-size: 12px;
-color: var(–ink-dim);
-margin-top: 8px;
-line-height: 1.5;
+.field-select option { background: var(–bg-1); color: var(–ink); }
+.field-hint {
+font-size: 10px;
+color: var(–ink-faded);
+margin-top: 5px;
 font-style: italic;
 }
-
-.note code {
-font-family: ‘JetBrains Mono’, monospace;
-font-size: 11px;
-background: rgba(0, 229, 255, 0.08);
-border: 1px solid var(–line-strong);
-padding: 1px 6px;
-color: var(–cyan);
-font-style: normal;
+.placeholder-tags {
+display: flex;
+flex-wrap: wrap;
+gap: 4px;
+margin-top: 5px;
 }
+.placeholder-tags .tag {
+font-size: 9.5px;
+background: var(–bg-3);
+color: var(–amber);
+padding: 2px 8px;
+border: 1px solid var(–line-bright);
+cursor: pointer;
+letter-spacing: 0.06em;
+}
+.placeholder-tags .tag:hover { background: var(–bg-2); border-color: var(–amber); }
 
-/* ===== AGENT GRID ===== */
-.agents-grid {
+/* agents grid in settings modal */
+.agents-config {
 display: grid;
 grid-template-columns: repeat(3, 1fr);
-gap: 18px;
+gap: 12px;
 }
-
-@media (max-width: 900px) {
-.agents-grid { grid-template-columns: 1fr; }
-}
-
-.agent-config {
-background: rgba(0, 10, 25, 0.6);
+.agent-cfg {
+background: var(–bg-0);
 border: 1px solid var(–line);
-border-top: 2px solid var(–agent-color, var(–cyan));
-padding: 22px 20px;
-position: relative;
-transition: all 0.3s;
+border-top: 2px solid var(–ag-color, var(–cyan));
+padding: 12px;
 }
-
-.agent-config:hover {
-border-color: var(–line-strong);
-background: rgba(0, 15, 35, 0.7);
-}
-
-.agent-config[data-agent=“agatha”] { –agent-color: var(–agatha); }
-.agent-config[data-agent=“arthur”] { –agent-color: var(–arthur); }
-.agent-config[data-agent=“dashiell”] { –agent-color: var(–dashiell); }
-
-.agent-header {
-margin-bottom: 18px;
-padding-bottom: 14px;
-border-bottom: 1px solid var(–line);
-}
-
-.agent-name {
-font-family: ‘Rajdhani’, sans-serif;
-font-size: 22px;
-font-weight: 700;
-letter-spacing: 0.22em;
-color: var(–agent-color);
-text-shadow: 0 0 16px var(–agent-color);
-filter: brightness(1.1);
-}
-
-.agent-tag {
-font-family: ‘JetBrains Mono’, monospace;
-font-size: 10px;
-letter-spacing: 0.16em;
-color: var(–ink-faded);
-text-transform: uppercase;
-margin-top: 6px;
-}
-
-.agent-id {
-font-family: ‘JetBrains Mono’, monospace;
-font-size: 9px;
-color: var(–ink-faded);
-margin-bottom: 4px;
+.agent-cfg[data-agent=“agatha”] { –ag-color: var(–agatha); }
+.agent-cfg[data-agent=“arthur”] { –ag-color: var(–arthur); }
+.agent-cfg[data-agent=“dashiell”] { –ag-color: var(–dashiell); }
+.agent-cfg .name {
+font-size: 13px;
 letter-spacing: 0.18em;
+color: var(–ag-color);
+font-weight: 700;
+margin-bottom: 2px;
 }
-
-.field-row {
-margin-bottom: 14px;
+.agent-cfg .role {
+font-size: 9.5px;
+color: var(–ink-faded);
+letter-spacing: 0.1em;
+margin-bottom: 12px;
+text-transform: uppercase;
 }
-.field-row:last-child { margin-bottom: 0; }
 
 .effort-grid {
 display: grid;
 grid-template-columns: repeat(5, 1fr);
-gap: 4px;
-background: rgba(0, 0, 0, 0.4);
-padding: 4px;
+gap: 2px;
+background: var(–bg-1);
+padding: 2px;
 border: 1px solid var(–line);
 }
-
 .effort-btn {
 background: transparent;
 border: none;
 color: var(–ink-faded);
-padding: 7px 4px;
-font-family: ‘JetBrains Mono’, monospace;
+padding: 6px 2px;
 font-size: 9px;
-letter-spacing: 0.12em;
+letter-spacing: 0.08em;
 text-transform: uppercase;
-cursor: pointer;
-transition: all 0.15s;
-font-weight: 500;
+font-family: inherit;
 }
 .effort-btn:hover { color: var(–ink); }
 .effort-btn.active {
-background: var(–agent-color, var(–cyan));
-color: var(–bg-void);
+background: var(–ag-color);
+color: var(–bg-0);
 font-weight: 700;
-box-shadow: 0 0 10px var(–agent-color);
 }
 
-/* ===== BUTTONS ===== */
-.btn {
-background: transparent;
-border: 1px solid var(–cyan);
-color: var(–cyan);
-padding: 13px 32px;
-font-family: ‘Rajdhani’, sans-serif;
-font-size: 14px;
-font-weight: 600;
-letter-spacing: 0.28em;
-text-transform: uppercase;
-cursor: pointer;
-transition: all 0.2s;
-position: relative;
-overflow: hidden;
-}
-
-.btn::before {
-content: ‘’;
-position: absolute;
-inset: 0;
-background: var(–cyan);
-opacity: 0;
-transition: opacity 0.2s;
-z-index: 0;
-}
-
-.btn span { position: relative; z-index: 1; }
-
-.btn:hover:not(:disabled) {
-color: var(–bg-void);
-box-shadow: 0 0 24px var(–cyan-glow);
-}
-.btn:hover:not(:disabled)::before { opacity: 1; }
-
-.btn:disabled {
-border-color: var(–line);
-color: var(–ink-faded);
-cursor: not-allowed;
-}
-
-.btn-secondary {
-border-color: var(–line-strong);
-color: var(–ink-dim);
-font-size: 11px;
-padding: 9px 18px;
-letter-spacing: 0.22em;
-}
-.btn-secondary::before { background: var(–ink-dim); }
-.btn-secondary:hover:not(:disabled) {
-color: var(–bg-void);
-box-shadow: 0 0 16px rgba(122, 139, 165, 0.4);
-}
-
-.btn-warn {
-border-color: var(–amber);
-color: var(–amber);
-font-size: 10px;
-padding: 7px 14px;
-letter-spacing: 0.2em;
-}
-.btn-warn::before { background: var(–amber); }
-.btn-warn:hover:not(:disabled) {
-color: var(–bg-void);
-box-shadow: 0 0 14px rgba(255, 179, 64, 0.4);
-}
-
-/* ===== PROTOCOLS / PROMPT EDITOR ===== */
-.protocol-tabs {
-display: grid;
-grid-template-columns: repeat(4, 1fr);
+/* prompts editor: tabs */
+.tabs {
+display: flex;
 gap: 0;
-margin-bottom: 24px;
-border: 1px solid var(–line-strong);
-background: rgba(0, 0, 0, 0.4);
-}
-
-.protocol-tab {
-background: transparent;
-border: none;
-border-right: 1px solid var(–line);
-color: var(–ink-dim);
-padding: 16px 12px;
-font-family: ‘Rajdhani’, sans-serif;
-font-size: 13px;
-font-weight: 600;
-letter-spacing: 0.16em;
-text-transform: uppercase;
-cursor: pointer;
-transition: all 0.2s;
-display: flex;
-flex-direction: column;
-gap: 4px;
-align-items: flex-start;
-text-align: left;
-position: relative;
-}
-.protocol-tab:last-child { border-right: none; }
-
-.protocol-tab .num {
-font-family: ‘JetBrains Mono’, monospace;
-font-size: 10px;
-color: var(–ink-faded);
-letter-spacing: 0.2em;
-}
-
-.protocol-tab:hover { color: var(–ink); background: rgba(0, 229, 255, 0.04); }
-.protocol-tab.active {
-color: var(–cyan);
-background: rgba(0, 229, 255, 0.08);
-}
-.protocol-tab.active .num { color: var(–cyan-dim); }
-.protocol-tab.active::before {
-content: ‘’;
-position: absolute;
-top: 0;
-left: 0;
-right: 0;
-height: 2px;
-background: var(–cyan);
-box-shadow: 0 0 8px var(–cyan);
-}
-
-.protocol-editor { display: none; }
-.protocol-editor.active { display: block; animation: fadeIn 0.3s ease; }
-
-.editor-block {
-background: rgba(0, 5, 15, 0.5);
-border: 1px solid var(–line);
-padding: 22px;
-margin-bottom: 18px;
-}
-
-.editor-block-header {
-display: flex;
-justify-content: space-between;
-align-items: center;
-margin-bottom: 10px;
-}
-
-.editor-block-title {
-font-family: ‘Rajdhani’, sans-serif;
-font-size: 13px;
-font-weight: 600;
-letter-spacing: 0.24em;
-color: var(–ink-bright);
-text-transform: uppercase;
-}
-
-.editor-block-status {
-font-family: ‘JetBrains Mono’, monospace;
-font-size: 9px;
-letter-spacing: 0.18em;
-text-transform: uppercase;
-color: var(–ink-faded);
-}
-.editor-block-status.modified { color: var(–amber); }
-
-.variables-doc {
-background: rgba(0, 229, 255, 0.05);
-border-left: 2px solid var(–cyan);
-padding: 10px 14px;
-margin: 10px 0 14px;
-font-family: ‘JetBrains Mono’, monospace;
-font-size: 11px;
-line-height: 1.6;
-color: var(–ink-dim);
-}
-.variables-doc strong {
-color: var(–cyan);
-font-weight: 500;
-background: rgba(0, 229, 255, 0.1);
-padding: 1px 6px;
-margin: 0 2px;
-}
-
-.editor-actions {
-display: flex;
-gap: 10px;
-margin-top: 16px;
-justify-content: flex-end;
-}
-
-/* ===== CHAMBER (question + phases) ===== */
-.question-bay {
-margin-bottom: 36px;
-}
-
-.controls-bar {
-display: flex;
-align-items: center;
-gap: 16px;
-margin-top: 18px;
-flex-wrap: wrap;
-}
-
-.global-status {
-margin-left: auto;
-font-family: ‘JetBrains Mono’, monospace;
-font-size: 11px;
-letter-spacing: 0.18em;
-text-transform: uppercase;
-color: var(–ink-dim);
-display: flex;
-align-items: center;
-gap: 10px;
-}
-
-.global-status.error { color: var(–red); }
-.global-status.success { color: var(–green); }
-.global-status.working { color: var(–cyan); }
-
-/* ===== PHASES ===== */
-.phase-track {
-margin-bottom: 32px;
-position: relative;
-opacity: 0.4;
-transition: opacity 0.4s;
-}
-.phase-track.active { opacity: 1; }
-.phase-track.completed { opacity: 1; }
-
-.phase-marker {
-display: flex;
-align-items: center;
-gap: 16px;
+border-bottom: 1px solid var(–line);
 margin-bottom: 14px;
 }
-
-.phase-num {
-font-family: ‘Rajdhani’, sans-serif;
-font-size: 32px;
-font-weight: 300;
-color: var(–ink-faded);
-letter-spacing: 0.05em;
-line-height: 1;
-}
-.phase-track.active .phase-num,
-.phase-track.completed .phase-num { color: var(–cyan); text-shadow: 0 0 12px var(–cyan-glow); }
-
-.phase-title {
-font-family: ‘Rajdhani’, sans-serif;
-font-size: 18px;
-font-weight: 600;
-letter-spacing: 0.18em;
-color: var(–ink);
-text-transform: uppercase;
-}
-
-.phase-subtitle {
-font-family: ‘JetBrains Mono’, monospace;
-font-size: 10px;
-letter-spacing: 0.18em;
-color: var(–ink-faded);
-text-transform: uppercase;
-margin-top: 3px;
-}
-
-.phase-state {
-margin-left: auto;
-font-family: ‘JetBrains Mono’, monospace;
-font-size: 10px;
-letter-spacing: 0.18em;
-text-transform: uppercase;
-color: var(–ink-faded);
-display: flex;
-align-items: center;
-gap: 8px;
-}
-
-.phase-track.active .phase-state { color: var(–cyan); }
-.phase-track.active .phase-state::before {
-content: ‘’;
-width: 8px;
-height: 8px;
-background: var(–cyan);
-box-shadow: 0 0 8px var(–cyan);
-animation: blink 1s ease-in-out infinite;
-}
-.phase-track.completed .phase-state { color: var(–green); }
-.phase-track.completed .phase-state::before {
-content: ‘’;
-width: 8px;
-height: 8px;
-background: var(–green);
-}
-.phase-track.error .phase-state { color: var(–red); }
-.phase-track.error .phase-state::before {
-content: ‘’;
-width: 8px;
-height: 8px;
-background: var(–red);
-}
-
-@keyframes blink {
-0%, 100% { opacity: 1; }
-50% { opacity: 0.3; }
-}
-
-.responses-grid {
-display: grid;
-grid-template-columns: repeat(3, 1fr);
-gap: 16px;
-}
-
-@media (max-width: 1100px) {
-.responses-grid { grid-template-columns: 1fr; }
-}
-
-.responses-grid.synthesis {
-grid-template-columns: 1fr;
-}
-
-/* ===== AGENT RESPONSE CARDS ===== */
-.response-card {
-background: var(–bg-panel);
-backdrop-filter: blur(6px);
--webkit-backdrop-filter: blur(6px);
-border: 1px solid var(–line);
-border-top: 2px solid var(–agent-color, var(–cyan));
-padding: 0;
-display: flex;
-flex-direction: column;
-min-height: 240px;
-position: relative;
-overflow: hidden;
-}
-
-.response-card[data-agent=“agatha”] { –agent-color: var(–agatha); }
-.response-card[data-agent=“arthur”] { –agent-color: var(–arthur); }
-.response-card[data-agent=“dashiell”] { –agent-color: var(–dashiell); }
-
-.response-card.thinking::after {
-content: ‘’;
-position: absolute;
-top: 0; left: -100%;
-width: 100%;
-height: 2px;
-background: linear-gradient(90deg, transparent, var(–agent-color), transparent);
-animation: scan 2s linear infinite;
-z-index: 5;
-}
-
-@keyframes scan {
-to { left: 100%; }
-}
-
-.rc-header {
-padding: 16px 18px 12px;
-border-bottom: 1px solid var(–line);
-display: flex;
-justify-content: space-between;
-align-items: center;
-gap: 10px;
-}
-
-.rc-id {
-display: flex;
-flex-direction: column;
-gap: 2px;
-}
-
-.rc-name {
-font-family: ‘Rajdhani’, sans-serif;
-font-size: 16px;
-font-weight: 700;
-letter-spacing: 0.22em;
-color: var(–agent-color);
-text-shadow: 0 0 10px var(–agent-color);
-filter: brightness(1.1);
-}
-
-.rc-meta {
-font-family: ‘JetBrains Mono’, monospace;
-font-size: 9px;
-letter-spacing: 0.14em;
-color: var(–ink-faded);
-text-transform: uppercase;
-}
-
-.rc-state {
-font-family: ‘JetBrains Mono’, monospace;
-font-size: 9px;
-letter-spacing: 0.18em;
-text-transform: uppercase;
-color: var(–ink-faded);
-padding: 4px 8px;
-border: 1px solid var(–line);
-}
-
-.rc-state.thinking { color: var(–cyan); border-color: var(–cyan); }
-.rc-state.thinking::after {
-content: ‘…’;
-display: inline-block;
-width: 14px;
-text-align: left;
-animation: dots-anim 1.4s steps(4) infinite;
-overflow: hidden;
-vertical-align: bottom;
-}
-
-@keyframes dots-anim {
-0%, 20% { content: ‘’; }
-40% { content: ‘.’; }
-60% { content: ‘..’; }
-80%, 100% { content: ‘…’; }
-}
-
-.rc-state.done { color: var(–green); border-color: var(–green); }
-.rc-state.error { color: var(–red); border-color: var(–red); }
-
-.rc-body {
-padding: 18px;
-flex: 1;
-font-size: 14.5px;
-line-height: 1.6;
-color: var(–ink);
-overflow-x: auto;
-}
-
-.rc-body em.placeholder {
-color: var(–ink-faded);
-font-style: italic;
-}
-
-.rc-body p { margin: 0 0 12px; }
-.rc-body p:last-child { margin-bottom: 0; }
-.rc-body h1, .rc-body h2, .rc-body h3, .rc-body h4 {
-font-family: ‘Rajdhani’, sans-serif;
-letter-spacing: 0.08em;
-text-transform: uppercase;
-color: var(–agent-color);
-filter: brightness(1.15);
-margin: 18px 0 10px;
-font-weight: 600;
-}
-.rc-body h1 { font-size: 18px; }
-.rc-body h2 { font-size: 15px; border-bottom: 1px solid var(–line); padding-bottom: 6px; }
-.rc-body h3 { font-size: 13px; color: var(–cyan); }
-.rc-body h4 { font-size: 12px; color: var(–ink); }
-.rc-body h2:first-child, .rc-body h1:first-child, .rc-body h3:first-child { margin-top: 0; }
-.rc-body ul, .rc-body ol { margin: 8px 0 14px 20px; }
-.rc-body li { margin-bottom: 4px; }
-.rc-body strong { color: var(–ink-bright); font-weight: 600; }
-.rc-body em { color: var(–ink); font-style: italic; }
-.rc-body code {
-font-family: ‘JetBrains Mono’, monospace;
-font-size: 12px;
-background: rgba(0, 229, 255, 0.08);
-border: 1px solid var(–line-strong);
-padding: 1px 6px;
-color: var(–cyan);
-border-radius: 0;
-}
-.rc-body blockquote {
-border-left: 2px solid var(–cyan);
-padding: 6px 0 6px 14px;
-margin: 12px 0;
-color: var(–ink-dim);
-font-style: italic;
-}
-.rc-body hr {
-border: none;
-height: 1px;
-background: var(–line);
-margin: 16px 0;
-}
-
-.rc-footer {
-border-top: 1px dashed var(–line);
-padding: 10px 18px;
-display: flex;
-gap: 12px;
-flex-wrap: wrap;
-}
-
-.rc-footer-btn {
+.tab {
 background: transparent;
-border: none;
+border: 1px solid var(–line);
+border-bottom: none;
 color: var(–ink-dim);
-font-family: ‘JetBrains Mono’, monospace;
+padding: 8px 18px;
+font-size: 10px;
+letter-spacing: 0.2em;
+font-family: inherit;
+text-transform: uppercase;
+margin-right: -1px;
+margin-bottom: -1px;
+position: relative;
+}
+.tab:hover { color: var(–ink); }
+.tab.active {
+color: var(–cyan);
+border-color: var(–cyan);
+border-bottom-color: var(–bg-1);
+background: var(–bg-1);
+z-index: 2;
+}
+
+.tab-pane { display: none; }
+.tab-pane.active { display: block; }
+
+/* api key with show/hide */
+.api-key-wrap { position: relative; }
+.api-key-toggle {
+position: absolute;
+right: 8px; top: 50%;
+transform: translateY(-50%);
+background: var(–bg-3);
+border: 1px solid var(–line-bright);
+color: var(–ink-dim);
+padding: 4px 8px;
 font-size: 9px;
 letter-spacing: 0.18em;
-text-transform: uppercase;
-cursor: pointer;
-padding: 0;
-transition: color 0.2s;
+font-family: inherit;
 }
-.rc-footer-btn:hover { color: var(–cyan); }
+.api-key-toggle:hover { color: var(–cyan); border-color: var(–cyan); }
 
-.rc-collapsible {
-display: none;
-padding: 12px 18px 16px;
-border-top: 1px solid var(–line);
-font-family: ‘JetBrains Mono’, monospace;
-font-size: 11px;
-line-height: 1.55;
-color: var(–ink-dim);
-white-space: pre-wrap;
-max-height: 320px;
-overflow-y: auto;
-background: rgba(0, 0, 0, 0.3);
-}
-.rc-collapsible.open { display: block; }
-
-.error-block {
-padding: 14px;
-background: rgba(255, 69, 101, 0.06);
-border: 1px solid var(–red);
-color: var(–red);
-font-family: ‘JetBrains Mono’, monospace;
-font-size: 11px;
-line-height: 1.5;
-word-break: break-word;
-}
-
-/* ===== SYNTHESIS CARD (special) ===== */
-.response-card.synthesis-card {
-border: 1px solid var(–agatha);
-border-top: 3px solid var(–agatha);
-box-shadow: 0 0 40px rgba(255, 107, 157, 0.15), inset 0 0 30px rgba(255, 107, 157, 0.04);
-}
-
-.synthesis-card .rc-name { font-size: 20px; }
-.synthesis-card .rc-body { font-size: 15.5px; padding: 24px; }
-
-/* ===== SCROLLBAR ===== */
+/* scrollbar */
 ::-webkit-scrollbar { width: 8px; height: 8px; }
-::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.3); }
-::-webkit-scrollbar-thumb { background: var(–line-strong); }
+::-webkit-scrollbar-track { background: var(–bg-0); }
+::-webkit-scrollbar-thumb { background: var(–line-bright); }
 ::-webkit-scrollbar-thumb:hover { background: var(–cyan-dim); }
 
-/* ===== TOAST ===== */
-.toast {
-position: fixed;
-bottom: 30px;
-right: 30px;
-background: var(–bg-panel-solid);
-border: 1px solid var(–cyan);
-color: var(–ink);
-padding: 14px 22px;
-font-family: ‘JetBrains Mono’, monospace;
-font-size: 11px;
-letter-spacing: 0.16em;
-text-transform: uppercase;
-box-shadow: 0 0 24px rgba(0, 229, 255, 0.2);
-z-index: 1000;
-transform: translateY(100px);
-opacity: 0;
-transition: all 0.3s;
+/* responsive: minimum useful sizes */
+@media (max-width: 1100px) {
+body { font-size: 11px; }
+.grid { grid-template-columns: 1fr 1fr 1fr 1.2fr; }
 }
-
-.toast.show { transform: translateY(0); opacity: 1; }
-.toast.error { border-color: var(–red); color: var(–red); box-shadow: 0 0 24px rgba(255, 69, 101, 0.2); }
-.toast.success { border-color: var(–green); color: var(–green); box-shadow: 0 0 24px rgba(0, 255, 149, 0.2); }
-
-/* ===== UTILITY ===== */
-.row-2 {
-display: grid;
-grid-template-columns: 1fr 1fr;
-gap: 24px;
-}
-@media (max-width: 800px) { .row-2 { grid-template-columns: 1fr; } }
-
-.spacer { height: 16px; }
-
 @media (max-width: 900px) {
-.topbar { grid-template-columns: 1fr; gap: 14px; padding: 12px 16px; }
-.system-status { justify-content: flex-start; }
-.tabs { width: 100%; overflow-x: auto; }
-.tab-btn { padding: 10px 14px; font-size: 11px; }
-.main { padding: 24px 16px 60px; }
-.panel { padding: 18px; }
+.app { grid-template-rows: 44px 38px 64px 1fr 24px; }
+.grid { grid-template-columns: 1fr 1fr 1fr; grid-template-rows: 1fr 1fr 1fr 1.2fr; }
+.cell.verdict { grid-column: 1 / -1; grid-row: 4; }
 }
 </style>
 
 </head>
 <body>
 
-<!-- ============ TOPBAR ============ -->
+<div class="app">
 
-<header class="topbar">
-  <div class="brand">
-    <div class="brand-mark"><div class="brand-mark-inner"></div></div>
-    <div class="brand-text">
+  <!-- HEADER -->
+
+  <header class="head bracketed">
+    <div class="brand">
       <div class="brand-name">TEMPLE</div>
-      <div class="brand-tagline">Concilium // v2.0</div>
+      <div class="brand-sub">// CONCILIUM ░ MMXXVI</div>
     </div>
-  </div>
+    <div class="head-status">
+      <span class="blink"></span>
+      <span id="globalStatus">SYSTEM IDLE</span>
+    </div>
+    <div class="head-actions">
+      <button class="btn" id="btnPrompts">PROMPTS</button>
+      <button class="btn" id="btnSettings">CONFIG</button>
+      <button class="btn" id="btnReset">RESET</button>
+    </div>
+  </header>
 
-  <nav class="tabs">
-    <button class="tab-btn active" data-tab="system">
-      <span class="tab-num">01</span>SISTEMA
-    </button>
-    <button class="tab-btn" data-tab="protocols">
-      <span class="tab-num">02</span>PROTOCOLOS
-    </button>
-    <button class="tab-btn" data-tab="chamber">
-      <span class="tab-num">03</span>CÁMARA
-    </button>
+  <!-- PROGRESS BAR -->
+
+  <nav class="progress" id="progressBar">
+    <div class="progress-step" data-phase="1">
+      <span class="num">I.</span>
+      <span class="label">GENERACIÓN INDEPENDIENTE</span>
+      <span class="meta">DELPHI</span>
+    </div>
+    <div class="progress-step" data-phase="2">
+      <span class="num">II.</span>
+      <span class="label">CRÍTICA CRUZADA</span>
+      <span class="meta">RED TEAM</span>
+    </div>
+    <div class="progress-step" data-phase="3">
+      <span class="num">III.</span>
+      <span class="label">REFINAMIENTO + ACH</span>
+      <span class="meta">CIA TRADECRAFT</span>
+    </div>
+    <div class="progress-step" data-phase="4">
+      <span class="num">IV.</span>
+      <span class="label">DICTAMEN FINAL</span>
+      <span class="meta">AGATHA</span>
+    </div>
   </nav>
 
-  <div class="system-status">
-    <div class="status-pill">
-      <span class="status-dot" id="dot-api"></span>
-      <span id="api-state">API</span>
-    </div>
-    <div class="status-pill">
-      <span class="status-dot ok"></span>
-      <span>3 CARACTERES</span>
-    </div>
-  </div>
-</header>
+  <!-- QUESTION -->
 
-<!-- ============ MAIN ============ -->
-
-<main class="main">
-
-<!-- =========== TAB 01 — SYSTEM =========== -->
-
-<section id="tab-system" class="tab-content active">
-
-  <div class="panel with-corners">
-    <span class="panel-corner-tr"></span>
-    <span class="panel-corner-bl"></span>
-    <div class="panel-header">
-      <div class="panel-title"><span class="marker"></span>Credenciales</div>
-      <div class="panel-meta">openrouter.ai</div>
-    </div>
-
-```
-<div class="panel-section">
-  <label for="apiKey">OPENROUTER API KEY</label>
-  <div class="api-key-wrap">
-    <input type="password" id="apiKey" placeholder="sk-or-v1-..." autocomplete="off">
-    <button class="toggle-vis" id="toggleKey" type="button">VER</button>
-  </div>
-  <div class="note">Persiste en <code>localStorage</code>. Obtén una clave en openrouter.ai/keys.</div>
-</div>
-```
-
+  <div class="question-bar bracketed">
+    <span class="prompt-tag">QUERY</span>
+    <textarea id="question" placeholder="Plantea la pregunta sobre la que el concilio deliberará..."></textarea>
+    <button class="btn btn-cta" id="convoke">CONVOCAR ▸</button>
   </div>
 
-  <div class="spacer"></div>
+  <!-- MAIN GRID -->
 
-  <div class="panel with-corners">
-    <span class="panel-corner-tr"></span>
-    <span class="panel-corner-bl"></span>
-    <div class="panel-header">
-      <div class="panel-title"><span class="marker"></span>Caracteres del concilio</div>
-      <div class="panel-meta">3 // active</div>
-    </div>
+  <main class="grid" id="mainGrid">
+    <!-- 9 agent cells (3 agents × 3 rounds) + 1 verdict cell, populated by JS -->
+  </main>
 
-```
-<div class="panel-section">
-  <div class="agents-grid" id="agentsGrid"></div>
-  <div class="note">El esfuerzo se normaliza a través de OpenRouter: GPT‑5 lo usa nativamente, Claude lo mapea a presupuesto de tokens (xhigh ≈ 95%, high ≈ 80%, medium ≈ 50%, low ≈ 20%, minimal ≈ 10%), y Gemini 3 lo mapea a <code>thinkingLevel</code>.</div>
-</div>
-```
+  <!-- FOOTER -->
 
-  </div>
+  <footer class="foot">
+    <span class="signal">CONNECTED // OPENROUTER/V1</span>
+    <span id="footMeta">QUOD SCRIPSI · SCRIPSI</span>
+  </footer>
 
-</section>
-
-<!-- =========== TAB 02 — PROTOCOLS =========== -->
-
-<section id="tab-protocols" class="tab-content">
-
-  <div class="panel with-corners">
-    <span class="panel-corner-tr"></span>
-    <span class="panel-corner-bl"></span>
-    <div class="panel-header">
-      <div class="panel-title"><span class="marker"></span>Editor de protocolos</div>
-      <div class="panel-meta">4 fases // editable</div>
-    </div>
-
-```
-<div class="note" style="margin-bottom: 22px;">
-  Edita los prompts que se envían en cada fase. Las variables entre <code>{{dobles llaves}}</code> se sustituyen en tiempo de ejecución. Los cambios se guardan automáticamente.
 </div>
 
-<div class="protocol-tabs">
-  <button class="protocol-tab active" data-protocol="phase1">
-    <span class="num">FASE 01</span>Generación
-  </button>
-  <button class="protocol-tab" data-protocol="phase2">
-    <span class="num">FASE 02</span>Crítica
-  </button>
-  <button class="protocol-tab" data-protocol="phase3">
-    <span class="num">FASE 03</span>Refinamiento
-  </button>
-  <button class="protocol-tab" data-protocol="phase4">
-    <span class="num">FASE 04</span>Síntesis
-  </button>
-</div>
+<!-- ============== SETTINGS MODAL ============== -->
 
-<div id="protocolEditors"></div>
-```
-
-  </div>
-
-</section>
-
-<!-- =========== TAB 03 — CHAMBER =========== -->
-
-<section id="tab-chamber" class="tab-content">
-
-  <div class="panel with-corners question-bay">
-    <span class="panel-corner-tr"></span>
-    <span class="panel-corner-bl"></span>
-    <div class="panel-header">
-      <div class="panel-title"><span class="marker"></span>Pregunta sometida al concilio</div>
-      <div class="panel-meta">paralelo // 3 oráculos</div>
+<div class="modal-backdrop" id="settingsModal">
+  <div class="modal">
+    <div class="modal-head">
+      <span class="modal-title">// CONFIG</span>
+      <button class="modal-close" data-close>×</button>
     </div>
-
-```
-<div class="panel-section">
-  <label for="question">CONSULTA</label>
-  <textarea id="question" placeholder="Plantea la pregunta sobre la que el concilio deliberará..."></textarea>
-
-  <div class="controls-bar">
-    <button class="btn" id="convoke"><span>► Convocar concilio</span></button>
-    <button class="btn-secondary btn" id="reset"><span>Reiniciar</span></button>
-    <div class="global-status" id="globalStatus">
-      <span class="status-dot"></span>
-      <span>EN REPOSO</span>
-    </div>
-  </div>
-</div>
-```
-
-  </div>
-
-  <!-- Phase 1 -->
-
-  <div class="phase-track" id="phase1">
-    <div class="phase-marker">
-      <div class="phase-num">01</div>
-      <div>
-        <div class="phase-title">Generación independiente</div>
-        <div class="phase-subtitle">Delphi // tres oráculos en paralelo, sin contaminación</div>
+    <div class="modal-body">
+      <div class="section-block">
+        <div class="section-block-title">CREDENTIALS</div>
+        <div class="field">
+          <label class="field-label">OpenRouter API Key</label>
+          <div class="api-key-wrap">
+            <input type="password" id="apiKey" class="field-input" placeholder="sk-or-v1-..." autocomplete="off">
+            <button class="api-key-toggle" id="apiKeyToggle" type="button">SHOW</button>
+          </div>
+          <div class="field-hint">Se almacena en localStorage de tu navegador. Obtén una en openrouter.ai/keys</div>
+        </div>
       </div>
-      <div class="phase-state"><span class="phase-state-text">EN ESPERA</span></div>
-    </div>
-    <div class="responses-grid" id="phase1Grid"></div>
+
+```
+  <div class="section-block">
+    <div class="section-block-title">CARACTERES DEL CONCILIO</div>
+    <div class="agents-config" id="agentsConfig"></div>
   </div>
+</div>
+<div class="modal-foot">
+  <button class="btn" data-close>CERRAR</button>
+</div>
+```
 
-  <!-- Phase 2 -->
+  </div>
+</div>
 
-  <div class="phase-track" id="phase2">
-    <div class="phase-marker">
-      <div class="phase-num">02</div>
-      <div>
-        <div class="phase-title">Crítica cruzada</div>
-        <div class="phase-subtitle">Devil's Advocate // cada oráculo destroza al resto</div>
+<!-- ============== PROMPTS MODAL ============== -->
+
+<div class="modal-backdrop" id="promptsModal">
+  <div class="modal">
+    <div class="modal-head">
+      <span class="modal-title">// PROMPTS // EDITOR</span>
+      <button class="modal-close" data-close>×</button>
+    </div>
+    <div class="modal-body">
+      <div class="tabs" id="promptsTabs">
+        <button class="tab active" data-tab="1">RONDA I</button>
+        <button class="tab" data-tab="2">RONDA II</button>
+        <button class="tab" data-tab="3">RONDA III</button>
+        <button class="tab" data-tab="4">RONDA IV</button>
       </div>
-      <div class="phase-state"><span class="phase-state-text">EN ESPERA</span></div>
+
+```
+  <div class="tab-pane active" data-pane="1">
+    <div class="field">
+      <label class="field-label">SYSTEM (Fase 1 — Generación independiente)</label>
+      <textarea id="p1_system" class="field-textarea"></textarea>
     </div>
-    <div class="responses-grid" id="phase2Grid"></div>
-  </div>
-
-  <!-- Phase 3 -->
-
-  <div class="phase-track" id="phase3">
-    <div class="phase-marker">
-      <div class="phase-num">03</div>
-      <div>
-        <div class="phase-title">Refinamiento + ACH</div>
-        <div class="phase-subtitle">Análisis de hipótesis en competencia // qué descartaría mi tesis</div>
+    <div class="field">
+      <label class="field-label">USER (Fase 1)</label>
+      <textarea id="p1_user" class="field-textarea"></textarea>
+      <div class="placeholder-tags">
+        <span class="tag" data-target="p1_user">{question}</span>
       </div>
-      <div class="phase-state"><span class="phase-state-text">EN ESPERA</span></div>
     </div>
-    <div class="responses-grid" id="phase3Grid"></div>
   </div>
 
-  <!-- Phase 4 -->
-
-  <div class="phase-track" id="phase4">
-    <div class="phase-marker">
-      <div class="phase-num">04</div>
-      <div>
-        <div class="phase-title">Dictamen final</div>
-        <div class="phase-subtitle">Tumor Board // Agatha preside, disensos preservados</div>
+  <div class="tab-pane" data-pane="2">
+    <div class="field">
+      <label class="field-label">SYSTEM (Fase 2 — Crítica cruzada)</label>
+      <textarea id="p2_system" class="field-textarea"></textarea>
+    </div>
+    <div class="field">
+      <label class="field-label">USER (Fase 2)</label>
+      <textarea id="p2_user" class="field-textarea"></textarea>
+      <div class="placeholder-tags">
+        <span class="tag" data-target="p2_user">{question}</span>
+        <span class="tag" data-target="p2_user">{otherA}</span>
+        <span class="tag" data-target="p2_user">{otherB}</span>
       </div>
-      <div class="phase-state"><span class="phase-state-text">EN ESPERA</span></div>
     </div>
-    <div class="responses-grid synthesis" id="phase4Grid"></div>
   </div>
 
-</section>
+  <div class="tab-pane" data-pane="3">
+    <div class="field">
+      <label class="field-label">SYSTEM (Fase 3 — Refinamiento + ACH)</label>
+      <textarea id="p3_system" class="field-textarea"></textarea>
+    </div>
+    <div class="field">
+      <label class="field-label">USER (Fase 3)</label>
+      <textarea id="p3_user" class="field-textarea"></textarea>
+      <div class="placeholder-tags">
+        <span class="tag" data-target="p3_user">{question}</span>
+        <span class="tag" data-target="p3_user">{ownResponse}</span>
+        <span class="tag" data-target="p3_user">{critiquesReceived}</span>
+        <span class="tag" data-target="p3_user">{critiquesObserved}</span>
+      </div>
+    </div>
+  </div>
 
-</main>
+  <div class="tab-pane" data-pane="4">
+    <div class="field">
+      <label class="field-label">SYSTEM (Fase 4 — Dictamen final · Agatha)</label>
+      <textarea id="p4_system" class="field-textarea"></textarea>
+    </div>
+    <div class="field">
+      <label class="field-label">USER (Fase 4)</label>
+      <textarea id="p4_user" class="field-textarea"></textarea>
+      <div class="placeholder-tags">
+        <span class="tag" data-target="p4_user">{question}</span>
+        <span class="tag" data-target="p4_user">{refinedA}</span>
+        <span class="tag" data-target="p4_user">{refinedB}</span>
+        <span class="tag" data-target="p4_user">{refinedC}</span>
+        <span class="tag" data-target="p4_user">{allCritiques}</span>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal-foot">
+  <button class="btn" id="resetPrompts">RESTAURAR DEFECTOS</button>
+  <button class="btn btn-cta" id="savePrompts">GUARDAR</button>
+</div>
+```
 
-<div class="toast" id="toast"></div>
+  </div>
+</div>
+
+<!-- ============== CELL DETAIL MODAL ============== -->
+
+<div class="modal-backdrop" id="cellModal">
+  <div class="modal">
+    <div class="modal-head">
+      <span class="modal-title" id="cellModalTitle">// CELL</span>
+      <button class="modal-close" data-close>×</button>
+    </div>
+    <div class="modal-body">
+      <div class="md-content" id="cellModalBody"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" id="cellShowReasoning">VER RAZONAMIENTO INTERNO</button>
+      <button class="btn" data-close>CERRAR</button>
+    </div>
+  </div>
+</div>
 
 <script>
-// ================================================================
-//  TEMPLE — Concilium Decision System
-//  Single-file artifact. Vanilla JS. localStorage-backed.
-// ================================================================
-
-const STORAGE_KEY = 'temple_state_v2';
+// =============================================================
+//  TEMPLE :: CONCILIUM
+//  Single-file. Vanilla JS. localStorage-backed.
+// =============================================================
 
 const MODELS = [
-  { id: 'openai/gpt-5.5',                  label: 'GPT-5.5 (OpenAI)' },
-  { id: 'openai/gpt-5.5-pro',              label: 'GPT-5.5 Pro (OpenAI)' },
-  { id: 'openai/gpt-5.4',                  label: 'GPT-5.4 (OpenAI)' },
-  { id: 'anthropic/claude-opus-4.7',       label: 'Claude Opus 4.7 (Anthropic)' },
-  { id: 'anthropic/claude-opus-4.6',       label: 'Claude Opus 4.6 (Anthropic)' },
-  { id: 'anthropic/claude-sonnet-4.5',     label: 'Claude Sonnet 4.5 (Anthropic)' },
-  { id: 'google/gemini-3.1-pro-preview',   label: 'Gemini 3.1 Pro (Google)' },
-  { id: 'google/gemini-3-pro-preview',     label: 'Gemini 3 Pro (Google)' },
-  { id: 'google/gemini-3-flash-preview',   label: 'Gemini 3 Flash (Google)' },
-  { id: 'x-ai/grok-4',                     label: 'Grok 4 (xAI)' },
+  { id: 'openai/gpt-5.5',                  label: 'GPT-5.5' },
+  { id: 'openai/gpt-5.5-pro',              label: 'GPT-5.5 Pro' },
+  { id: 'openai/gpt-5.4',                  label: 'GPT-5.4' },
+  { id: 'anthropic/claude-opus-4.7',       label: 'Claude Opus 4.7' },
+  { id: 'anthropic/claude-opus-4.6',       label: 'Claude Opus 4.6' },
+  { id: 'anthropic/claude-sonnet-4.5',     label: 'Claude Sonnet 4.5' },
+  { id: 'google/gemini-3.1-pro-preview',   label: 'Gemini 3.1 Pro' },
+  { id: 'google/gemini-3-pro-preview',     label: 'Gemini 3 Pro' },
+  { id: 'google/gemini-3-flash-preview',   label: 'Gemini 3 Flash' },
+  { id: 'x-ai/grok-4',                     label: 'Grok 4' },
   { id: 'deepseek/deepseek-v4-pro',        label: 'DeepSeek V4 Pro' }
 ];
 
-const EFFORT_LEVELS = ['minimal','low','medium','high','xhigh'];
+const EFFORT_LEVELS = ['minimal', 'low', 'medium', 'high', 'xhigh'];
 
 const AGENTS = [
-  { key: 'agatha',   name: 'AGATHA',   tag: 'la presidenta · síntesis',     defaultModel: 'anthropic/claude-opus-4.7',    defaultEffort: 'high' },
-  { key: 'arthur',   name: 'ARTHUR',   tag: 'el lógico · método deductivo', defaultModel: 'openai/gpt-5.5',                defaultEffort: 'high' },
-  { key: 'dashiell', name: 'DASHIELL', tag: 'el cínico · mirada noir',      defaultModel: 'google/gemini-3.1-pro-preview', defaultEffort: 'high' }
+  { key: 'agatha',   name: 'AGATHA',   role: 'PRESIDENTA · SÍNTESIS',     defaultModel: 'anthropic/claude-opus-4.7',    defaultEffort: 'high' },
+  { key: 'arthur',   name: 'ARTHUR',   role: 'LÓGICO · DEDUCCIÓN',        defaultModel: 'openai/gpt-5.5',                defaultEffort: 'high' },
+  { key: 'dashiell', name: 'DASHIELL', role: 'NOIR · ESCEPTICISMO',       defaultModel: 'google/gemini-3.1-pro-preview', defaultEffort: 'high' }
 ];
 
-// Default prompts — these are the templates editable by the user
+// ============= DEFAULT PROMPTS =============
 const DEFAULT_PROMPTS = {
-  phase1: {
-    label: 'GENERACIÓN INDEPENDIENTE',
-    description: 'Cada agente recibe esta misma plantilla en paralelo, sin ver lo de los demás.',
-    variables: [
-      { name: 'question', desc: 'la pregunta del usuario' }
-    ],
-    system: `Eres un consultor experto invitado a un panel de deliberación. Vas a responder de forma INDEPENDIENTE — no verás aún a los otros expertos. Tu respuesta servirá luego para crítica cruzada.
+  p1_system:
+`Eres un consultor experto invitado a un panel de deliberación. Vas a responder de forma INDEPENDIENTE — no verás aún a los otros expertos. Tu respuesta servirá luego para crítica cruzada.
 
 Sé riguroso, claro y conciso. No te disculpes ni añadas preámbulos. No menciones que formas parte de un panel.`,
-    user: `PREGUNTA:
-{{question}}
+
+  p1_user:
+`PREGUNTA:
+{question}
 
 Estructura tu respuesta exactamente así, en Markdown:
 
@@ -1446,31 +1046,25 @@ Justificación: (una o dos frases)
 
 ## SUPUESTOS CLAVE
 - supuesto 1
-- supuesto 2
-- ...`
-  },
-  phase2: {
-    label: 'CRÍTICA CRUZADA',
-    description: 'Cada agente recibe las respuestas de los otros dos anonimizadas como A y B, y las destroza.',
-    variables: [
-      { name: 'question', desc: 'la pregunta original' },
-      { name: 'responseA', desc: 'la respuesta del primer otro agente' },
-      { name: 'responseB', desc: 'la respuesta del segundo otro agente' }
-    ],
-    system: `Eres un ABOGADO DEL DIABLO (Devil's Advocate) en un panel de deliberación. Tu único trabajo es ENCONTRAR FALLOS en las respuestas que se te muestran. NO estás aquí para validar, equilibrar ni ser amable. La cortesía aquí es un defecto profesional.
+- supuesto 2`,
+
+  p2_system:
+`Eres un ABOGADO DEL DIABLO (Devil's Advocate) en un panel de deliberación. Tu único trabajo es ENCONTRAR FALLOS en las respuestas que se te muestran. NO estás aquí para validar, equilibrar ni ser amable. La cortesía aquí es un defecto profesional.
 
 Sé implacable pero específico: una crítica vaga no sirve. Cita lo que critiques.`,
-    user: `PREGUNTA ORIGINAL:
-{{question}}
+
+  p2_user:
+`PREGUNTA ORIGINAL:
+{question}
 
 ═══════════════════════════════════
 RESPUESTA A:
-{{responseA}}
+{otherA}
 ═══════════════════════════════════
 
 ═══════════════════════════════════
 RESPUESTA B:
-{{responseB}}
+{otherB}
 ═══════════════════════════════════
 
 Para CADA una de las dos respuestas, identifica:
@@ -1495,36 +1089,30 @@ Estructura en Markdown así:
 ### Supuestos frágiles
 ### Sesgos
 ### Modos de fallo
-### Omisiones`
-  },
-  phase3: {
-    label: 'REFINAMIENTO CON ACH',
-    description: 'Cada agente integra las críticas y aplica Analysis of Competing Hypotheses: lista qué evidencia rompería su tesis.',
-    variables: [
-      { name: 'question', desc: 'la pregunta original' },
-      { name: 'ownResponse', desc: 'la respuesta inicial del propio agente' },
-      { name: 'critiquesReceived', desc: 'las críticas que los otros le hicieron' },
-      { name: 'critiquesObserved', desc: 'las críticas que los otros se hicieron entre sí' }
-    ],
-    system: `Estás en un panel de deliberación. Has dado una respuesta inicial y otros expertos te han criticado. Ahora la refinarás aplicando ANÁLISIS DE HIPÓTESIS EN COMPETENCIA (ACH, tradecraft de la CIA): la pregunta clave no es "qué confirma mi tesis" sino "qué la descartaría".
+### Omisiones`,
+
+  p3_system:
+`Estás en un panel de deliberación. Has dado una respuesta inicial y otros expertos te han criticado. Ahora la refinarás aplicando ANÁLISIS DE HIPÓTESIS EN COMPETENCIA (ACH, tradecraft de la CIA): la pregunta clave no es "qué confirma mi tesis" sino "qué la descartaría".
 
 Sé honesto: si una crítica acierta, intégrala; si no, defiéndela razonadamente. Lo que el panel valora más es tu lista de cosas que romperían tu propia respuesta.`,
-    user: `PREGUNTA ORIGINAL:
-{{question}}
+
+  p3_user:
+`PREGUNTA ORIGINAL:
+{question}
 
 ═══════════════════════════════════
 TU RESPUESTA INICIAL:
-{{ownResponse}}
+{ownResponse}
 ═══════════════════════════════════
 
 ═══════════════════════════════════
 CRÍTICAS QUE TE HAN HECHO:
-{{critiquesReceived}}
+{critiquesReceived}
 ═══════════════════════════════════
 
 ═══════════════════════════════════
 CRÍTICAS HECHAS A LOS OTROS (puedes aprender de ellas):
-{{critiquesObserved}}
+{critiquesObserved}
 ═══════════════════════════════════
 
 Estructura tu respuesta refinada en Markdown:
@@ -1534,33 +1122,21 @@ Estructura tu respuesta refinada en Markdown:
 
 ## CRÍTICAS INCORPORADAS
 - crítica → cómo la integré
-- ...
 
 ## CRÍTICAS RECHAZADAS
 - crítica → por qué no aplica o es errónea
-- ...
 
 ## QUÉ DESCARTARÍA MI RESPUESTA (ACH)
 Lista evidencias o argumentos que ROMPERÍAN tu tesis refinada. No "la apoyarían" — la "romperían".
 - evidencia/argumento 1
 - evidencia/argumento 2
-- ...
 
 ## CONFIANZA ACTUALIZADA
 Nivel: X/10
-Justificación: (breve)`
-  },
-  phase4: {
-    label: 'DICTAMEN FINAL',
-    description: 'Solo Agatha. Recibe los tres refinamientos + todas las críticas y produce el dictamen.',
-    variables: [
-      { name: 'question', desc: 'la pregunta original' },
-      { name: 'refined1', desc: 'respuesta refinada del primer experto' },
-      { name: 'refined2', desc: 'respuesta refinada del segundo experto' },
-      { name: 'refined3', desc: 'respuesta refinada del tercer experto' },
-      { name: 'allCritiques', desc: 'todas las críticas producidas durante el debate' }
-    ],
-    system: `Eres la PRESIDENTA del concilio. Tres expertos han deliberado: respuesta independiente → crítica cruzada → refinamiento con ACH. Te corresponde ahora producir el dictamen final.
+Justificación: (breve)`,
+
+  p4_system:
+`Eres la PRESIDENTA del concilio. Tres expertos han deliberado: respuesta independiente → crítica cruzada → refinamiento con ACH. Te corresponde ahora producir el dictamen final.
 
 Tu trabajo NO es promediar opiniones. Es:
 (1) tomar una decisión clara y accionable;
@@ -1568,27 +1144,29 @@ Tu trabajo NO es promediar opiniones. Es:
 (3) ser honesta sobre la incertidumbre y bajo qué condiciones cambiarías de opinión.
 
 Esto es protocolo Tumor Board + panel apelativo: la decisión lleva consigo sus contraargumentos.`,
-    user: `PREGUNTA ORIGINAL:
-{{question}}
+
+  p4_user:
+`PREGUNTA ORIGINAL:
+{question}
 
 ═══════════════════════════════════
 RESPUESTA REFINADA — EXPERTO 1:
-{{refined1}}
+{refinedA}
 ═══════════════════════════════════
 
 ═══════════════════════════════════
 RESPUESTA REFINADA — EXPERTO 2:
-{{refined2}}
+{refinedB}
 ═══════════════════════════════════
 
 ═══════════════════════════════════
 RESPUESTA REFINADA — EXPERTO 3:
-{{refined3}}
+{refinedC}
 ═══════════════════════════════════
 
 ═══════════════════════════════════
 CRÍTICAS PRODUCIDAS DURANTE EL DEBATE:
-{{allCritiques}}
+{allCritiques}
 ═══════════════════════════════════
 
 Produce el dictamen final en Markdown con esta estructura exacta:
@@ -1611,705 +1189,646 @@ Justificación: (qué te da confianza, qué te la quita)
 
 ## CONDICIONES BAJO LAS QUE LA RESPUESTA CAMBIARÍA
 - condición 1
-- condición 2
-- ...`
-  }
+- condición 2`
 };
 
-// Runtime state
+// ============= STATE & STORAGE =============
+const STORAGE_KEY = 'temple.config.v1';
+
 const state = {
   apiKey: '',
   agents: {},
-  prompts: JSON.parse(JSON.stringify(DEFAULT_PROMPTS)),  // deep clone
+  prompts: { ...DEFAULT_PROMPTS },
   question: '',
   results: { phase1: {}, phase2: {}, phase3: {}, phase4: {} },
-  sentPrompts: { phase1: {}, phase2: {}, phase3: {}, phase4: {} }   // record what we actually sent
+  cells: {}            // cell DOM refs by id like 'agatha-r1'
 };
 
-// Initialize agents
-AGENTS.forEach(a => {
-  state.agents[a.key] = { model: a.defaultModel, effort: a.defaultEffort };
-});
-
-// =========================================================
-//  PERSISTENCE
-// =========================================================
-function saveState() {
+function safeLS(op, key, val) {
   try {
-    const payload = {
-      apiKey: state.apiKey,
-      agents: state.agents,
-      prompts: state.prompts,
-      question: state.question
-    };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
-  } catch (e) { /* localStorage may be unavailable */ }
+    if (op === 'get') return localStorage.getItem(key);
+    if (op === 'set') return localStorage.setItem(key, val);
+    if (op === 'del') return localStorage.removeItem(key);
+  } catch (e) { return null; }
 }
 
-function loadState() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return;
-    const saved = JSON.parse(raw);
-    if (saved.apiKey) state.apiKey = saved.apiKey;
-    if (saved.agents) {
-      Object.keys(saved.agents).forEach(k => {
-        if (state.agents[k]) state.agents[k] = saved.agents[k];
-      });
-    }
-    if (saved.prompts) {
-      Object.keys(saved.prompts).forEach(k => {
-        if (state.prompts[k] && saved.prompts[k]) {
-          state.prompts[k].system = saved.prompts[k].system ?? state.prompts[k].system;
-          state.prompts[k].user = saved.prompts[k].user ?? state.prompts[k].user;
-        }
-      });
-    }
-    if (saved.question) state.question = saved.question;
-  } catch (e) { /* corrupt or unavailable */ }
+function saveAll() {
+  const payload = {
+    apiKey: state.apiKey,
+    agents: state.agents,
+    prompts: state.prompts,
+    question: state.question,
+    results: state.results
+  };
+  try { safeLS('set', STORAGE_KEY, JSON.stringify(payload)); } catch (e) {
+    console.warn('Storage save failed', e);
+  }
 }
 
-// =========================================================
-//  SYSTEM TAB — agent config UI
-// =========================================================
-function buildAgentConfigCards() {
-  const grid = document.getElementById('agentsGrid');
+function loadAll() {
+  // initialise agents from defaults
+  AGENTS.forEach(a => {
+    state.agents[a.key] = { model: a.defaultModel, effort: a.defaultEffort };
+  });
+  state.prompts = { ...DEFAULT_PROMPTS };
+
+  const raw = safeLS('get', STORAGE_KEY);
+  if (!raw) return;
+  try {
+    const data = JSON.parse(raw);
+    if (data.apiKey) state.apiKey = data.apiKey;
+    if (data.agents) Object.keys(data.agents).forEach(k => {
+      if (state.agents[k]) state.agents[k] = { ...state.agents[k], ...data.agents[k] };
+    });
+    if (data.prompts) state.prompts = { ...DEFAULT_PROMPTS, ...data.prompts };
+    if (typeof data.question === 'string') state.question = data.question;
+    if (data.results) state.results = data.results;
+  } catch (e) {
+    console.warn('Storage load failed', e);
+  }
+}
+
+// ============= API =============
+async function callOpenRouter(model, effort, messages) {
+  const body = {
+    model,
+    messages,
+    reasoning: { effort },
+    max_tokens: 16000
+  };
+  const resp = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${state.apiKey}`,
+      'Content-Type': 'application/json',
+      'X-Title': 'Temple'
+    },
+    body: JSON.stringify(body)
+  });
+  if (!resp.ok) {
+    let detail = '';
+    try { detail = JSON.stringify(await resp.json()); } catch (e) { detail = await resp.text(); }
+    throw new Error(`HTTP ${resp.status}: ${detail.slice(0, 400)}`);
+  }
+  const data = await resp.json();
+  const msg = data.choices && data.choices[0] && data.choices[0].message;
+  if (!msg) throw new Error('Respuesta sin choices/message');
+  let reasoning = msg.reasoning || '';
+  if (!reasoning && Array.isArray(msg.reasoning_details)) {
+    reasoning = msg.reasoning_details
+      .map(r => r.text || r.summary || '')
+      .filter(Boolean)
+      .join('\n\n');
+  }
+  return { content: msg.content || '', reasoning };
+}
+
+// ============= PROMPT TEMPLATING =============
+function fill(tpl, vars) {
+  return tpl.replace(/\{(\w+)\}/g, (m, k) => (k in vars ? vars[k] : m));
+}
+
+function makeMsgs(systemTpl, userTpl, vars) {
+  return [
+    { role: 'system', content: fill(systemTpl, vars) },
+    { role: 'user',   content: fill(userTpl,   vars) }
+  ];
+}
+
+// ============= GRID CELLS =============
+function renderGrid() {
+  const grid = document.getElementById('mainGrid');
   grid.innerHTML = '';
+  state.cells = {};
 
-  AGENTS.forEach((agent, idx) => {
+  // Build 3 agents × 3 rounds
+  AGENTS.forEach((agent, colIdx) => {
+    for (let round = 1; round <= 3; round++) {
+      const cell = document.createElement('div');
+      cell.className = 'cell empty';
+      cell.style.gridColumn = colIdx + 1;
+      cell.style.gridRow = round;
+      cell.dataset.agent = agent.key;
+      cell.dataset.round = round;
+      cell.dataset.id = `${agent.key}-r${round}`;
+      cell.innerHTML = `
+        <div class="cell-head">
+          <span class="agent-tag" data-agent="${agent.key}">${agent.name}</span>
+          <span class="round-tag">R${round}</span>
+          <span class="status-pill">EMPTY</span>
+        </div>
+        <div class="cell-body empty">— vacío —</div>
+      `;
+      cell.addEventListener('click', () => openCellModal(agent.key, round));
+      grid.appendChild(cell);
+      state.cells[`${agent.key}-r${round}`] = cell;
+    }
+  });
+
+  // Verdict cell
+  const verdict = document.createElement('div');
+  verdict.className = 'cell verdict empty';
+  verdict.dataset.id = 'verdict';
+  verdict.innerHTML = `
+    <div class="cell-head">
+      <span class="agent-tag" style="color:var(--amber)">VERDICTUM</span>
+      <span class="round-tag">R4 · AGATHA</span>
+      <span class="status-pill">EMPTY</span>
+    </div>
+    <div class="cell-body empty">— el dictamen final aparecerá aquí —</div>
+  `;
+  verdict.addEventListener('click', () => openCellModal('agatha', 4));
+  document.getElementById('mainGrid').appendChild(verdict);
+  state.cells.verdict = verdict;
+}
+
+function setCellState(cellId, status) {
+  const cell = state.cells[cellId];
+  if (!cell) return;
+  cell.classList.remove('empty', 'thinking', 'done', 'error');
+  cell.classList.add(status);
+  const pill = cell.querySelector('.status-pill');
+  pill.textContent = status.toUpperCase();
+}
+
+function setCellThinking(cellId) {
+  setCellState(cellId, 'thinking');
+  const cell = state.cells[cellId];
+  cell.querySelector('.cell-body').classList.remove('empty');
+  cell.querySelector('.cell-body').innerHTML =
+    `<div class="thinking-loader">
+       <span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+       PROCESANDO
+     </div>`;
+}
+
+function setCellDone(cellId, content, confidence) {
+  setCellState(cellId, 'done');
+  const cell = state.cells[cellId];
+  const body = cell.querySelector('.cell-body');
+  body.classList.remove('empty');
+  body.innerHTML = renderMd(content);
+
+  if (confidence) {
+    const head = cell.querySelector('.cell-head');
+    let cp = head.querySelector('.confidence-pill');
+    if (!cp) {
+      cp = document.createElement('span');
+      cp.className = 'confidence-pill';
+      head.insertBefore(cp, head.querySelector('.status-pill'));
+    }
+    cp.textContent = `${confidence}/10`;
+  }
+}
+
+function setCellError(cellId, msg) {
+  setCellState(cellId, 'error');
+  const cell = state.cells[cellId];
+  const body = cell.querySelector('.cell-body');
+  body.classList.remove('empty');
+  body.innerHTML = `<div class="cell-error">${escapeHtml(msg)}</div>`;
+}
+
+function renderMd(text) {
+  if (!text) return '<em style="color:var(--ink-faded)">(sin contenido)</em>';
+  if (window.marked) {
+    marked.setOptions({ breaks: true, gfm: true });
+    return marked.parse(text);
+  }
+  return text.replace(/\n/g, '<br>');
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+}
+
+function extractConfidence(text) {
+  if (!text) return null;
+  const m = text.match(/Nivel:?\s*(\d{1,2})\s*\/\s*10/i);
+  return m ? m[1] : null;
+}
+
+// ============= PROGRESS =============
+function setPhaseStatus(phase, status) {
+  const step = document.querySelector(`.progress-step[data-phase="${phase}"]`);
+  if (!step) return;
+  step.classList.remove('active', 'done', 'error');
+  if (status) step.classList.add(status);
+}
+function setGlobalStatus(text) {
+  document.getElementById('globalStatus').textContent = text.toUpperCase();
+}
+
+// ============= ORCHESTRATION =============
+async function runPhase1(question) {
+  setPhaseStatus(1, 'active');
+  setGlobalStatus('FASE 1 // GENERACIÓN INDEPENDIENTE');
+  AGENTS.forEach(a => setCellThinking(`${a.key}-r1`));
+
+  const results = await Promise.all(AGENTS.map(async a => {
+    const cfg = state.agents[a.key];
+    try {
+      const msgs = makeMsgs(state.prompts.p1_system, state.prompts.p1_user, { question });
+      const r = await callOpenRouter(cfg.model, cfg.effort, msgs);
+      state.results.phase1[a.key] = { ...r, error: null };
+      setCellDone(`${a.key}-r1`, r.content, extractConfidence(r.content));
+      return true;
+    } catch (e) {
+      state.results.phase1[a.key] = { content: '', reasoning: '', error: e.message };
+      setCellError(`${a.key}-r1`, e.message);
+      return false;
+    }
+  }));
+
+  saveAll();
+  const ok = results.every(Boolean);
+  setPhaseStatus(1, ok ? 'done' : 'error');
+  return ok;
+}
+
+async function runPhase2(question) {
+  setPhaseStatus(2, 'active');
+  setGlobalStatus('FASE 2 // CRÍTICA CRUZADA');
+  AGENTS.forEach(a => setCellThinking(`${a.key}-r2`));
+
+  const results = await Promise.all(AGENTS.map(async a => {
+    const others = AGENTS.filter(x => x.key !== a.key);
+    const otherA = state.results.phase1[others[0].key]?.content || '';
+    const otherB = state.results.phase1[others[1].key]?.content || '';
+    const cfg = state.agents[a.key];
+    try {
+      const msgs = makeMsgs(state.prompts.p2_system, state.prompts.p2_user, {
+        question, otherA, otherB
+      });
+      const r = await callOpenRouter(cfg.model, cfg.effort, msgs);
+      state.results.phase2[a.key] = {
+        ...r, error: null, criticOf: [others[0].key, others[1].key]
+      };
+      setCellDone(`${a.key}-r2`, r.content);
+      return true;
+    } catch (e) {
+      state.results.phase2[a.key] = { content: '', reasoning: '', error: e.message };
+      setCellError(`${a.key}-r2`, e.message);
+      return false;
+    }
+  }));
+
+  saveAll();
+  const ok = results.every(Boolean);
+  setPhaseStatus(2, ok ? 'done' : 'error');
+  return ok;
+}
+
+function splitCritiqueAB(text) {
+  if (!text) return { a: '', b: '' };
+  const idxB = text.search(/##\s*CR[ÍI]TICA\s+A\s+LA\s+RESPUESTA\s+B/i);
+  if (idxB === -1) return { a: text, b: '' };
+  return { a: text.slice(0, idxB).trim(), b: text.slice(idxB).trim() };
+}
+
+async function runPhase3(question) {
+  setPhaseStatus(3, 'active');
+  setGlobalStatus('FASE 3 // REFINAMIENTO + ACH');
+  AGENTS.forEach(a => setCellThinking(`${a.key}-r3`));
+
+  const results = await Promise.all(AGENTS.map(async a => {
+    const received = [];
+    const observed = [];
+    AGENTS.forEach(critic => {
+      if (critic.key === a.key) return;
+      const cr = state.results.phase2[critic.key];
+      if (!cr || cr.error) return;
+      const [keyA, keyB] = cr.criticOf;
+      const parts = splitCritiqueAB(cr.content);
+      if (a.key === keyA) {
+        received.push(`— Crítica de ${critic.name} a tu respuesta:\n${parts.a || cr.content}`);
+        observed.push(`— ${critic.name} criticó también a ${keyB.toUpperCase()}:\n${parts.b || ''}`);
+      } else if (a.key === keyB) {
+        received.push(`— Crítica de ${critic.name} a tu respuesta:\n${parts.b || cr.content}`);
+        observed.push(`— ${critic.name} criticó también a ${keyA.toUpperCase()}:\n${parts.a || ''}`);
+      }
+    });
+
+    const cfg = state.agents[a.key];
+    try {
+      const msgs = makeMsgs(state.prompts.p3_system, state.prompts.p3_user, {
+        question,
+        ownResponse: state.results.phase1[a.key].content,
+        critiquesReceived: received.join('\n\n'),
+        critiquesObserved: observed.join('\n\n')
+      });
+      const r = await callOpenRouter(cfg.model, cfg.effort, msgs);
+      state.results.phase3[a.key] = { ...r, error: null };
+      setCellDone(`${a.key}-r3`, r.content, extractConfidence(r.content));
+      return true;
+    } catch (e) {
+      state.results.phase3[a.key] = { content: '', reasoning: '', error: e.message };
+      setCellError(`${a.key}-r3`, e.message);
+      return false;
+    }
+  }));
+
+  saveAll();
+  const ok = results.every(Boolean);
+  setPhaseStatus(3, ok ? 'done' : 'error');
+  return ok;
+}
+
+async function runPhase4(question) {
+  setPhaseStatus(4, 'active');
+  setGlobalStatus('FASE 4 // DICTAMEN FINAL');
+  setCellThinking('verdict');
+
+  const refined = AGENTS.map(a => state.results.phase3[a.key]?.content || '(sin refinamiento)');
+  const allCritiques = AGENTS.map(a =>
+    `## Críticas emitidas por ${a.name}:\n${state.results.phase2[a.key]?.content || ''}`
+  ).join('\n\n');
+
+  const cfg = state.agents.agatha;
+  try {
+    const msgs = makeMsgs(state.prompts.p4_system, state.prompts.p4_user, {
+      question,
+      refinedA: refined[0],
+      refinedB: refined[1],
+      refinedC: refined[2],
+      allCritiques
+    });
+    const r = await callOpenRouter(cfg.model, cfg.effort, msgs);
+    state.results.phase4.agatha = { ...r, error: null };
+    setCellDone('verdict', r.content, extractConfidence(r.content));
+    saveAll();
+    setPhaseStatus(4, 'done');
+    return true;
+  } catch (e) {
+    state.results.phase4.agatha = { content: '', reasoning: '', error: e.message };
+    setCellError('verdict', e.message);
+    saveAll();
+    setPhaseStatus(4, 'error');
+    return false;
+  }
+}
+
+async function convoke() {
+  const question = document.getElementById('question').value.trim();
+  if (!question) { setGlobalStatus('FALTA LA PREGUNTA'); return; }
+  if (!state.apiKey) { setGlobalStatus('FALTA LA API KEY // ABRE CONFIG'); return; }
+  state.question = question;
+  saveAll();
+
+  // reset
+  ['1','2','3','4'].forEach(p => setPhaseStatus(p, ''));
+  state.results = { phase1: {}, phase2: {}, phase3: {}, phase4: {} };
+  renderGrid();
+
+  document.getElementById('convoke').disabled = true;
+  try {
+    if (!(await runPhase1(question))) return;
+    if (!(await runPhase2(question))) return;
+    if (!(await runPhase3(question))) return;
+    await runPhase4(question);
+    setGlobalStatus('CONCILIO COMPLETADO');
+  } catch (e) {
+    setGlobalStatus('ERROR // ' + e.message.slice(0, 60));
+  } finally {
+    document.getElementById('convoke').disabled = false;
+  }
+}
+
+function resetSession() {
+  state.results = { phase1: {}, phase2: {}, phase3: {}, phase4: {} };
+  state.question = '';
+  document.getElementById('question').value = '';
+  ['1','2','3','4'].forEach(p => setPhaseStatus(p, ''));
+  renderGrid();
+  setGlobalStatus('SYSTEM IDLE');
+  saveAll();
+}
+
+// ============= SETTINGS UI =============
+function buildAgentsConfig() {
+  const root = document.getElementById('agentsConfig');
+  root.innerHTML = '';
+  AGENTS.forEach(agent => {
+    const div = document.createElement('div');
+    div.className = 'agent-cfg';
+    div.dataset.agent = agent.key;
     const cfg = state.agents[agent.key];
-    const card = document.createElement('div');
-    card.className = 'agent-config';
-    card.dataset.agent = agent.key;
 
-    const modelOptions = MODELS.map(m =>
+    const modelOpts = MODELS.map(m =>
       `<option value="${m.id}" ${m.id === cfg.model ? 'selected' : ''}>${m.label}</option>`
     ).join('');
 
-    const effortBtns = EFFORT_LEVELS.map(lvl =>
-      `<button class="effort-btn ${lvl === cfg.effort ? 'active' : ''}" data-effort="${lvl}" type="button">${lvl}</button>`
+    const effortBtns = EFFORT_LEVELS.map(lv =>
+      `<button class="effort-btn ${lv === cfg.effort ? 'active' : ''}" data-eff="${lv}" type="button">${lv}</button>`
     ).join('');
 
-    card.innerHTML = `
-      <div class="agent-header">
-        <div class="agent-id">SLOT // 0${idx+1}</div>
-        <div class="agent-name">${agent.name}</div>
-        <div class="agent-tag">${agent.tag}</div>
+    div.innerHTML = `
+      <div class="name">${agent.name}</div>
+      <div class="role">${agent.role}</div>
+      <div class="field">
+        <label class="field-label">Modelo</label>
+        <select class="field-select model-sel">${modelOpts}</select>
       </div>
-      <div class="field-row">
-        <label>Modelo</label>
-        <select class="model-select">${modelOptions}</select>
-      </div>
-      <div class="field-row">
-        <label>Esfuerzo de razonamiento</label>
+      <div class="field">
+        <label class="field-label">Esfuerzo</label>
         <div class="effort-grid">${effortBtns}</div>
       </div>
     `;
 
-    card.querySelector('.model-select').addEventListener('change', e => {
+    div.querySelector('.model-sel').addEventListener('change', e => {
       state.agents[agent.key].model = e.target.value;
-      saveState();
+      saveAll();
     });
-
-    card.querySelectorAll('.effort-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        card.querySelectorAll('.effort-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        state.agents[agent.key].effort = btn.dataset.effort;
-        saveState();
+    div.querySelectorAll('.effort-btn').forEach(b => {
+      b.addEventListener('click', () => {
+        div.querySelectorAll('.effort-btn').forEach(x => x.classList.remove('active'));
+        b.classList.add('active');
+        state.agents[agent.key].effort = b.dataset.eff;
+        saveAll();
       });
     });
 
-    grid.appendChild(card);
+    root.appendChild(div);
   });
 }
 
-// =========================================================
-//  PROTOCOLS TAB — prompt editor
-// =========================================================
-function buildProtocolEditors() {
-  const root = document.getElementById('protocolEditors');
-  root.innerHTML = '';
-
-  Object.keys(DEFAULT_PROMPTS).forEach((phaseKey, idx) => {
-    const def = DEFAULT_PROMPTS[phaseKey];
-    const cur = state.prompts[phaseKey];
-
-    const editor = document.createElement('div');
-    editor.className = 'protocol-editor' + (idx === 0 ? ' active' : '');
-    editor.dataset.protocol = phaseKey;
-
-    const varsHtml = def.variables.map(v =>
-      `<div><strong>{{${v.name}}}</strong> — ${v.desc}</div>`
-    ).join('');
-
-    editor.innerHTML = `
-      <div class="note" style="margin-bottom: 18px;">
-        <strong style="color: var(--ink-bright)">${def.label}</strong> · ${def.description}
-      </div>
-
-      <div class="editor-block">
-        <div class="editor-block-header">
-          <div class="editor-block-title">SYSTEM PROMPT</div>
-          <div class="editor-block-status" data-status="${phaseKey}-system">DEFAULT</div>
-        </div>
-        <textarea class="code-area" data-prompt="${phaseKey}.system" rows="6">${escapeHtml(cur.system)}</textarea>
-
-```
-  </div>
-
-  <div class="editor-block">
-    <div class="editor-block-header">
-      <div class="editor-block-title">USER PROMPT TEMPLATE</div>
-      <div class="editor-block-status" data-status="${phaseKey}-user">DEFAULT</div>
-    </div>
-    <div class="variables-doc">
-      <div style="margin-bottom: 4px;">VARIABLES SUSTITUIBLES:</div>
-      ${varsHtml}
-    </div>
-    <textarea class="code-area" data-prompt="${phaseKey}.user" rows="14">${escapeHtml(cur.user)}</textarea>
-  </div>
-
-  <div class="editor-actions">
-    <button class="btn-warn btn" data-reset="${phaseKey}"><span>↺ Restaurar por defecto</span></button>
-  </div>
-`;
-
-// wire textareas
-editor.querySelectorAll('textarea[data-prompt]').forEach(ta => {
-  ta.addEventListener('input', e => {
-    const [phase, field] = e.target.dataset.prompt.split('.');
-    state.prompts[phase][field] = e.target.value;
-    updatePromptStatus(phase, field);
-    saveState();
+// ============= PROMPTS UI =============
+function loadPromptsToUI() {
+  Object.keys(DEFAULT_PROMPTS).forEach(k => {
+    const el = document.getElementById(k);
+    if (el) el.value = state.prompts[k] || DEFAULT_PROMPTS[k];
   });
-});
-
-// wire reset
-editor.querySelector('[data-reset]').addEventListener('click', () => {
-  if (!confirm(`¿Restaurar los prompts de "${def.label}" a los valores por defecto?`)) return;
-  state.prompts[phaseKey].system = DEFAULT_PROMPTS[phaseKey].system;
-  state.prompts[phaseKey].user = DEFAULT_PROMPTS[phaseKey].user;
-  editor.querySelector(`textarea[data-prompt="${phaseKey}.system"]`).value = DEFAULT_PROMPTS[phaseKey].system;
-  editor.querySelector(`textarea[data-prompt="${phaseKey}.user"]`).value = DEFAULT_PROMPTS[phaseKey].user;
-  updatePromptStatus(phaseKey, 'system');
-  updatePromptStatus(phaseKey, 'user');
-  saveState();
-  showToast(`Protocolo "${def.label}" restaurado`, 'success');
-});
-
-root.appendChild(editor);
-
-// initial status
-updatePromptStatus(phaseKey, 'system');
-updatePromptStatus(phaseKey, 'user');
-```
-
-});
+}
+function savePromptsFromUI() {
+  Object.keys(DEFAULT_PROMPTS).forEach(k => {
+    const el = document.getElementById(k);
+    if (el) state.prompts[k] = el.value;
+  });
+  saveAll();
 }
 
-function updatePromptStatus(phase, field) {
-const status = document.querySelector(`[data-status="${phase}-${field}"]`);
-if (!status) return;
-const isModified = state.prompts[phase][field] !== DEFAULT_PROMPTS[phase][field];
-status.textContent = isModified ? ‘● MODIFIED’ : ‘DEFAULT’;
-status.classList.toggle(‘modified’, isModified);
-}
-
-// =========================================================
-//  TAB SWITCHING
-// =========================================================
-function setupTabs() {
-document.querySelectorAll(’.tab-btn’).forEach(btn => {
-btn.addEventListener(‘click’, () => {
-const tab = btn.dataset.tab;
-document.querySelectorAll(’.tab-btn’).forEach(b => b.classList.toggle(‘active’, b === btn));
-document.querySelectorAll(’.tab-content’).forEach(c => {
-c.classList.toggle(‘active’, c.id === ‘tab-’ + tab);
-});
-});
-});
-
-document.querySelectorAll(’.protocol-tab’).forEach(btn => {
-btn.addEventListener(‘click’, () => {
-const p = btn.dataset.protocol;
-document.querySelectorAll(’.protocol-tab’).forEach(b => b.classList.toggle(‘active’, b === btn));
-document.querySelectorAll(’.protocol-editor’).forEach(e =>
-e.classList.toggle(‘active’, e.dataset.protocol === p));
-});
-});
-}
-
-// =========================================================
-//  API CALL
-// =========================================================
-async function callOpenRouter(model, effort, messages) {
-const body = {
-model,
-messages,
-max_tokens: 16000,
-reasoning: { effort: effort }
-};
-
-const resp = await fetch(‘https://openrouter.ai/api/v1/chat/completions’, {
-method: ‘POST’,
-headers: {
-‘Authorization’: `Bearer ${state.apiKey}`,
-‘Content-Type’: ‘application/json’,
-‘X-Title’: ‘Temple’
-},
-body: JSON.stringify(body)
-});
-
-if (!resp.ok) {
-let detail = ‘’;
-try { detail = JSON.stringify(await resp.json()); } catch (e) { detail = await resp.text(); }
-throw new Error(`HTTP ${resp.status}: ${detail.slice(0, 500)}`);
-}
-
-const data = await resp.json();
-const msg = data.choices && data.choices[0] && data.choices[0].message;
-if (!msg) throw new Error(‘Respuesta sin choices/message’);
-
-return {
-content: msg.content || ‘’,
-reasoning: msg.reasoning || (Array.isArray(msg.reasoning_details)
-? msg.reasoning_details.map(r => r.text || r.summary || ‘’).filter(Boolean).join(’\n\n’)
-: ‘’),
-usage: data.usage || null
-};
-}
-
-// =========================================================
-//  PROMPT BUILDING
-// =========================================================
-function substituteVars(template, vars) {
-return template.replace(/{{(\w+)}}/g, (m, k) => (vars[k] !== undefined ? vars[k] : m));
-}
-
-function buildMessages(phase, vars) {
-const sys = substituteVars(state.prompts[phase].system, vars);
-const usr = substituteVars(state.prompts[phase].user, vars);
-return {
-messages: [
-{ role: ‘system’, content: sys },
-{ role: ‘user’, content: usr }
-],
-rendered: { system: sys, user: usr }
-};
-}
-
-// =========================================================
-//  UI HELPERS
-// =========================================================
-function renderMarkdown(text) {
-if (!text) return ‘<em class="placeholder">(sin contenido)</em>’;
-if (window.marked) {
-marked.setOptions({ breaks: true, gfm: true });
-return marked.parse(text);
-}
-return text.replace(/\n/g, ‘<br>’);
-}
-
-function escapeHtml(s) {
-return String(s)
-.replace(/&/g, ‘&’)
-.replace(/</g, ‘<’)
-.replace(/>/g, ‘>’)
-.replace(/”/g, ‘"’)
-.replace(/’/g, ‘'’);
-}
-
-function modelLabelOf(modelId) {
-const m = MODELS.find(x => x.id === modelId);
-if (!m) return modelId;
-return m.label.replace(/\s(.*?)$/, ‘’);
-}
-
-function makeResponseCard(agentKey, modelLabel, effort, isSynthesis = false) {
-const agent = AGENTS.find(a => a.key === agentKey);
-const card = document.createElement(‘div’);
-card.className = ‘response-card thinking’ + (isSynthesis ? ’ synthesis-card’ : ‘’);
-card.dataset.agent = agentKey;
-card.innerHTML = `<div class="rc-header"> <div class="rc-id"> <div class="rc-name">${agent.name}</div> <div class="rc-meta">${modelLabel} // effort=${effort}</div> </div> <div class="rc-state thinking">PENSANDO</div> </div> <div class="rc-body"> <em class="placeholder">Esperando respuesta del oráculo…</em> </div>`;
-return card;
-}
-
-function fillResponseCard(card, result, sentPrompt) {
-card.classList.remove(‘thinking’);
-const stateEl = card.querySelector(’.rc-state’);
-const bodyEl = card.querySelector(’.rc-body’);
-
-if (result.error) {
-stateEl.className = ‘rc-state error’;
-stateEl.textContent = ‘ERROR’;
-bodyEl.innerHTML = `<div class="error-block">${escapeHtml(result.error)}</div>`;
-return;
-}
-
-stateEl.className = ‘rc-state done’;
-stateEl.textContent = ‘OK’;
-bodyEl.innerHTML = renderMarkdown(result.content);
-
-// Build footer with toggles
-const footer = document.createElement(‘div’);
-footer.className = ‘rc-footer’;
-
-if (result.reasoning && result.reasoning.trim()) {
-const btn = document.createElement(‘button’);
-btn.className = ‘rc-footer-btn’;
-btn.textContent = `▸ Razonamiento (${result.reasoning.length} ch)`;
-const block = document.createElement(‘div’);
-block.className = ‘rc-collapsible’;
-block.textContent = result.reasoning;
-btn.addEventListener(‘click’, () => {
-block.classList.toggle(‘open’);
-btn.textContent = (block.classList.contains(‘open’) ? ‘▾’ : ‘▸’) + btn.textContent.slice(1);
-});
-footer.appendChild(btn);
-card.appendChild(footer);
-card.appendChild(block);
-}
-
-if (sentPrompt) {
-const btn = document.createElement(‘button’);
-btn.className = ‘rc-footer-btn’;
-btn.textContent = ‘▸ Prompt enviado’;
-const block = document.createElement(‘div’);
-block.className = ‘rc-collapsible’;
-block.textContent = `═══ SYSTEM ═══\n${sentPrompt.system}\n\n═══ USER ═══\n${sentPrompt.user}`;
-btn.addEventListener(‘click’, () => {
-block.classList.toggle(‘open’);
-btn.textContent = (block.classList.contains(‘open’) ? ‘▾’ : ‘▸’) + btn.textContent.slice(1);
-});
-if (!card.querySelector(’.rc-footer’)) card.appendChild(footer);
-else card.querySelector(’.rc-footer’).appendChild(btn);
-card.appendChild(block);
-}
-}
-
-function setPhaseStatus(phaseId, statusKey, text) {
-const phase = document.getElementById(phaseId);
-phase.classList.remove(‘active’, ‘completed’, ‘error’);
-if (statusKey) phase.classList.add(statusKey);
-const txt = phase.querySelector(’.phase-state-text’);
-if (txt) txt.textContent = text;
-}
-
-function clearPhaseGrid(gridId) { document.getElementById(gridId).innerHTML = ‘’; }
-
-function setGlobalStatus(text, kind = ‘’) {
-const el = document.getElementById(‘globalStatus’);
-el.className = ’global-status ’ + kind;
-el.innerHTML = `<span class="status-dot ${kind === 'error' ? 'err' : kind === 'success' ? 'ok' : kind === 'working' ? 'warn' : ''}"></span><span>${text}</span>`;
-}
-
-function showToast(msg, kind = ‘’) {
-const t = document.getElementById(‘toast’);
-t.className = ’toast ’ + kind;
-t.textContent = msg;
-t.classList.add(‘show’);
-setTimeout(() => t.classList.remove(‘show’), 2800);
-}
-
-function updateApiStatus() {
-const dot = document.getElementById(‘dot-api’);
-const txt = document.getElementById(‘api-state’);
-if (state.apiKey && state.apiKey.length > 10) {
-dot.className = ‘status-dot ok’;
-txt.textContent = ‘API READY’;
-} else {
-dot.className = ‘status-dot err’;
-txt.textContent = ‘NO API KEY’;
-}
-}
-
-// =========================================================
-//  PHASE ORCHESTRATION
-// =========================================================
-async function runPhase1(question) {
-setPhaseStatus(‘phase1’, ‘active’, ‘EJECUTANDO’);
-clearPhaseGrid(‘phase1Grid’);
-state.results.phase1 = {};
-state.sentPrompts.phase1 = {};
-
-const grid = document.getElementById(‘phase1Grid’);
-const cards = {};
-AGENTS.forEach(a => {
-const c = makeResponseCard(a.key, modelLabelOf(state.agents[a.key].model), state.agents[a.key].effort);
-grid.appendChild(c);
-cards[a.key] = c;
-});
-
-const results = await Promise.all(AGENTS.map(async a => {
-const cfg = state.agents[a.key];
-const built = buildMessages(‘phase1’, { question });
-state.sentPrompts.phase1[a.key] = built.rendered;
-try {
-const res = await callOpenRouter(cfg.model, cfg.effort, built.messages);
-state.results.phase1[a.key] = { …res, error: null };
-fillResponseCard(cards[a.key], state.results.phase1[a.key], built.rendered);
-return { ok: true };
-} catch (e) {
-state.results.phase1[a.key] = { content: ‘’, reasoning: ‘’, error: e.message };
-fillResponseCard(cards[a.key], state.results.phase1[a.key], built.rendered);
-return { ok: false };
-}
-}));
-
-const ok = results.every(r => r.ok);
-setPhaseStatus(‘phase1’, ok ? ‘completed’ : ‘error’, ok ? ‘OK · 3/3’ : ‘CON ERRORES’);
-return ok;
-}
-
-async function runPhase2(question) {
-setPhaseStatus(‘phase2’, ‘active’, ‘EJECUTANDO’);
-clearPhaseGrid(‘phase2Grid’);
-state.results.phase2 = {};
-state.sentPrompts.phase2 = {};
-
-const grid = document.getElementById(‘phase2Grid’);
-const cards = {};
-AGENTS.forEach(a => {
-const c = makeResponseCard(a.key, modelLabelOf(state.agents[a.key].model), state.agents[a.key].effort);
-grid.appendChild(c);
-cards[a.key] = c;
-});
-
-const results = await Promise.all(AGENTS.map(async a => {
-const others = AGENTS.filter(x => x.key !== a.key);
-const responseA = state.results.phase1[others[0].key].content;
-const responseB = state.results.phase1[others[1].key].content;
-const built = buildMessages(‘phase2’, { question, responseA, responseB });
-state.sentPrompts.phase2[a.key] = built.rendered;
-const cfg = state.agents[a.key];
-try {
-const res = await callOpenRouter(cfg.model, cfg.effort, built.messages);
-state.results.phase2[a.key] = {
-…res,
-error: null,
-criticOf: [others[0].key, others[1].key]
-};
-fillResponseCard(cards[a.key], state.results.phase2[a.key], built.rendered);
-return { ok: true };
-} catch (e) {
-state.results.phase2[a.key] = { content: ‘’, reasoning: ‘’, error: e.message };
-fillResponseCard(cards[a.key], state.results.phase2[a.key], built.rendered);
-return { ok: false };
-}
-}));
-
-const ok = results.every(r => r.ok);
-setPhaseStatus(‘phase2’, ok ? ‘completed’ : ‘error’, ok ? ‘OK · 3/3’ : ‘CON ERRORES’);
-return ok;
-}
-
-function splitCritiqueAB(text) {
-if (!text) return { a: ‘’, b: ‘’ };
-const idxB = text.search(/##\s*CR[ÍI]TICA\s+A\s+LA\s+RESPUESTA\s+B/i);
-if (idxB === -1) return { a: text, b: ‘’ };
-return { a: text.slice(0, idxB).trim(), b: text.slice(idxB).trim() };
-}
-
-async function runPhase3(question) {
-setPhaseStatus(‘phase3’, ‘active’, ‘EJECUTANDO’);
-clearPhaseGrid(‘phase3Grid’);
-state.results.phase3 = {};
-state.sentPrompts.phase3 = {};
-
-const grid = document.getElementById(‘phase3Grid’);
-const cards = {};
-AGENTS.forEach(a => {
-const c = makeResponseCard(a.key, modelLabelOf(state.agents[a.key].model), state.agents[a.key].effort);
-grid.appendChild(c);
-cards[a.key] = c;
-});
-
-const results = await Promise.all(AGENTS.map(async a => {
-const received = [];
-const observed = [];
-
-```
-AGENTS.forEach(critic => {
-  if (critic.key === a.key) return;
-  const cr = state.results.phase2[critic.key];
-  if (!cr || cr.error) return;
-  const [keyA, keyB] = cr.criticOf;
-  const parts = splitCritiqueAB(cr.content);
-  if (a.key === keyA) {
-    received.push(`— Crítica de ${critic.key.toUpperCase()} a tu respuesta:\n${parts.a || cr.content}`);
-    observed.push(`— ${critic.key.toUpperCase()} criticó también a otro experto:\n${parts.b || ''}`);
-  } else if (a.key === keyB) {
-    received.push(`— Crítica de ${critic.key.toUpperCase()} a tu respuesta:\n${parts.b || cr.content}`);
-    observed.push(`— ${critic.key.toUpperCase()} criticó también a otro experto:\n${parts.a || ''}`);
+// ============= CELL MODAL =============
+function openCellModal(agentKey, round) {
+  let title, content, reasoning, error;
+  if (round === 4) {
+    title = 'AGATHA · DICTAMEN FINAL';
+    const r = state.results.phase4.agatha;
+    content = r?.content || ''; reasoning = r?.reasoning || ''; error = r?.error;
+  } else {
+    const phaseKey = `phase${round}`;
+    const romanNum = ['I','II','III'][round - 1];
+    title = `${agentKey.toUpperCase()} · RONDA ${romanNum}`;
+    const r = state.results[phaseKey]?.[agentKey];
+    content = r?.content || ''; reasoning = r?.reasoning || ''; error = r?.error;
   }
-});
 
-const built = buildMessages('phase3', {
-  question,
-  ownResponse: state.results.phase1[a.key].content,
-  critiquesReceived: received.join('\n\n'),
-  critiquesObserved: observed.join('\n\n')
-});
-state.sentPrompts.phase3[a.key] = built.rendered;
-const cfg = state.agents[a.key];
-try {
-  const res = await callOpenRouter(cfg.model, cfg.effort, built.messages);
-  state.results.phase3[a.key] = { ...res, error: null };
-  fillResponseCard(cards[a.key], state.results.phase3[a.key], built.rendered);
-  return { ok: true };
-} catch (e) {
-  state.results.phase3[a.key] = { content: '', reasoning: '', error: e.message };
-  fillResponseCard(cards[a.key], state.results.phase3[a.key], built.rendered);
-  return { ok: false };
-}
-```
+  if (error) {
+    content = `**ERROR:**\n\n\`\`\`\n${error}\n\`\`\``;
+  } else if (!content) {
+    content = '*Sin contenido todavía. La celda se llenará cuando se ejecute esta fase.*';
+  }
+  document.getElementById('cellModalTitle').textContent = '// ' + title;
+  document.getElementById('cellModalBody').innerHTML = renderMd(content);
 
-}));
-
-const ok = results.every(r => r.ok);
-setPhaseStatus(‘phase3’, ok ? ‘completed’ : ‘error’, ok ? ‘OK · 3/3’ : ‘CON ERRORES’);
-return ok;
-}
-
-async function runPhase4(question) {
-setPhaseStatus(‘phase4’, ‘active’, ‘EJECUTANDO’);
-clearPhaseGrid(‘phase4Grid’);
-state.results.phase4 = {};
-state.sentPrompts.phase4 = {};
-
-const grid = document.getElementById(‘phase4Grid’);
-const card = makeResponseCard(‘agatha’, modelLabelOf(state.agents.agatha.model), state.agents.agatha.effort, true);
-grid.appendChild(card);
-
-const refined = AGENTS.map(a => state.results.phase3[a.key]?.content || ‘(sin refinamiento)’);
-const allCritiques = AGENTS.map(a =>
-`## Críticas emitidas por ${a.name}:\n${state.results.phase2[a.key]?.content || ''}`
-).join(’\n\n’);
-
-const built = buildMessages(‘phase4’, {
-question,
-refined1: refined[0],
-refined2: refined[1],
-refined3: refined[2],
-allCritiques
-});
-state.sentPrompts.phase4.agatha = built.rendered;
-
-const cfg = state.agents.agatha;
-try {
-const res = await callOpenRouter(cfg.model, cfg.effort, built.messages);
-state.results.phase4.agatha = { …res, error: null };
-fillResponseCard(card, state.results.phase4.agatha, built.rendered);
-setPhaseStatus(‘phase4’, ‘completed’, ‘DICTAMEN ENTREGADO’);
-return true;
-} catch (e) {
-state.results.phase4.agatha = { content: ‘’, reasoning: ‘’, error: e.message };
-fillResponseCard(card, state.results.phase4.agatha, built.rendered);
-setPhaseStatus(‘phase4’, ‘error’, ‘ERROR EN SÍNTESIS’);
-return false;
-}
-}
-
-async function runFullPipeline() {
-const question = document.getElementById(‘question’).value.trim();
-if (!question) {
-showToast(‘Falta la pregunta’, ‘error’);
-setGlobalStatus(‘FALTA PREGUNTA’, ‘error’);
-return;
-}
-if (!state.apiKey) {
-showToast(‘Configura tu API key en SISTEMA’, ‘error’);
-setGlobalStatus(‘FALTA API KEY’, ‘error’);
-return;
-}
-state.question = question;
-saveState();
-
-[‘phase1’,‘phase2’,‘phase3’,‘phase4’].forEach(p => {
-setPhaseStatus(p, ‘’, ‘EN ESPERA’);
-clearPhaseGrid(p + ‘Grid’);
-});
-
-const btn = document.getElementById(‘convoke’);
-btn.disabled = true;
-btn.querySelector(‘span’).textContent = ‘◌ Procesando…’;
-setGlobalStatus(‘CONVOCANDO CONCILIO’, ‘working’);
-
-try {
-const ok1 = await runPhase1(question);
-if (!ok1) { setGlobalStatus(‘DETENIDO TRAS FASE 01’, ‘error’); return; }
+  const reasoningBtn = document.getElementById('cellShowReasoning');
+  if (reasoning && reasoning.trim()) {
+    reasoningBtn.style.display = '';
+    reasoningBtn.onclick = () => {
+      const body = document.getElementById('cellModalBody');
+      body.innerHTML += `
+        <h2 style="margin-top:24px">// REASONING TRACE</h2>
+        <pre>${escapeHtml(reasoning)}</pre>`;
 
 ```
-setGlobalStatus('FASE 02 // CRÍTICA CRUZADA', 'working');
-const ok2 = await runPhase2(question);
-if (!ok2) { setGlobalStatus('DETENIDO TRAS FASE 02', 'error'); return; }
-
-setGlobalStatus('FASE 03 // REFINAMIENTO', 'working');
-const ok3 = await runPhase3(question);
-if (!ok3) { setGlobalStatus('DETENIDO TRAS FASE 03', 'error'); return; }
-
-setGlobalStatus('FASE 04 // SÍNTESIS', 'working');
-const ok4 = await runPhase4(question);
-if (!ok4) { setGlobalStatus('SÍNTESIS CON ERROR', 'error'); return; }
-
-setGlobalStatus('DICTAMEN COMPLETO', 'success');
-showToast('Dictamen completo', 'success');
+  reasoningBtn.style.display = 'none';
+};
 ```
 
-} catch (e) {
-setGlobalStatus(’ERROR: ’ + e.message.slice(0, 40), ‘error’);
-showToast(’Error: ’ + e.message.slice(0, 60), ‘error’);
-} finally {
-btn.disabled = false;
-btn.querySelector(‘span’).textContent = ‘► Convocar concilio’;
-}
+} else {
+reasoningBtn.style.display = ‘none’;
 }
 
-function resetAll() {
-[‘phase1’,‘phase2’,‘phase3’,‘phase4’].forEach(p => {
-setPhaseStatus(p, ‘’, ‘EN ESPERA’);
-clearPhaseGrid(p + ‘Grid’);
+document.getElementById(‘cellModal’).classList.add(‘open’);
+}
+
+// ============= RESTORE FROM SESSION =============
+function restoreLastSession() {
+if (state.question) document.getElementById(‘question’).value = state.question;
+
+// restore agent cells
+AGENTS.forEach(a => {
+[1, 2, 3].forEach(rd => {
+const r = state.results[`phase${rd}`]?.[a.key];
+if (!r) return;
+if (r.error) setCellError(`${a.key}-r${rd}`, r.error);
+else if (r.content) setCellDone(`${a.key}-r${rd}`, r.content, extractConfidence(r.content));
 });
-state.results = { phase1: {}, phase2: {}, phase3: {}, phase4: {} };
-state.sentPrompts = { phase1: {}, phase2: {}, phase3: {}, phase4: {} };
-setGlobalStatus(‘EN REPOSO’);
+});
+const v = state.results.phase4?.agatha;
+if (v) {
+if (v.error) setCellError(‘verdict’, v.error);
+else if (v.content) setCellDone(‘verdict’, v.content, extractConfidence(v.content));
 }
 
-// =========================================================
-//  INIT
-// =========================================================
-document.addEventListener(‘DOMContentLoaded’, () => {
-loadState();
-buildAgentConfigCards();
-buildProtocolEditors();
-setupTabs();
+// restore phase status (mark done if all agents completed)
+for (let p = 1; p <= 3; p++) {
+const ph = state.results[`phase${p}`];
+if (ph && AGENTS.every(a => ph[a.key] && !ph[a.key].error && ph[a.key].content)) {
+setPhaseStatus(p, ‘done’);
+}
+}
+if (v && !v.error && v.content) setPhaseStatus(4, ‘done’);
+}
 
-// Restore inputs
+// ============= MODAL HOOKS =============
+function bindModals() {
+document.querySelectorAll(’[data-close]’).forEach(el => {
+el.addEventListener(‘click’, () => {
+el.closest(’.modal-backdrop’).classList.remove(‘open’);
+});
+});
+document.querySelectorAll(’.modal-backdrop’).forEach(bd => {
+bd.addEventListener(‘click’, e => {
+if (e.target === bd) bd.classList.remove(‘open’);
+});
+});
+
+document.getElementById(‘btnSettings’).addEventListener(‘click’, () => {
 document.getElementById(‘apiKey’).value = state.apiKey;
-document.getElementById(‘question’).value = state.question;
-updateApiStatus();
+buildAgentsConfig();
+document.getElementById(‘settingsModal’).classList.add(‘open’);
+});
 
 document.getElementById(‘apiKey’).addEventListener(‘input’, e => {
 state.apiKey = e.target.value.trim();
-updateApiStatus();
-saveState();
+saveAll();
+});
+document.getElementById(‘apiKeyToggle’).addEventListener(‘click’, () => {
+const inp = document.getElementById(‘apiKey’);
+const btn = document.getElementById(‘apiKeyToggle’);
+if (inp.type === ‘password’) { inp.type = ‘text’; btn.textContent = ‘HIDE’; }
+else { inp.type = ‘password’; btn.textContent = ‘SHOW’; }
 });
 
+document.getElementById(‘btnPrompts’).addEventListener(‘click’, () => {
+loadPromptsToUI();
+document.getElementById(‘promptsModal’).classList.add(‘open’);
+});
+document.getElementById(‘savePrompts’).addEventListener(‘click’, () => {
+savePromptsFromUI();
+document.getElementById(‘promptsModal’).classList.remove(‘open’);
+setGlobalStatus(‘PROMPTS GUARDADOS’);
+setTimeout(() => setGlobalStatus(‘SYSTEM IDLE’), 1800);
+});
+document.getElementById(‘resetPrompts’).addEventListener(‘click’, () => {
+state.prompts = { …DEFAULT_PROMPTS };
+loadPromptsToUI();
+saveAll();
+});
+
+document.getElementById(‘promptsTabs’).addEventListener(‘click’, e => {
+const tab = e.target.closest(’.tab’);
+if (!tab) return;
+document.querySelectorAll(’#promptsTabs .tab’).forEach(t => t.classList.remove(‘active’));
+document.querySelectorAll(’.tab-pane’).forEach(p => p.classList.remove(‘active’));
+tab.classList.add(‘active’);
+document.querySelector(`.tab-pane[data-pane="${tab.dataset.tab}"]`).classList.add(‘active’);
+});
+
+// placeholder tag insertion
+document.querySelectorAll(’.placeholder-tags .tag’).forEach(t => {
+t.addEventListener(‘click’, () => {
+const tgt = document.getElementById(t.dataset.target);
+if (!tgt) return;
+const start = tgt.selectionStart;
+const end = tgt.selectionEnd;
+tgt.value = tgt.value.slice(0, start) + t.textContent + tgt.value.slice(end);
+tgt.focus();
+tgt.selectionStart = tgt.selectionEnd = start + t.textContent.length;
+});
+});
+
+document.getElementById(‘btnReset’).addEventListener(‘click’, () => {
+if (confirm(’¿Reiniciar la sesión actual? La configuración no se borra.’)) resetSession();
+});
+}
+
+// ============= INIT =============
+document.addEventListener(‘DOMContentLoaded’, () => {
+loadAll();
+renderGrid();
+bindModals();
+document.getElementById(‘convoke’).addEventListener(‘click’, convoke);
 document.getElementById(‘question’).addEventListener(‘input’, e => {
 state.question = e.target.value;
-saveState();
 });
 
-document.getElementById(‘toggleKey’).addEventListener(‘click’, () => {
-const inp = document.getElementById(‘apiKey’);
-const btn = document.getElementById(‘toggleKey’);
-if (inp.type === ‘password’) { inp.type = ‘text’; btn.textContent = ‘OCULTAR’; }
-else { inp.type = ‘password’; btn.textContent = ‘VER’; }
-});
+restoreLastSession();
 
-document.getElementById(‘convoke’).addEventListener(‘click’, runFullPipeline);
-document.getElementById(‘reset’).addEventListener(‘click’, resetAll);
+if (!state.apiKey) {
+setGlobalStatus(‘CONFIGURA LA API KEY EN CONFIG’);
+}
 });
 </script>
 
