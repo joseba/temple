@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/11.1.1/marked.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
 :root {
   --bg-0: #050a12;
@@ -73,7 +74,7 @@ input, textarea, select { font-family: inherit; }
   position: relative;
   z-index: 1;
   display: grid;
-  grid-template-rows: 44px 38px 64px 1fr 24px;
+  grid-template-rows: 44px 38px 100px 1fr 24px;
   height: 100vh;
   padding: 12px;
   gap: 10px;
@@ -174,7 +175,7 @@ input, textarea, select { font-family: inherit; }
 /* ========== PROGRESS BAR ========== */
 .progress {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   gap: 8px;
   padding: 0;
 }
@@ -269,7 +270,7 @@ textarea#question::placeholder { color: var(--ink-faded); }
 .grid {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr 1.4fr;
-  grid-template-rows: 1fr 1fr 1fr;
+  grid-template-rows: 1fr 1fr 1fr 0.6fr;
   gap: 8px;
   min-height: 0;
 }
@@ -337,6 +338,41 @@ textarea#question::placeholder { color: var(--ink-faded); }
   background: var(--bg-3);
   color: var(--amber);
   margin-left: 4px;
+}
+
+.web-pill {
+  font-size: 8.5px;
+  letter-spacing: 0.18em;
+  padding: 2px 6px;
+  background: rgba(0, 229, 255, 0.12);
+  color: var(--cyan);
+  border: 1px solid var(--cyan-dim);
+  margin-left: 4px;
+  font-weight: 600;
+}
+
+.pdf-pill {
+  font-size: 9px;
+  letter-spacing: 0.22em;
+  padding: 3px 9px;
+  background: rgba(255, 181, 71, 0.12);
+  color: var(--amber);
+  border: 1px solid var(--amber);
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: inherit;
+  text-transform: uppercase;
+  margin-left: auto;
+}
+.pdf-pill:hover {
+  background: var(--amber);
+  color: var(--bg-0);
+  box-shadow: 0 0 10px rgba(255, 181, 71, 0.55);
+}
+.pdf-pill::before {
+  content: '↓ ';
+  letter-spacing: 0;
 }
 
 .cell-body {
@@ -423,7 +459,7 @@ textarea#question::placeholder { color: var(--ink-faded); }
 /* Verdict cell — special */
 .cell.verdict {
   grid-column: 4;
-  grid-row: 1 / -1;
+  grid-row: 1 / 4;
   border-color: var(--amber);
   background: linear-gradient(180deg, rgba(255, 181, 71, 0.04) 0%, var(--bg-1) 100%);
 }
@@ -439,6 +475,87 @@ textarea#question::placeholder { color: var(--ink-faded); }
 }
 .cell.verdict .cell-body strong { color: var(--amber); }
 .cell.verdict .cell-body { font-size: 12px; }
+
+/* Phase 5 — Audit + Revision cells */
+.cell.audit.veto {
+  border-color: var(--red);
+  background: linear-gradient(180deg, rgba(255, 77, 109, 0.05) 0%, var(--bg-1) 100%);
+}
+.cell.audit.veto .cell-head { border-bottom-color: var(--red); }
+
+.cell.audit.no-veto { border-color: var(--green); }
+.cell.audit.no-veto .cell-head { border-bottom-color: var(--green); }
+
+.cell.audit-skip {
+  border-color: var(--line);
+  background: var(--bg-0);
+  opacity: 0.5;
+  cursor: default !important;
+}
+.cell.audit-skip:hover { border-color: var(--line) !important; cursor: default !important; }
+.cell.audit-skip .cell-head { background: var(--bg-1); }
+.cell.audit-skip .cell-body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-style: italic;
+  font-size: 9.5px;
+  letter-spacing: 0.18em;
+  color: var(--ink-faded);
+  text-transform: uppercase;
+}
+
+.cell.revision {
+  border-color: var(--amber);
+  background: linear-gradient(180deg, rgba(255, 181, 71, 0.04) 0%, var(--bg-1) 100%);
+}
+.cell.revision .cell-head {
+  background: linear-gradient(90deg, rgba(255, 181, 71, 0.08) 0%, var(--bg-2) 100%);
+  border-bottom-color: var(--amber);
+}
+.cell.revision .cell-head .agent-tag { color: var(--amber); }
+.cell.revision.thinking { border-color: var(--amber); }
+.cell.revision.thinking .status-pill { color: var(--amber); }
+.cell.revision .cell-body h1, .cell.revision .cell-body h2, .cell.revision .cell-body h3 {
+  color: var(--amber);
+}
+.cell.revision .cell-body strong { color: var(--amber); }
+.cell.revision.skipped { opacity: 0.6; }
+.cell.revision.skipped .cell-body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-style: italic;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  color: var(--ink-faded);
+  text-transform: uppercase;
+}
+
+.veto-pill, .no-veto-pill, .action-pill {
+  font-size: 8.5px;
+  letter-spacing: 0.18em;
+  padding: 2px 6px;
+  font-weight: 700;
+  margin-left: 4px;
+  border: 1px solid currentColor;
+}
+.veto-pill { color: var(--red); background: rgba(255, 77, 109, 0.12); }
+.no-veto-pill { color: var(--green); background: rgba(94, 234, 141, 0.12); font-weight: 600; }
+.action-pill { color: var(--amber); background: rgba(255, 181, 71, 0.12); }
+
+.minority-pill {
+  font-size: 8.5px;
+  letter-spacing: 0.18em;
+  padding: 2px 6px;
+  background: rgba(255, 77, 109, 0.12);
+  color: var(--red);
+  border: 1px solid var(--red);
+  font-weight: 600;
+  margin-left: 4px;
+}
 
 /* ========== FOOTER ========== */
 .foot {
@@ -462,6 +579,20 @@ textarea#question::placeholder { color: var(--ink-faded); }
   border-radius: 50%;
   box-shadow: 0 0 6px var(--green);
 }
+.foot .credits {
+  color: var(--ink-dim);
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.15s;
+}
+.foot .credits:hover { color: var(--ink); }
+.foot .credits .val {
+  color: var(--amber);
+  font-weight: 600;
+  letter-spacing: 0.1em;
+}
+.foot .credits .err { color: var(--red); }
+.foot .credits .loading { opacity: 0.55; }
 
 /* ========== MODAL ========== */
 .modal-backdrop {
@@ -762,6 +893,65 @@ textarea#question::placeholder { color: var(--ink-faded); }
 }
 .api-key-toggle:hover { color: var(--cyan); border-color: var(--cyan); }
 
+/* settings toggle row */
+.toggle-row {
+  display: grid;
+  grid-template-columns: auto 18px 1fr;
+  align-items: start;
+  gap: 12px;
+  cursor: pointer;
+  user-select: none;
+  padding: 4px 0;
+}
+.toggle-row input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  width: 0; height: 0;
+}
+.toggle-box {
+  grid-column: 1;
+  width: 16px; height: 16px;
+  border: 1px solid var(--line-bright);
+  background: var(--bg-0);
+  position: relative;
+  transition: all 0.15s;
+  margin-top: 2px;
+}
+.toggle-row:hover .toggle-box { border-color: var(--cyan); }
+.toggle-row input[type="checkbox"]:checked + .toggle-box {
+  background: var(--cyan);
+  border-color: var(--cyan);
+  box-shadow: 0 0 8px var(--cyan-glow);
+}
+.toggle-row input[type="checkbox"]:checked + .toggle-box::after {
+  content: '';
+  position: absolute;
+  left: 4px; top: 0px;
+  width: 5px; height: 10px;
+  border: solid var(--bg-0);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+.toggle-text {
+  grid-column: 3;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.toggle-title {
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  color: var(--ink);
+  text-transform: uppercase;
+  font-weight: 500;
+}
+.toggle-hint {
+  font-size: 10.5px;
+  color: var(--ink-faded);
+  font-style: italic;
+  line-height: 1.45;
+}
+
 /* scrollbar */
 ::-webkit-scrollbar { width: 8px; height: 8px; }
 ::-webkit-scrollbar-track { background: var(--bg-0); }
@@ -774,9 +964,15 @@ textarea#question::placeholder { color: var(--ink-faded); }
   .grid { grid-template-columns: 1fr 1fr 1fr 1.2fr; }
 }
 @media (max-width: 900px) {
-  .app { grid-template-rows: 44px 38px 64px 1fr 24px; }
-  .grid { grid-template-columns: 1fr 1fr 1fr; grid-template-rows: 1fr 1fr 1fr 1.2fr; }
+  .app { grid-template-rows: 44px 38px 100px 1fr 24px; }
+  .grid {
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr 1fr 1fr 0.7fr;
+  }
   .cell.verdict { grid-column: 1 / -1; grid-row: 4; }
+  /* row 5: arthur-r5 (col 1), dashiell-r5 (col 2), revision (col 3) */
+  /* the agatha audit-skip cell is hidden on mobile to save space */
+  .cell.audit-skip { display: none; }
 }
 </style>
 </head>
@@ -823,6 +1019,11 @@ textarea#question::placeholder { color: var(--ink-faded); }
       <span class="label">DICTAMEN FINAL</span>
       <span class="meta">AGATHA</span>
     </div>
+    <div class="progress-step" data-phase="5">
+      <span class="num">V.</span>
+      <span class="label">AUDITORÍA + VETO</span>
+      <span class="meta">RED TEAM AL DICTAMEN</span>
+    </div>
   </nav>
 
   <!-- QUESTION -->
@@ -840,6 +1041,7 @@ textarea#question::placeholder { color: var(--ink-faded); }
   <!-- FOOTER -->
   <footer class="foot">
     <span class="signal">CONNECTED // OPENROUTER/V1</span>
+    <span class="credits" id="creditsDisplay" title="Click para refrescar">— · —</span>
     <span id="footMeta">QUOD SCRIPSI · SCRIPSI</span>
   </footer>
 
@@ -869,6 +1071,18 @@ textarea#question::placeholder { color: var(--ink-faded); }
         <div class="section-block-title">CARACTERES DEL CONCILIO</div>
         <div class="agents-config" id="agentsConfig"></div>
       </div>
+
+      <div class="section-block">
+        <div class="section-block-title">COMPORTAMIENTO</div>
+        <label class="toggle-row" for="webSearchPhase1">
+          <input type="checkbox" id="webSearchPhase1">
+          <span class="toggle-box"></span>
+          <span class="toggle-text">
+            <span class="toggle-title">Búsqueda web en Ronda I</span>
+            <span class="toggle-hint">Cada agente puede consultar internet durante la generación independiente. Nativo en Anthropic / OpenAI / xAI; Exa para el resto. Coste extra por búsqueda.</span>
+          </span>
+        </label>
+      </div>
     </div>
     <div class="modal-foot">
       <button class="btn" data-close>CERRAR</button>
@@ -889,6 +1103,7 @@ textarea#question::placeholder { color: var(--ink-faded); }
         <button class="tab" data-tab="2">RONDA II</button>
         <button class="tab" data-tab="3">RONDA III</button>
         <button class="tab" data-tab="4">RONDA IV</button>
+        <button class="tab" data-tab="5">RONDA V</button>
       </div>
 
       <div class="tab-pane active" data-pane="1">
@@ -955,6 +1170,37 @@ textarea#question::placeholder { color: var(--ink-faded); }
           </div>
         </div>
       </div>
+
+      <div class="tab-pane" data-pane="5">
+        <div class="field">
+          <label class="field-label">SYSTEM (Fase 5a — Auditoría · Arthur + Dashiell)</label>
+          <textarea id="p5_audit_system" class="field-textarea"></textarea>
+          <div class="field-hint">Solo Arthur y Dashiell auditan. Agatha está recusada como juez de su propio dictamen.</div>
+        </div>
+        <div class="field">
+          <label class="field-label">USER (Fase 5a — Auditoría)</label>
+          <textarea id="p5_audit_user" class="field-textarea"></textarea>
+          <div class="placeholder-tags">
+            <span class="tag" data-target="p5_audit_user">{question}</span>
+            <span class="tag" data-target="p5_audit_user">{verdict}</span>
+            <span class="tag" data-target="p5_audit_user">{dossier}</span>
+          </div>
+        </div>
+        <div class="field">
+          <label class="field-label">SYSTEM (Fase 5b — Revisión / Defensa · Agatha)</label>
+          <textarea id="p5_revision_system" class="field-textarea"></textarea>
+          <div class="field-hint">Solo se ejecuta si al menos un auditor emite VETO con [FATAL]. Agatha tiene una sola oportunidad: revisar o defender.</div>
+        </div>
+        <div class="field">
+          <label class="field-label">USER (Fase 5b — Revisión / Defensa)</label>
+          <textarea id="p5_revision_user" class="field-textarea"></textarea>
+          <div class="placeholder-tags">
+            <span class="tag" data-target="p5_revision_user">{question}</span>
+            <span class="tag" data-target="p5_revision_user">{verdict}</span>
+            <span class="tag" data-target="p5_revision_user">{vetos}</span>
+          </div>
+        </div>
+      </div>
     </div>
     <div class="modal-foot">
       <button class="btn" id="resetPrompts">RESTAURAR DEFECTOS</button>
@@ -986,18 +1232,31 @@ textarea#question::placeholder { color: var(--ink-faded); }
 //  Single-file. Vanilla JS. localStorage-backed.
 // =============================================================
 
+// Prices: [input, output] in USD per 1M tokens. null = no public price (free / unknown).
+// Curated to keep only the latest model per family/tier.
 const MODELS = [
-  { id: 'openai/gpt-5.5',                  label: 'GPT-5.5' },
-  { id: 'openai/gpt-5.5-pro',              label: 'GPT-5.5 Pro' },
-  { id: 'openai/gpt-5.4',                  label: 'GPT-5.4' },
-  { id: 'anthropic/claude-opus-4.7',       label: 'Claude Opus 4.7' },
-  { id: 'anthropic/claude-opus-4.6',       label: 'Claude Opus 4.6' },
-  { id: 'anthropic/claude-sonnet-4.5',     label: 'Claude Sonnet 4.5' },
-  { id: 'google/gemini-3.1-pro-preview',   label: 'Gemini 3.1 Pro' },
-  { id: 'google/gemini-3-pro-preview',     label: 'Gemini 3 Pro' },
-  { id: 'google/gemini-3-flash-preview',   label: 'Gemini 3 Flash' },
-  { id: 'x-ai/grok-4',                     label: 'Grok 4' },
-  { id: 'deepseek/deepseek-v4-pro',        label: 'DeepSeek V4 Pro' }
+  // ── OpenAI ──────────────────────────────────────────────────────────
+  { id: 'openai/gpt-5.5',                  label: 'GPT-5.5',           price: [5, 30] },
+  // ── Anthropic ───────────────────────────────────────────────────────
+  { id: 'anthropic/claude-opus-4.7',       label: 'Claude Opus 4.7',   price: [5, 25] },
+  { id: 'anthropic/claude-sonnet-4.5',     label: 'Claude Sonnet 4.5', price: [3, 15] },
+  // ── Google ──────────────────────────────────────────────────────────
+  { id: 'google/gemini-3.1-pro-preview',   label: 'Gemini 3.1 Pro',    price: [2, 12] },
+  { id: 'google/gemini-3-flash-preview',   label: 'Gemini 3 Flash',    price: [0.30, 2.50] },
+  // ── xAI ─────────────────────────────────────────────────────────────
+  { id: 'x-ai/grok-4',                     label: 'Grok 4',            price: [3, 15] },
+  // ── DeepSeek ────────────────────────────────────────────────────────
+  { id: 'deepseek/deepseek-v4-pro',        label: 'DeepSeek V4 Pro',   price: [0.435, 0.87] },
+  { id: 'deepseek/deepseek-v4-flash',      label: 'DeepSeek V4 Flash', price: [0.14, 0.28] },
+  // ── Moonshot AI · Kimi ──────────────────────────────────────────────
+  { id: 'moonshotai/kimi-k2-thinking',     label: 'Kimi K2 Thinking',  price: [0.60, 2.50] },
+  { id: 'moonshotai/kimi-k2.6',            label: 'Kimi K2.6',         price: [0.75, 3.50] },
+  // ── Alibaba · Qwen ──────────────────────────────────────────────────
+  { id: 'qwen/qwen3-max-thinking',         label: 'Qwen3 Max Thinking', price: [0.78, 3.90] },
+  { id: 'qwen/qwen3.6-plus',               label: 'Qwen3.6 Plus',      price: [0.325, 1.95] },
+  // ── Xiaomi · MiMo ───────────────────────────────────────────────────
+  { id: 'xiaomi/mimo-v2.5-pro',            label: 'MiMo V2.5 Pro',     price: [1.00, 3.00] },
+  { id: 'xiaomi/mimo-v2.5',                label: 'MiMo V2.5',         price: [0.40, 2.00] }
 ];
 
 const EFFORT_LEVELS = ['minimal', 'low', 'medium', 'high', 'xhigh'];
@@ -1249,7 +1508,97 @@ Para cada desacuerdo importante:
 
 ## NIVEL DE CONFIANZA GLOBAL
 Nivel: X/10
-Justificación: (sé generosa con la duda; penaliza la falsa certeza)`
+Justificación: (sé generosa con la duda; penaliza la falsa certeza)`,
+
+  p5_audit_system:
+`Eres AUDITOR del dictamen final emitido por la presidenta del concilio. Tu única tarea es detectar fallos [FATAL] que invaliden la decisión recomendada.
+
+NO estás aquí para mejorar el dictamen, reescribirlo, proponer alternativas ni re-litigar la deliberación. Solo: ¿hay un fallo grave que lo invalide?
+
+Definiciones operativas:
+- [FATAL] — error de razonamiento, factual o lógico que hace inválida la decisión recomendada. Ejemplos: confundir un supuesto con un hecho del que depende la decisión; ignorar una restricción explícita de la pregunta; cometer un error de cálculo o lógica determinante; contradecir abiertamente las críticas refinadas sin justificación; recomendar algo que las propias condiciones del dictamen ya descartan.
+- [MATERIAL] — cambia matices del dictamen pero NO invalida la decisión. Se anota pero NO dispara revisión.
+- [MENOR] o cualquier otra cosa — NO se reporta.
+
+Output ultra-constreñido. Sin markdown libre. Sin propuestas alternativas. Si te encuentras escribiendo más de lo que el formato permite, estás haciendo el trabajo equivocado.
+
+No fabriques objeciones para tener algo que decir. La crítica fabricada es peor que el silencio. Si el dictamen no tiene fallo fatal, di NO.`,
+
+  p5_audit_user:
+`PREGUNTA ORIGINAL:
+{question}
+
+═══════════════════════════════════
+DICTAMEN A AUDITAR:
+{verdict}
+═══════════════════════════════════
+
+CONTEXTO (críticas refinadas previas — para verificar que el dictamen no las contradice sin razón):
+{dossier}
+
+Responde EXACTAMENTE en uno de los dos formatos siguientes, sin preámbulos, sin saludos, sin secciones de análisis:
+
+── Si encuentras un fallo fatal ──
+
+VETO: SÍ
+FALLO_FATAL: (una sola objeción concreta, máx. 80 palabras)
+POR_QUÉ_INVALIDA_EL_DICTAMEN: (máx. 60 palabras)
+
+── Si NO encuentras fallo fatal ──
+
+VETO: NO
+
+── Opcionalmente, en cualquiera de los dos casos, puedes añadir al final: ──
+
+NOTAS_MATERIALES:
+- (máx. 40 palabras)
+- (máx. 40 palabras)
+
+No incluyas nada más. Nada de "como auditor", nada de "tras revisar el dictamen", nada de cierres educados.`,
+
+  p5_revision_system:
+`Eres la presidenta del concilio. Los auditores externos han examinado tu dictamen y al menos uno ha emitido VETO con un fallo [FATAL].
+
+Tienes UNA sola oportunidad y debes elegir UNA de dos opciones:
+
+1. REVISAR — aceptas el fallo y emites un dictamen revisado, focalizado solo en el fallo señalado. No reescribas todas las secciones; solo lo que el fallo afecta. Máximo ~500 palabras totales en la revisión.
+
+2. DEFENDER — argumentas por qué el supuesto fallo NO es realmente fatal. Sé concreto. Si defiendes, el dictamen original se mantiene y los vetos se anexarán al PDF como objeciones de minoría no resueltas.
+
+No hay tercera ronda. No hay "aprovecho para mejorar otras cosas". Solo: revisar el fallo señalado o defender contra él.`,
+
+  p5_revision_user:
+`PREGUNTA ORIGINAL:
+{question}
+
+═══════════════════════════════════
+TU DICTAMEN ORIGINAL:
+{verdict}
+═══════════════════════════════════
+
+VETOS RECIBIDOS:
+{vetos}
+
+Responde EXACTAMENTE en uno de los dos formatos siguientes, en Markdown:
+
+── Si REVISAS ──
+
+## ACCIÓN
+REVISAR
+
+## DICTAMEN REVISADO
+(Reescritura focalizada, máx. ~500 palabras. Mantén las secciones que el fallo no afecta indicando "Sin cambios" en lugar de reproducirlas. Reescribe solo lo que cambia.)
+
+## CAMBIOS APLICADOS
+- Qué cambió y por qué (lista breve)
+
+── Si DEFIENDES ──
+
+## ACCIÓN
+DEFENDER
+
+## DEFENSA
+Argumento concreto contra cada veto. Por qué el supuesto fallo no invalida la decisión recomendada. Las objeciones se anexarán como minoría no resuelta independientemente de tu defensa.`
 };
 
 // ============= STATE & STORAGE =============
@@ -1261,7 +1610,8 @@ const state = {
   agents: {},
   prompts: { ...DEFAULT_PROMPTS },
   question: '',
-  results: { phase1: {}, phase2: {}, phase3: {}, phase4: {} },
+  webSearchPhase1: false,
+  results: { phase1: {}, phase2: {}, phase3: {}, phase4: {}, phase5: {} },
   cells: {}            // cell DOM refs by id like 'agatha-r1'
 };
 
@@ -1279,6 +1629,7 @@ function saveAll() {
     agents: state.agents,
     prompts: state.prompts,
     question: state.question,
+    webSearchPhase1: state.webSearchPhase1,
     results: state.results
   };
   try { safeLS('set', STORAGE_KEY, JSON.stringify(payload)); } catch (e) {
@@ -1323,6 +1674,7 @@ function loadAll() {
     });
     if (data.prompts) state.prompts = { ...DEFAULT_PROMPTS, ...data.prompts };
     if (typeof data.question === 'string') state.question = data.question;
+    if (typeof data.webSearchPhase1 === 'boolean') state.webSearchPhase1 = data.webSearchPhase1;
     if (data.results) state.results = data.results;
   } catch (e) {
     console.warn('Storage load failed', e);
@@ -1330,13 +1682,18 @@ function loadAll() {
 }
 
 // ============= API =============
-async function callOpenRouter(model, effort, messages) {
+async function callOpenRouter(model, effort, messages, options = {}) {
   const body = {
     model,
     messages,
     reasoning: { effort },
     max_tokens: 16000
   };
+  if (options.webSearch) {
+    // Server tool: model decides when to search; OpenRouter executes it.
+    // Native search is used for Anthropic/OpenAI/xAI/Perplexity, Exa otherwise.
+    body.tools = [{ type: 'openrouter:web_search' }];
+  }
   const resp = await fetch('https://openrouter.ai/api/v1/chat/completions', {
     method: 'POST',
     headers: {
@@ -1361,10 +1718,82 @@ async function callOpenRouter(model, effort, messages) {
       .filter(Boolean)
       .join('\n\n');
   }
-  return { content: msg.content || '', reasoning };
+
+  // Extract URL citations from web search if present
+  let content = msg.content || '';
+  const annotations = Array.isArray(msg.annotations) ? msg.annotations : [];
+  const sources = annotations
+    .filter(a => a && a.type === 'url_citation' && a.url_citation)
+    .map(a => ({
+      url: a.url_citation.url,
+      title: a.url_citation.title || a.url_citation.url
+    }));
+  if (sources.length) {
+    // Dedupe by url
+    const seen = new Set();
+    const unique = sources.filter(s => {
+      if (seen.has(s.url)) return false;
+      seen.add(s.url); return true;
+    });
+    content += '\n\n## FUENTES CONSULTADAS\n' +
+      unique.map((s, i) => `${i + 1}. [${s.title}](${s.url})`).join('\n');
+  }
+  return { content, reasoning, sources };
 }
 
-// ============= PROMPT TEMPLATING =============
+// ============= CREDITS / BALANCE =============
+let _creditsDebounce = null;
+async function fetchKeyInfo() {
+  const display = document.getElementById('creditsDisplay');
+  if (!display) return;
+  if (!state.apiKey) {
+    display.innerHTML = '<span class="loading">SIN API KEY</span>';
+    return;
+  }
+  display.innerHTML = '<span class="loading">CONSULTANDO BALANCE…</span>';
+
+  const headers = { 'Authorization': `Bearer ${state.apiKey}` };
+
+  // Strategy: prefer /api/v1/credits (account-level total balance). If that
+  // fails (it usually requires a management key), fall back to /api/v1/key
+  // which always works for the bearer key and may include limit_remaining.
+  try {
+    const r = await fetch('https://openrouter.ai/api/v1/credits', { headers });
+    if (r.ok) {
+      const j = await r.json();
+      const d = (j && j.data) || {};
+      if (typeof d.total_credits === 'number' && typeof d.total_usage === 'number') {
+        const remaining = (d.total_credits - d.total_usage);
+        display.innerHTML = `BALANCE <span class="val">$${remaining.toFixed(2)}</span>`;
+        return;
+      }
+    }
+  } catch (e) { /* fallthrough */ }
+
+  // Fallback: per-key info
+  try {
+    const r = await fetch('https://openrouter.ai/api/v1/key', { headers });
+    if (!r.ok) {
+      display.innerHTML = `<span class="err">BALANCE · HTTP ${r.status}</span>`;
+      return;
+    }
+    const j = await r.json();
+    const d = (j && j.data) || {};
+    if (typeof d.limit_remaining === 'number') {
+      display.innerHTML = `BALANCE <span class="val">$${d.limit_remaining.toFixed(2)}</span>`;
+    } else {
+      // No per-key limit and credits endpoint denied us — best we can show
+      const usage = (typeof d.usage === 'number' ? d.usage : 0).toFixed(2);
+      display.innerHTML = `USED <span class="val">$${usage}</span> · KEY SIN LÍMITE`;
+    }
+  } catch (e) {
+    display.innerHTML = '<span class="err">BALANCE · ERROR DE RED</span>';
+  }
+}
+function scheduleCreditsRefresh(ms = 600) {
+  if (_creditsDebounce) clearTimeout(_creditsDebounce);
+  _creditsDebounce = setTimeout(fetchKeyInfo, ms);
+}
 function fill(tpl, vars) {
   return tpl.replace(/\{(\w+)\}/g, (m, k) => (k in vars ? vars[k] : m));
 }
@@ -1434,6 +1863,65 @@ function renderGrid() {
   verdict.addEventListener('click', () => openCellModal('agatha', 4));
   document.getElementById('mainGrid').appendChild(verdict);
   state.cells.verdict = verdict;
+
+  // ───── Phase 5 row (audit + revision) ─────
+  // Col 1, Row 4 — Agatha recused (judge cannot audit own verdict)
+  const recused = document.createElement('div');
+  recused.className = 'cell audit-skip';
+  recused.style.gridColumn = 1;
+  recused.style.gridRow = 4;
+  recused.dataset.id = 'agatha-r5-skip';
+  recused.innerHTML = `
+    <div class="cell-head">
+      <span class="agent-tag" data-agent="agatha">AGATHA</span>
+      <span class="round-tag">R5 · RECUSADA</span>
+      <span class="status-pill">N/A</span>
+    </div>
+    <div class="cell-body">JUEZ NO AUDITA<br>SU PROPIO DICTAMEN</div>
+  `;
+  grid.appendChild(recused);
+  state.cells['agatha-r5-skip'] = recused;
+
+  // Col 2-3, Row 4 — Arthur and Dashiell audit cells
+  ['arthur', 'dashiell'].forEach((key, idx) => {
+    const auditor = AGENTS.find(a => a.key === key);
+    const cell = document.createElement('div');
+    cell.className = 'cell audit empty';
+    cell.style.gridColumn = idx + 2;  // col 2 or 3
+    cell.style.gridRow = 4;
+    cell.dataset.agent = key;
+    cell.dataset.round = 5;
+    cell.dataset.id = `${key}-r5`;
+    cell.innerHTML = `
+      <div class="cell-head">
+        <span class="agent-tag" data-agent="${key}">${auditor.name}</span>
+        <span class="round-tag">R5 · AUDIT</span>
+        <span class="status-pill">EMPTY</span>
+      </div>
+      <div class="cell-body empty">— audit pendiente —</div>
+    `;
+    cell.addEventListener('click', () => openCellModal(key, 5));
+    grid.appendChild(cell);
+    state.cells[`${key}-r5`] = cell;
+  });
+
+  // Col 4, Row 4 — Revision/Defense cell (Agatha)
+  const revision = document.createElement('div');
+  revision.className = 'cell revision empty';
+  revision.style.gridColumn = 4;
+  revision.style.gridRow = 4;
+  revision.dataset.id = 'revision';
+  revision.innerHTML = `
+    <div class="cell-head">
+      <span class="agent-tag" style="color:var(--amber)">REVISIÓN</span>
+      <span class="round-tag">R5 · AGATHA</span>
+      <span class="status-pill">EMPTY</span>
+    </div>
+    <div class="cell-body empty">— en espera de auditoría —</div>
+  `;
+  revision.addEventListener('click', () => openCellModal('revision', 5));
+  grid.appendChild(revision);
+  state.cells.revision = revision;
 }
 
 function setCellState(cellId, status) {
@@ -1483,6 +1971,268 @@ function setCellError(cellId, msg) {
   body.innerHTML = `<div class="cell-error">${escapeHtml(msg)}</div>`;
 }
 
+function markCellWebSearch(cellId) {
+  const cell = state.cells[cellId];
+  if (!cell) return;
+  const head = cell.querySelector('.cell-head');
+  if (!head || head.querySelector('.web-pill')) return;
+  const pill = document.createElement('span');
+  pill.className = 'web-pill';
+  pill.title = 'Búsqueda web activa';
+  pill.textContent = 'WEB';
+  head.insertBefore(pill, head.querySelector('.status-pill'));
+}
+
+// ============= VERDICT PDF =============
+function downloadVerdictPDF() {
+  const verdict = state.results.phase4 && state.results.phase4.agatha;
+  if (!verdict || !verdict.content) return;
+  if (!window.jspdf || !window.jspdf.jsPDF) {
+    alert('Generador de PDF no disponible. Recarga la página.');
+    return;
+  }
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+
+  const pageW = doc.internal.pageSize.getWidth();
+  const pageH = doc.internal.pageSize.getHeight();
+  const margin = 18;
+  const maxW = pageW - 2 * margin;
+  let y = margin;
+
+  const cfg = state.agents.agatha;
+  const modelLbl = (MODELS.find(m => m.id === cfg.model) || {}).label || cfg.model;
+  const dateStr = new Date().toLocaleString('es-ES', {
+    year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit'
+  });
+
+  // ── Phase 5: assemble composite body and choose subtitle ──
+  const ph5 = state.results.phase5 || {};
+  const rev = ph5.revision;
+  const arthurAudit = ph5.arthur;
+  const dashiellAudit = ph5.dashiell;
+  const auditList = [
+    arthurAudit && !arthurAudit.error ? { agent: 'ARTHUR',   ...arthurAudit } : null,
+    dashiellAudit && !dashiellAudit.error ? { agent: 'DASHIELL', ...dashiellAudit } : null
+  ].filter(Boolean);
+  const vetos = auditList.filter(a => a.veto);
+  const allMaterial = auditList.flatMap(a =>
+    (a.material || []).map(m => ({ from: a.agent, text: m }))
+  );
+
+  let subtitle = '// CONCILIUM · DICTAMEN FINAL';
+  let bodyMd = verdict.content;
+
+  if (rev && rev.action === 'revise' && rev.content) {
+    subtitle = '// CONCILIUM · DICTAMEN REVISADO TRAS AUDITORÍA';
+    // Strip the model's leading "## ACCIÓN / REVISAR" header for cleanliness
+    const cleaned = rev.content.replace(/^\s*##\s*ACCI[ÓO]N\s*\n+\s*REVISAR\s*\n+/i, '');
+    bodyMd = cleaned;
+    bodyMd += '\n\n## DICTAMEN ORIGINAL (PRE-AUDITORÍA)\n\n' + verdict.content;
+  } else if (rev && rev.action === 'defend' && rev.content) {
+    subtitle = '// CONCILIUM · DICTAMEN CON OBJECIONES NO RESUELTAS';
+    bodyMd = verdict.content;
+    if (vetos.length) {
+      bodyMd += '\n\n## OBJECIONES DE MINORÍA NO RESUELTAS\n\n';
+      bodyMd += vetos.map(v =>
+        `### Veto emitido por ${v.agent}\n\n**Fallo fatal:** ${v.fatal || '(no especificado)'}\n\n**Por qué invalida:** ${v.why || '(no especificado)'}`
+      ).join('\n\n');
+    }
+    const cleanDefense = rev.content.replace(/^\s*##\s*ACCI[ÓO]N\s*\n+\s*DEFENDER\s*\n+/i, '');
+    bodyMd += '\n\n## DEFENSA DE LA PRESIDENTA\n\n' + cleanDefense;
+  }
+
+  if (allMaterial.length) {
+    bodyMd += '\n\n## NOTAS MATERIALES DE AUDITORÍA\n\n';
+    bodyMd += allMaterial.map(m => `- *(${m.from})* ${m.text}`).join('\n');
+  }
+
+  // — Header
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(20);
+  doc.setTextColor(20, 20, 20);
+  doc.text('TEMPLE', margin, y + 6);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9);
+  doc.setTextColor(120, 120, 120);
+  doc.text(subtitle, margin + 28, y + 6);
+  y += 12;
+
+  doc.setDrawColor(180, 130, 50);
+  doc.setLineWidth(0.5);
+  doc.line(margin, y, pageW - margin, y);
+  y += 7;
+
+  // — Metadata block
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8);
+  doc.setTextColor(110, 110, 110);
+  doc.text(`Síntesis por · ${modelLbl} (effort: ${cfg.effort})`, margin, y);
+  doc.text(dateStr, pageW - margin, y, { align: 'right' });
+  y += 6;
+
+  // — Question block
+  if (state.question) {
+    doc.setFont('helvetica', 'italic');
+    doc.setFontSize(10);
+    doc.setTextColor(80, 80, 80);
+    const qLabel = 'Pregunta:';
+    doc.setFont('helvetica', 'bold');
+    doc.text(qLabel, margin, y);
+    doc.setFont('helvetica', 'italic');
+    const qLines = doc.splitTextToSize(state.question, maxW - 22);
+    doc.text(qLines, margin + 22, y);
+    y += Math.max(qLines.length * 5, 5) + 4;
+  }
+
+  doc.setDrawColor(220, 220, 220);
+  doc.line(margin, y, pageW - margin, y);
+  y += 6;
+
+  // — Body: parse markdown line by line
+  const lines = bodyMd.split('\n');
+  const lineHeight = 5.2;
+
+  function ensureSpace(needed) {
+    if (y + needed > pageH - margin) {
+      doc.addPage();
+      y = margin;
+    }
+  }
+
+  function stripInlineMd(s) {
+    return s
+      .replace(/\*\*(.+?)\*\*/g, '$1')
+      .replace(/\*(.+?)\*/g, '$1')
+      .replace(/`(.+?)`/g, '$1')
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1');
+  }
+
+  for (let raw of lines) {
+    const line = raw.trimEnd();
+
+    if (line.startsWith('## ')) {
+      ensureSpace(12);
+      y += 4;
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(13);
+      doc.setTextColor(180, 110, 30);
+      doc.text(stripInlineMd(line.slice(3)), margin, y);
+      y += 2;
+      doc.setDrawColor(220, 180, 120);
+      doc.setLineWidth(0.3);
+      doc.line(margin, y, pageW - margin, y);
+      y += 5;
+      doc.setTextColor(30, 30, 30);
+    } else if (line.startsWith('### ')) {
+      ensureSpace(8);
+      y += 2;
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(11);
+      doc.setTextColor(60, 60, 60);
+      doc.text(stripInlineMd(line.slice(4)), margin, y);
+      y += 5;
+      doc.setTextColor(30, 30, 30);
+    } else if (line.startsWith('# ')) {
+      ensureSpace(10);
+      y += 3;
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(15);
+      doc.setTextColor(180, 110, 30);
+      doc.text(stripInlineMd(line.slice(2)), margin, y);
+      y += 7;
+      doc.setTextColor(30, 30, 30);
+    } else if (line.match(/^[\-\*]\s+/)) {
+      const text = stripInlineMd(line.replace(/^[\-\*]\s+/, ''));
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(10);
+      const wrapped = doc.splitTextToSize(text, maxW - 6);
+      ensureSpace(wrapped.length * lineHeight);
+      doc.setTextColor(150, 100, 30);
+      doc.text('•', margin + 1, y);
+      doc.setTextColor(30, 30, 30);
+      doc.text(wrapped, margin + 6, y);
+      y += wrapped.length * lineHeight;
+    } else if (line.match(/^\d+\.\s+/)) {
+      const m = line.match(/^(\d+)\.\s+(.+)$/);
+      const text = stripInlineMd(m[2]);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(10);
+      const wrapped = doc.splitTextToSize(text, maxW - 8);
+      ensureSpace(wrapped.length * lineHeight);
+      doc.setTextColor(150, 100, 30);
+      doc.text(m[1] + '.', margin + 1, y);
+      doc.setTextColor(30, 30, 30);
+      doc.text(wrapped, margin + 8, y);
+      y += wrapped.length * lineHeight;
+    } else if (line.trim() === '') {
+      y += 3;
+    } else {
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(10);
+      doc.setTextColor(30, 30, 30);
+      const wrapped = doc.splitTextToSize(stripInlineMd(line), maxW);
+      ensureSpace(wrapped.length * lineHeight);
+      doc.text(wrapped, margin, y);
+      y += wrapped.length * lineHeight;
+    }
+  }
+
+  // — Footer on every page
+  const pageCount = doc.internal.getNumberOfPages();
+  for (let i = 1; i <= pageCount; i++) {
+    doc.setPage(i);
+    doc.setFont('helvetica', 'italic');
+    doc.setFontSize(7.5);
+    doc.setTextColor(160, 160, 160);
+    doc.text('Quod scripsi, scripsi · Temple Concilium', margin, pageH - 8);
+    doc.text(`${i} / ${pageCount}`, pageW - margin, pageH - 8, { align: 'right' });
+  }
+
+  // — Filename: question slug + timestamp
+  const slug = (state.question || 'verdict')
+    .toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 40) || 'verdict';
+  const stamp = new Date().toISOString().slice(0, 16).replace(/[T:]/g, '-');
+  doc.save(`temple-${slug}-${stamp}.pdf`);
+}
+
+function installVerdictPdfButton() {
+  const cell = state.cells.verdict;
+  if (!cell) return;
+  const head = cell.querySelector('.cell-head');
+  const pill = head && head.querySelector('.status-pill');
+  if (!pill) return;
+  // replace status-pill with PDF button
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = 'pdf-pill';
+  btn.textContent = 'PDF';
+  btn.title = 'Descargar el dictamen en PDF';
+  btn.addEventListener('click', e => {
+    e.stopPropagation();   // don't open the cell modal
+    downloadVerdictPDF();
+  });
+  pill.replaceWith(btn);
+}
+
+function removeVerdictPdfButton() {
+  const cell = state.cells.verdict;
+  if (!cell) return;
+  const head = cell.querySelector('.cell-head');
+  const btn = head && head.querySelector('.pdf-pill');
+  if (!btn) return;
+  // restore default status pill
+  const pill = document.createElement('span');
+  pill.className = 'status-pill';
+  pill.textContent = 'EMPTY';
+  btn.replaceWith(pill);
+}
+
 function renderMd(text) {
   if (!text) return '<em style="color:var(--ink-faded)">(sin contenido)</em>';
   if (window.marked) {
@@ -1503,6 +2253,19 @@ function extractConfidence(text) {
   return m ? m[1] : null;
 }
 
+function formatPrice(n) {
+  // Compact: $5  /  $0.30  /  $0.075  -- always trim trailing zeros sensibly
+  if (n == null) return '';
+  if (n >= 1) return '$' + (Number.isInteger(n) ? n : n.toFixed(2));
+  if (n >= 0.1) return '$' + n.toFixed(2);
+  return '$' + n.toFixed(3);
+}
+
+function formatPriceSuffix(price) {
+  if (!Array.isArray(price) || price.length < 2) return '';
+  return `  ·  ${formatPrice(price[0])}/${formatPrice(price[1])}/M`;
+}
+
 // ============= PROGRESS =============
 function setPhaseStatus(phase, status) {
   const step = document.querySelector(`.progress-step[data-phase="${phase}"]`);
@@ -1514,19 +2277,113 @@ function setGlobalStatus(text) {
   document.getElementById('globalStatus').textContent = text.toUpperCase();
 }
 
+// ============= PHASE 5 HELPERS =============
+
+// Parse the constrained auditor output. Tolerates accent variations and
+// extra whitespace. Looks for VETO: SÍ/SI/NO and the structured fields.
+function parseVeto(content) {
+  const out = { veto: false, fatal: '', why: '', material: [] };
+  if (!content) return out;
+
+  const m = content.match(/VETO\s*:\s*(S[ÍI]|NO)/i);
+  if (m && /S[ÍI]/i.test(m[1])) out.veto = true;
+
+  const fatalMatch = content.match(
+    /FALLO_FATAL\s*:\s*([\s\S]+?)(?=\n\s*(?:POR_QU[ÉE]_INVALIDA|NOTAS_MATERIALES|VETO\s*:|$))/i
+  );
+  if (fatalMatch) out.fatal = fatalMatch[1].trim();
+
+  const whyMatch = content.match(
+    /POR_QU[ÉE]_INVALIDA[A-Z_]*\s*:\s*([\s\S]+?)(?=\n\s*(?:NOTAS_MATERIALES|VETO\s*:|$))/i
+  );
+  if (whyMatch) out.why = whyMatch[1].trim();
+
+  const matMatch = content.match(/NOTAS_MATERIALES\s*:\s*([\s\S]+?)$/i);
+  if (matMatch) {
+    out.material = matMatch[1]
+      .split('\n')
+      .map(s => s.replace(/^\s*[-*•]\s*/, '').trim())
+      .filter(Boolean);
+  }
+  return out;
+}
+
+// Effort downgrade for auditors: one notch below the agent's main effort.
+function downgradeEffort(eff) {
+  const map = { xhigh: 'high', high: 'medium', medium: 'low', low: 'minimal', minimal: 'minimal' };
+  return map[eff] || 'medium';
+}
+
+// Mark an audit cell with VETO / NO VETO pill and styling
+function markAuditCell(cellId, parsed) {
+  const cell = state.cells[cellId];
+  if (!cell) return;
+  cell.classList.remove('veto', 'no-veto');
+  cell.classList.add(parsed.veto ? 'veto' : 'no-veto');
+
+  const head = cell.querySelector('.cell-head');
+  // remove any old veto pills
+  head.querySelectorAll('.veto-pill, .no-veto-pill').forEach(p => p.remove());
+
+  const pill = document.createElement('span');
+  if (parsed.veto) {
+    pill.className = 'veto-pill';
+    pill.textContent = 'VETO';
+  } else {
+    pill.className = 'no-veto-pill';
+    pill.textContent = 'OK';
+  }
+  const statusPill = head.querySelector('.status-pill');
+  if (statusPill) head.insertBefore(pill, statusPill);
+  else head.appendChild(pill);
+}
+
+// Mark the revision cell with the action taken
+function markRevisionCell(action) {
+  const cell = state.cells.revision;
+  if (!cell) return;
+  const head = cell.querySelector('.cell-head');
+  head.querySelectorAll('.action-pill').forEach(p => p.remove());
+
+  const pill = document.createElement('span');
+  pill.className = 'action-pill';
+  pill.textContent = action === 'revise' ? 'REVISADO' : 'DEFENDIDO';
+  const statusPill = head.querySelector('.status-pill');
+  if (statusPill) head.insertBefore(pill, statusPill);
+  else head.appendChild(pill);
+}
+
+// Mark the revision cell as not required (no veto path)
+function setCellSkippedRevision(label) {
+  const cell = state.cells.revision;
+  if (!cell) return;
+  cell.classList.remove('empty', 'thinking', 'done', 'error');
+  cell.classList.add('skipped');
+  const pill = cell.querySelector('.status-pill');
+  if (pill) pill.textContent = 'N/A';
+  const body = cell.querySelector('.cell-body');
+  body.classList.remove('empty');
+  body.innerHTML = label || 'SIN VETO · INNECESARIA';
+}
+
 // ============= ORCHESTRATION =============
 async function runPhase1(question) {
   setPhaseStatus(1, 'active');
-  setGlobalStatus('FASE 1 // GENERACIÓN INDEPENDIENTE');
+  setGlobalStatus(state.webSearchPhase1
+    ? 'FASE 1 // GENERACIÓN INDEPENDIENTE + WEB'
+    : 'FASE 1 // GENERACIÓN INDEPENDIENTE');
   AGENTS.forEach(a => setCellThinking(`${a.key}-r1`));
 
   const results = await Promise.all(AGENTS.map(async a => {
     const cfg = state.agents[a.key];
     try {
       const msgs = makeMsgs(state.prompts.p1_system, state.prompts.p1_user, { question });
-      const r = await callOpenRouter(cfg.model, cfg.effort, msgs);
-      state.results.phase1[a.key] = { ...r, error: null };
+      const r = await callOpenRouter(cfg.model, cfg.effort, msgs, {
+        webSearch: state.webSearchPhase1
+      });
+      state.results.phase1[a.key] = { ...r, error: null, webSearch: state.webSearchPhase1 };
       setCellDone(`${a.key}-r1`, r.content, extractConfidence(r.content));
+      if (state.webSearchPhase1) markCellWebSearch(`${a.key}-r1`);
       return true;
     } catch (e) {
       state.results.phase1[a.key] = { content: '', reasoning: '', error: e.message };
@@ -1694,6 +2551,7 @@ async function runPhase4(question) {
     const r = await callOpenRouter(cfg.model, cfg.effort, msgs);
     state.results.phase4.agatha = { ...r, error: null, order: orderKeys };
     setCellDone('verdict', r.content, extractConfidence(r.content));
+    installVerdictPdfButton();
     saveAll();
     setPhaseStatus(4, 'done');
     return true;
@@ -1706,6 +2564,95 @@ async function runPhase4(question) {
   }
 }
 
+async function runPhase5(question) {
+  setPhaseStatus(5, 'active');
+  setGlobalStatus('FASE 5 // AUDITORÍA AL DICTAMEN');
+
+  const verdictResult = state.results.phase4 && state.results.phase4.agatha;
+  if (!verdictResult || verdictResult.error || !verdictResult.content) {
+    setPhaseStatus(5, 'error');
+    return false;
+  }
+  const verdict = verdictResult.content;
+
+  // Compact dossier from refined responses (truncate long ones).
+  const dossier = AGENTS.map(a => {
+    const r = state.results.phase3 && state.results.phase3[a.key];
+    if (!r || r.error || !r.content) return '';
+    const trimmed = r.content.length > 4000 ? r.content.slice(0, 4000) + '\n[...truncado]' : r.content;
+    return `--- Refinada por ${a.name} ---\n${trimmed}`;
+  }).filter(Boolean).join('\n\n');
+
+  // ── Auditors: Arthur and Dashiell, in parallel ──
+  const auditors = AGENTS.filter(a => a.key !== 'agatha');
+  auditors.forEach(a => setCellThinking(`${a.key}-r5`));
+
+  const auditResults = await Promise.all(auditors.map(async a => {
+    const cfg = state.agents[a.key];
+    const auditEffort = downgradeEffort(cfg.effort);
+    try {
+      const msgs = makeMsgs(state.prompts.p5_audit_system, state.prompts.p5_audit_user, {
+        question, verdict, dossier
+      });
+      const r = await callOpenRouter(cfg.model, auditEffort, msgs);
+      const parsed = parseVeto(r.content);
+      state.results.phase5[a.key] = {
+        ...r, error: null,
+        veto: parsed.veto, fatal: parsed.fatal, why: parsed.why, material: parsed.material,
+        effort: auditEffort
+      };
+      setCellDone(`${a.key}-r5`, r.content);
+      markAuditCell(`${a.key}-r5`, parsed);
+      return { ...parsed, agent: a };
+    } catch (e) {
+      state.results.phase5[a.key] = { content: '', reasoning: '', error: e.message };
+      setCellError(`${a.key}-r5`, e.message);
+      return null;
+    }
+  }));
+
+  // ── Decide: any veto? ──
+  const validAudits = auditResults.filter(Boolean);
+  const vetos = validAudits.filter(v => v.veto);
+
+  if (vetos.length === 0) {
+    state.results.phase5.revision = { content: '', reasoning: '', error: null, action: 'none' };
+    setCellSkippedRevision('SIN VETO · DICTAMEN INTACTO');
+    saveAll();
+    setPhaseStatus(5, 'done');
+    return true;
+  }
+
+  // ── Revision/Defense: Agatha gets one shot ──
+  setCellThinking('revision');
+  const cfg = state.agents.agatha;
+
+  const vetosText = vetos.map(v =>
+    `── Veto emitido por ${v.agent.name} ──\nFallo fatal: ${v.fatal || '(no especificado)'}\nPor qué invalida: ${v.why || '(no especificado)'}`
+  ).join('\n\n');
+
+  try {
+    const msgs = makeMsgs(state.prompts.p5_revision_system, state.prompts.p5_revision_user, {
+      question, verdict, vetos: vetosText
+    });
+    const r = await callOpenRouter(cfg.model, cfg.effort, msgs);
+    const actionMatch = r.content.match(/##\s*ACCI[ÓO]N\s*\n+\s*(REVISAR|DEFENDER)/i);
+    const action = actionMatch ? (actionMatch[1].toUpperCase() === 'REVISAR' ? 'revise' : 'defend') : 'defend';
+    state.results.phase5.revision = { ...r, error: null, action };
+    setCellDone('revision', r.content);
+    markRevisionCell(action);
+    saveAll();
+    setPhaseStatus(5, 'done');
+    return true;
+  } catch (e) {
+    state.results.phase5.revision = { content: '', reasoning: '', error: e.message, action: null };
+    setCellError('revision', e.message);
+    saveAll();
+    setPhaseStatus(5, 'error');
+    return false;
+  }
+}
+
 async function convoke() {
   const question = document.getElementById('question').value.trim();
   if (!question) { setGlobalStatus('FALTA LA PREGUNTA'); return; }
@@ -1714,8 +2661,8 @@ async function convoke() {
   saveAll();
 
   // reset
-  ['1','2','3','4'].forEach(p => setPhaseStatus(p, ''));
-  state.results = { phase1: {}, phase2: {}, phase3: {}, phase4: {} };
+  ['1','2','3','4','5'].forEach(p => setPhaseStatus(p, ''));
+  state.results = { phase1: {}, phase2: {}, phase3: {}, phase4: {}, phase5: {} };
   renderGrid();
 
   document.getElementById('convoke').disabled = true;
@@ -1723,20 +2670,22 @@ async function convoke() {
     if (!(await runPhase1(question))) return;
     if (!(await runPhase2(question))) return;
     if (!(await runPhase3(question))) return;
-    await runPhase4(question);
+    if (!(await runPhase4(question))) return;
+    await runPhase5(question);
     setGlobalStatus('CONCILIO COMPLETADO');
   } catch (e) {
     setGlobalStatus('ERROR // ' + e.message.slice(0, 60));
   } finally {
     document.getElementById('convoke').disabled = false;
+    fetchKeyInfo();
   }
 }
 
 function resetSession() {
-  state.results = { phase1: {}, phase2: {}, phase3: {}, phase4: {} };
+  state.results = { phase1: {}, phase2: {}, phase3: {}, phase4: {}, phase5: {} };
   state.question = '';
   document.getElementById('question').value = '';
-  ['1','2','3','4'].forEach(p => setPhaseStatus(p, ''));
+  ['1','2','3','4','5'].forEach(p => setPhaseStatus(p, ''));
   renderGrid();
   setGlobalStatus('SYSTEM IDLE');
   saveAll();
@@ -1753,7 +2702,7 @@ function buildAgentsConfig() {
     const cfg = state.agents[agent.key];
 
     const modelOpts = MODELS.map(m =>
-      `<option value="${m.id}" ${m.id === cfg.model ? 'selected' : ''}>${m.label}</option>`
+      `<option value="${m.id}" ${m.id === cfg.model ? 'selected' : ''}>${m.label}${formatPriceSuffix(m.price)}</option>`
     ).join('');
 
     const effortBtns = EFFORT_LEVELS.map(lv =>
@@ -1812,6 +2761,29 @@ function openCellModal(agentKey, round) {
     title = 'AGATHA · DICTAMEN FINAL';
     const r = state.results.phase4.agatha;
     content = r?.content || ''; reasoning = r?.reasoning || ''; error = r?.error;
+  } else if (round === 5) {
+    if (agentKey === 'revision') {
+      const r = state.results.phase5?.revision;
+      const action = r?.action;
+      if (action === 'none') {
+        title = 'AGATHA · REVISIÓN NO REQUERIDA';
+        content = '*No se emitió ningún VETO durante la auditoría. El dictamen original se mantiene intacto, sin revisión ni defensa.*';
+        reasoning = ''; error = null;
+      } else if (action === 'revise') {
+        title = 'AGATHA · DICTAMEN REVISADO';
+        content = r?.content || ''; reasoning = r?.reasoning || ''; error = r?.error;
+      } else if (action === 'defend') {
+        title = 'AGATHA · DEFENSA DEL DICTAMEN';
+        content = r?.content || ''; reasoning = r?.reasoning || ''; error = r?.error;
+      } else {
+        title = 'AGATHA · REVISIÓN';
+        content = r?.content || ''; reasoning = r?.reasoning || ''; error = r?.error;
+      }
+    } else {
+      title = `${agentKey.toUpperCase()} · RONDA V · AUDITORÍA`;
+      const r = state.results.phase5?.[agentKey];
+      content = r?.content || ''; reasoning = r?.reasoning || ''; error = r?.error;
+    }
   } else {
     const phaseKey = `phase${round}`;
     const romanNum = ['I','II','III'][round - 1];
@@ -1855,13 +2827,40 @@ function restoreLastSession() {
       const r = state.results[`phase${rd}`]?.[a.key];
       if (!r) return;
       if (r.error) setCellError(`${a.key}-r${rd}`, r.error);
-      else if (r.content) setCellDone(`${a.key}-r${rd}`, r.content, extractConfidence(r.content));
+      else if (r.content) {
+        setCellDone(`${a.key}-r${rd}`, r.content, extractConfidence(r.content));
+        if (rd === 1 && r.webSearch) markCellWebSearch(`${a.key}-r${rd}`);
+      }
     });
   });
   const v = state.results.phase4?.agatha;
   if (v) {
     if (v.error) setCellError('verdict', v.error);
-    else if (v.content) setCellDone('verdict', v.content, extractConfidence(v.content));
+    else if (v.content) {
+      setCellDone('verdict', v.content, extractConfidence(v.content));
+      installVerdictPdfButton();
+    }
+  }
+
+  // restore phase 5 (audit + revision)
+  const ph5 = state.results.phase5 || {};
+  ['arthur', 'dashiell'].forEach(key => {
+    const r = ph5[key];
+    if (!r) return;
+    if (r.error) setCellError(`${key}-r5`, r.error);
+    else if (r.content) {
+      setCellDone(`${key}-r5`, r.content);
+      markAuditCell(`${key}-r5`, { veto: !!r.veto, fatal: r.fatal, why: r.why, material: r.material || [] });
+    }
+  });
+  const rev = ph5.revision;
+  if (rev) {
+    if (rev.error) setCellError('revision', rev.error);
+    else if (rev.action === 'none') setCellSkippedRevision('SIN VETO · DICTAMEN INTACTO');
+    else if (rev.content) {
+      setCellDone('revision', rev.content);
+      if (rev.action) markRevisionCell(rev.action);
+    }
   }
 
   // restore phase status (mark done if all agents completed)
@@ -1872,6 +2871,11 @@ function restoreLastSession() {
     }
   }
   if (v && !v.error && v.content) setPhaseStatus(4, 'done');
+
+  // phase 5 done if both auditors completed and revision is resolved (none, revise, or defend)
+  const auditsOk = ['arthur','dashiell'].every(k => ph5[k] && !ph5[k].error && ph5[k].content);
+  const revOk = ph5.revision && (ph5.revision.action === 'none' || (!ph5.revision.error && ph5.revision.content));
+  if (auditsOk && revOk) setPhaseStatus(5, 'done');
 }
 
 // ============= MODAL HOOKS =============
@@ -1889,13 +2893,20 @@ function bindModals() {
 
   document.getElementById('btnSettings').addEventListener('click', () => {
     document.getElementById('apiKey').value = state.apiKey;
+    document.getElementById('webSearchPhase1').checked = !!state.webSearchPhase1;
     buildAgentsConfig();
     document.getElementById('settingsModal').classList.add('open');
+  });
+
+  document.getElementById('webSearchPhase1').addEventListener('change', e => {
+    state.webSearchPhase1 = e.target.checked;
+    saveAll();
   });
 
   document.getElementById('apiKey').addEventListener('input', e => {
     state.apiKey = e.target.value.trim();
     saveAll();
+    scheduleCreditsRefresh();
   });
   document.getElementById('apiKeyToggle').addEventListener('click', () => {
     const inp = document.getElementById('apiKey');
@@ -1956,12 +2967,20 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('question').addEventListener('input', e => {
     state.question = e.target.value;
   });
+  document.getElementById('question').addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      if (!document.getElementById('convoke').disabled) convoke();
+    }
+  });
+  document.getElementById('creditsDisplay').addEventListener('click', fetchKeyInfo);
 
   restoreLastSession();
 
   if (!state.apiKey) {
     setGlobalStatus('CONFIGURA LA API KEY EN CONFIG');
   }
+  fetchKeyInfo();
 });
 </script>
 </body>
