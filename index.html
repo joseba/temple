@@ -815,8 +815,8 @@ textarea#question::placeholder { color: var(--ink-faded); }
     </div>
     <div class="progress-step" data-phase="3">
       <span class="num">III.</span>
-      <span class="label">REFINAMIENTO + ACH</span>
-      <span class="meta">CIA TRADECRAFT</span>
+      <span class="label">REFINAMIENTO + ROBUSTEZ</span>
+      <span class="meta">FALSACIÓN</span>
     </div>
     <div class="progress-step" data-phase="4">
       <span class="num">IV.</span>
@@ -923,7 +923,7 @@ textarea#question::placeholder { color: var(--ink-faded); }
 
       <div class="tab-pane" data-pane="3">
         <div class="field">
-          <label class="field-label">SYSTEM (Fase 3 — Refinamiento + ACH)</label>
+          <label class="field-label">SYSTEM (Fase 3 — Refinamiento + Robustez)</label>
           <textarea id="p3_system" class="field-textarea"></textarea>
         </div>
         <div class="field">
@@ -1013,7 +1013,9 @@ const DEFAULT_PROMPTS = {
   p1_system:
 `Eres un consultor experto invitado a un panel de deliberación. Vas a responder de forma INDEPENDIENTE — no verás aún a los otros expertos. Tu respuesta servirá luego para crítica cruzada.
 
-Sé riguroso, claro y conciso. No te disculpes ni añadas preámbulos. No menciones que formas parte de un panel.`,
+DISTINGUE EXPLÍCITAMENTE entre hechos verificables, inferencias y supuestos. No presentes como cierto algo que dependa de información no proporcionada. Si la pregunta requiere datos externos o actuales que no tienes, declara claramente qué hace falta verificar.
+
+Sé riguroso y conciso. No te disculpes ni añadas preámbulos. No menciones que formas parte de un panel.`,
 
   p1_user:
 `PREGUNTA:
@@ -1021,21 +1023,46 @@ Sé riguroso, claro y conciso. No te disculpes ni añadas preámbulos. No mencio
 
 Estructura tu respuesta exactamente así, en Markdown:
 
+## HECHOS RELEVANTES
+Información explícitamente dada en la pregunta o conocimiento general estable y bien establecido (constantes físicas, capitales, eventos históricos sólidos, etc.).
+NO incluyas aquí datos actuales, cifras específicas, leyes vigentes, precios, estudios concretos o referencias técnicas precisas salvo que el usuario te los haya proporcionado en la pregunta.
+Si dudas si algo es "estable" o no, muévelo a "PUNTOS QUE REQUIEREN VERIFICACIÓN".
+- hecho 1
+- hecho 2
+
+## INFERENCIAS
+Lo que deduces a partir de los hechos, marcado como tal (no como hecho).
+- inferencia 1
+- inferencia 2
+
+## SUPUESTOS CLAVE
+Lo que necesitas asumir y que podría no ser cierto.
+- supuesto 1
+- supuesto 2
+
+## PUNTOS QUE REQUIEREN VERIFICACIÓN
+Datos, cifras, hechos actuales, normas o referencias técnicas que no puedes confirmar y que serían determinantes para la respuesta.
+- punto 1
+
 ## RESPUESTA
-(tu análisis y conclusión principal)
+Tu análisis y conclusión principal, apoyada en lo anterior.
 
 ## CONFIANZA
 Nivel: X/10
-Justificación: (una o dos frases)
-
-## SUPUESTOS CLAVE
-- supuesto 1
-- supuesto 2`,
+Justificación: (una o dos frases — qué te da confianza, qué te la quita)`,
 
   p2_system:
-`Eres un ABOGADO DEL DIABLO (Devil's Advocate) en un panel de deliberación. Tu único trabajo es ENCONTRAR FALLOS en las respuestas que se te muestran. NO estás aquí para validar, equilibrar ni ser amable. La cortesía aquí es un defecto profesional.
+`Eres un ABOGADO DEL DIABLO en un panel de deliberación. Tu trabajo es identificar fallos REALES en las respuestas que se te muestran, NO maximizar la cantidad de objeciones.
 
-Sé implacable pero específico: una crítica vaga no sirve. Cita lo que critiques.`,
+Cada crítica que emitas debe llevar al inicio una etiqueta de severidad:
+- [FATAL] — invalida la conclusión.
+- [MATERIAL] — cambia significativamente la conclusión.
+- [MENOR] — mejora matices pero no cambia el resultado.
+- [NO CONCLUYENTE] — posible problema, pero falta evidencia para juzgarlo.
+
+Tras criticar, identifica también las FORTALEZAS que sobreviven a la crítica: puntos sólidos que el refinamiento posterior NO debe eliminar. No es cortesía, es calibración: un buen red team también señala qué no hay que romper.
+
+No inventes objeciones para rellenar, ni elogios para suavizar. Si una sección es sólida, no la critiques; si una crítica es vaga, no la emitas. La crítica fabricada es peor que el silencio.`,
 
   p2_user:
 `PREGUNTA ORIGINAL:
@@ -1051,34 +1078,58 @@ RESPUESTA B:
 {otherB}
 ═══════════════════════════════════
 
-Para CADA una de las dos respuestas, identifica:
+Para CADA una de las dos respuestas, identifica fallos en estas dimensiones:
 
 1. Errores factuales o de razonamiento
 2. Supuestos no justificados o frágiles
 3. Sesgos detectables (confirmación, anclaje, exceso de confianza, etc.)
-4. Modos de fallo (¿en qué circunstancias esta respuesta sería catastróficamente errónea?)
+4. Modos de fallo (¿en qué circunstancias sería catastróficamente errónea?)
 5. Omisiones importantes
+6. Confusiones de registro (presentar como hecho lo que es inferencia o supuesto)
+
+CADA crítica debe empezar por una etiqueta de severidad: [FATAL] [MATERIAL] [MENOR] [NO CONCLUYENTE].
 
 Estructura en Markdown así:
 
 ## CRÍTICA A LA RESPUESTA A
 ### Errores
+- [SEVERIDAD] crítica concreta
 ### Supuestos frágiles
+- [SEVERIDAD] crítica
 ### Sesgos
+- [SEVERIDAD] crítica
 ### Modos de fallo
+- [SEVERIDAD] crítica
 ### Omisiones
+- [SEVERIDAD] crítica
+### Confusiones de registro
+- [SEVERIDAD] crítica
+### Fortalezas que sobreviven
+Lista breve y concreta de puntos sólidos que NO deberían eliminarse en el refinamiento. Cita el punto, no generalidades elogiosas.
+- [punto concreto] : por qué resiste
 
 ## CRÍTICA A LA RESPUESTA B
 ### Errores
 ### Supuestos frágiles
 ### Sesgos
 ### Modos de fallo
-### Omisiones`,
+### Omisiones
+### Confusiones de registro
+### Fortalezas que sobreviven
+
+(Si en alguna dimensión no encuentras fallos reales, escribe "Sin objeciones materiales" en esa subsección. Si no identificas fortalezas claras, escribe "Ninguna fortaleza notable que preservar". No rellenes con material inventado en ninguna dirección.)`,
 
   p3_system:
-`Estás en un panel de deliberación. Has dado una respuesta inicial y otros expertos te han criticado. Ahora la refinarás aplicando ANÁLISIS DE HIPÓTESIS EN COMPETENCIA (ACH, tradecraft de la CIA): la pregunta clave no es "qué confirma mi tesis" sino "qué la descartaría".
+`Estás en un panel de deliberación. Has dado una respuesta inicial y otros expertos te han criticado. Ahora la refinarás.
 
-Sé honesto: si una crítica acierta, intégrala; si no, defiéndela razonadamente. Lo que el panel valora más es tu lista de cosas que romperían tu propia respuesta.`,
+Trata cada crítica recibida según su severidad declarada:
+- Las críticas FATALES y MATERIALES deben integrarse en tu respuesta refinada o defenderse explícitamente con un contraargumento concreto.
+- Las críticas MENORES pueden integrarse o ignorarse con una nota breve.
+- Las críticas NO CONCLUYENTES señálalas como puntos abiertos a verificar.
+
+Tras refinar tu respuesta, somete tu tesis a un test de robustez: declara qué evidencia o argumento la rompería y, solo si existen, qué hipótesis alternativas serían igualmente plausibles. NO inventes alternativas para rellenar el formulario.
+
+Mantén la distinción entre hechos, inferencias y supuestos en la respuesta refinada. Lo que el panel valora más es tu transparencia sobre lo que podría romper tu propia tesis.`,
 
   p3_user:
 `PREGUNTA ORIGINAL:
@@ -1102,32 +1153,46 @@ CRÍTICAS HECHAS A LOS OTROS (puedes aprender de ellas):
 Estructura tu respuesta refinada en Markdown:
 
 ## RESPUESTA REFINADA
-(tu respuesta actualizada, integrando lo que hayas aceptado)
+Tu respuesta actualizada, integrando lo que hayas aceptado. Mantén la distinción entre hechos, inferencias y supuestos.
 
 ## CRÍTICAS INCORPORADAS
-- crítica → cómo la integré
+- [SEVERIDAD] crítica → cómo la integré
 
 ## CRÍTICAS RECHAZADAS
-- crítica → por qué no aplica o es errónea
+- [SEVERIDAD] crítica → por qué no aplica o es errónea
 
-## QUÉ DESCARTARÍA MI RESPUESTA (ACH)
-Lista evidencias o argumentos que ROMPERÍAN tu tesis refinada. No "la apoyarían" — la "romperían".
+## ROBUSTEZ DE LA TESIS
+
+### Qué evidencia o argumento la ROMPERÍA
+Lista cosas que descartarían tu tesis refinada. No "la apoyarían" — la "romperían".
 - evidencia/argumento 1
 - evidencia/argumento 2
 
+### Hipótesis alternativas plausibles
+Solo si existen alternativas reales (no las inventes para rellenar). Para cada una, qué evidencia la favorecería frente a la tuya.
+- H_alt 1: ... — la favorecería: ...
+- H_alt 2: ... — la favorecería: ...
+
+(Si no identificas alternativas competitivas reales, escribe: "No identifico alternativas competitivas reales" y explica brevemente por qué.)
+
 ## CONFIANZA ACTUALIZADA
 Nivel: X/10
-Justificación: (breve)`,
+Justificación: (qué cambió respecto a tu confianza inicial y por qué)`,
 
   p4_system:
-`Eres la PRESIDENTA del concilio. Tres expertos han deliberado: respuesta independiente → crítica cruzada → refinamiento con ACH. Te corresponde ahora producir el dictamen final.
+`Eres la PRESIDENTA del concilio. Tres expertos han deliberado: respuesta independiente → crítica cruzada con severidad → refinamiento con test de robustez. Te corresponde ahora producir el dictamen final.
+
+Las respuestas refinadas y las críticas se te presentan ANONIMIZADAS como Experto 1, Experto 2 y Experto 3 en un orden aleatorio. No infieras identidad, modelo, autoridad o calidad a partir del orden, el estilo o la extensión de cada respuesta. No favorezcas la primera por aparecer primero. Considera activamente si una respuesta posterior corrige, supera o invalida a una anterior.
 
 Tu trabajo NO es promediar opiniones. Es:
-(1) tomar una decisión clara y accionable;
+(1) tomar una decisión clara, accionable y honesta sobre la incertidumbre;
 (2) preservar disensos genuinos en lugar de aplastarlos en un consenso falso;
-(3) ser honesta sobre la incertidumbre y bajo qué condiciones cambiarías de opinión.
+(3) penalizar respuestas que ignoren incertidumbres relevantes o confundan hechos con inferencias o supuestos;
+(4) declarar explícitamente la base factual del dictamen y los riesgos de error.
 
-Esto es protocolo Tumor Board + panel apelativo: la decisión lleva consigo sus contraargumentos.`,
+Si la información disponible no permite una decisión responsable, la decisión recomendada PUEDE ser "no decidir todavía" o una decisión condicional, indicando qué dato falta. La falsa certeza es peor que la suspensión declarada del juicio.
+
+Esto es protocolo Tumor Board + panel apelativo: la decisión lleva consigo sus contraargumentos y sus condiciones de revocación.`,
 
   p4_user:
 `PREGUNTA ORIGINAL:
@@ -1156,28 +1221,40 @@ CRÍTICAS PRODUCIDAS DURANTE EL DEBATE:
 Produce el dictamen final en Markdown con esta estructura exacta:
 
 ## DECISIÓN RECOMENDADA
-(respuesta única, clara y accionable — no ambigua)
+Decisión clara y accionable. Puede ser condicional ("X si se cumple Y") o suspensiva ("no decidir todavía hasta obtener Z") si la evidencia es insuficiente. NO fabriques certeza.
+
+## BASE FACTUAL DECLARADA
+Distingue:
+### Hechos sólidos
+Lo que el dictamen toma como verificado y por qué.
+### Supuestos cargados
+Lo que el dictamen asume sin verificar y de lo que depende. Si alguno fallara, la decisión cambiaría.
 
 ## CONVERGENCIAS
-(en qué coinciden los tres expertos)
+En qué coinciden los tres expertos refinados.
 
 ## DISENSOS NO RESUELTOS
 Para cada desacuerdo importante:
 - **Posición A:** argumento más fuerte
 - **Posición B:** argumento más fuerte
-- **Mi juicio:** cuál pesa más y por qué
+- **Mi juicio:** cuál pesa más y por qué (o por qué el disenso queda abierto)
 
-## NIVEL DE CONFIANZA GLOBAL
-Nivel: X/10
-Justificación: (qué te da confianza, qué te la quita)
+## RIESGOS DE ERROR
+- Cómo podría estar equivocado este dictamen
+- Señales tempranas de que la decisión está fallando
 
 ## CONDICIONES BAJO LAS QUE LA RESPUESTA CAMBIARÍA
 - condición 1
-- condición 2`
+- condición 2
+
+## NIVEL DE CONFIANZA GLOBAL
+Nivel: X/10
+Justificación: (sé generosa con la duda; penaliza la falsa certeza)`
 };
 
 // ============= STATE & STORAGE =============
-const STORAGE_KEY = 'temple.config.v1';
+const STORAGE_KEY = 'temple.config.v3';
+const LEGACY_STORAGE_KEYS = ['temple.config.v2', 'temple.config.v1'];
 
 const state = {
   apiKey: '',
@@ -1216,8 +1293,28 @@ function loadAll() {
   });
   state.prompts = { ...DEFAULT_PROMPTS };
 
-  const raw = safeLS('get', STORAGE_KEY);
-  if (!raw) return;
+  let raw = safeLS('get', STORAGE_KEY);
+
+  // Migration: if v2 not found, try to pull credentials/agents from older versions.
+  // Prompts and results are NOT migrated — the schema changed and old prompts
+  // would override the hardened defaults. The user gets fresh prompts.
+  if (!raw) {
+    for (const legacy of LEGACY_STORAGE_KEYS) {
+      const old = safeLS('get', legacy);
+      if (!old) continue;
+      try {
+        const data = JSON.parse(old);
+        if (data.apiKey) state.apiKey = data.apiKey;
+        if (data.agents) Object.keys(data.agents).forEach(k => {
+          if (state.agents[k]) state.agents[k] = { ...state.agents[k], ...data.agents[k] };
+        });
+        saveAll();           // persist into v2 keyspace
+        break;
+      } catch (e) {}
+    }
+    return;
+  }
+
   try {
     const data = JSON.parse(raw);
     if (data.apiKey) state.apiKey = data.apiKey;
@@ -1277,6 +1374,19 @@ function makeMsgs(systemTpl, userTpl, vars) {
     { role: 'system', content: fill(systemTpl, vars) },
     { role: 'user',   content: fill(userTpl,   vars) }
   ];
+}
+
+// Fisher–Yates shuffle (non-mutating). Used in Phase 4 so that the order
+// in which refined responses appear to the judge is independent from the
+// order the agents were configured. Removes positional bias when the same
+// model that judges (Agatha) wrote one of the responses.
+function shuffled(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
 }
 
 // ============= GRID CELLS =============
@@ -1471,9 +1581,17 @@ function splitCritiqueAB(text) {
   return { a: text.slice(0, idxB).trim(), b: text.slice(idxB).trim() };
 }
 
+// Strips a leading "## CRÍTICA A LA RESPUESTA A/B" header so the critique
+// body can be re-wrapped under a different attribution (e.g. "### Sobre EXPERTO 3")
+// without leaving a stale or duplicated header inside.
+function stripCritiqueHeader(text) {
+  if (!text) return '';
+  return text.replace(/^\s*##\s*CR[ÍI]TICA\s+A\s+LA\s+RESPUESTA\s+[AB]\s*\n+/i, '').trim();
+}
+
 async function runPhase3(question) {
   setPhaseStatus(3, 'active');
-  setGlobalStatus('FASE 3 // REFINAMIENTO + ACH');
+  setGlobalStatus('FASE 3 // REFINAMIENTO + ROBUSTEZ');
   AGENTS.forEach(a => setCellThinking(`${a.key}-r3`));
 
   const results = await Promise.all(AGENTS.map(async a => {
@@ -1524,10 +1642,45 @@ async function runPhase4(question) {
   setGlobalStatus('FASE 4 // DICTAMEN FINAL');
   setCellThinking('verdict');
 
-  const refined = AGENTS.map(a => state.results.phase3[a.key]?.content || '(sin refinamiento)');
-  const allCritiques = AGENTS.map(a =>
-    `## Críticas emitidas por ${a.name}:\n${state.results.phase2[a.key]?.content || ''}`
-  ).join('\n\n');
+  // Shuffle so EXPERTO 1/2/3 doesn't always map to AGENTS[0..2].
+  // Removes positional bias and keeps the dossier internally consistent:
+  // we use this single shuffled order to label both the refined responses
+  // AND the critiques (emitter + target). Real agent names are never
+  // exposed to the judge.
+  const order = shuffled(AGENTS);
+
+  // Build a map from agent key to the anonymized label it gets in this run.
+  const expertLabel = {};
+  order.forEach((a, i) => { expertLabel[a.key] = `EXPERTO ${i + 1}`; });
+
+  // Refined responses, in shuffled order.
+  const refined = order.map(a => state.results.phase3[a.key]?.content || '(sin refinamiento)');
+
+  // Critiques: re-attribute internal "RESPUESTA A/B" references to the
+  // anonymized EXPERTO N labels of the shuffled dossier. Without this
+  // remapping the judge sees critiques targeting "RESPUESTA A/B" with
+  // no way to know which Experto each refers to.
+  const allCritiques = order.map(critic => {
+    const cr = state.results.phase2[critic.key];
+    if (!cr || cr.error || !cr.content) {
+      return `## Críticas emitidas por ${expertLabel[critic.key]}\n\n*(no disponibles)*`;
+    }
+    const [keyA, keyB] = cr.criticOf || [];
+    const parts = splitCritiqueAB(cr.content);
+    const partA = stripCritiqueHeader(parts.a);
+    const partB = stripCritiqueHeader(parts.b);
+
+    const blocks = [`## Críticas emitidas por ${expertLabel[critic.key]}`];
+    if (keyA && expertLabel[keyA]) {
+      blocks.push(`### Sobre ${expertLabel[keyA]}\n${partA || '(sin crítica extraída)'}`);
+    }
+    if (keyB && expertLabel[keyB]) {
+      blocks.push(`### Sobre ${expertLabel[keyB]}\n${partB || '(sin crítica extraída)'}`);
+    }
+    return blocks.join('\n\n');
+  }).join('\n\n');
+
+  const orderKeys = order.map(a => a.key);
 
   const cfg = state.agents.agatha;
   try {
@@ -1539,13 +1692,13 @@ async function runPhase4(question) {
       allCritiques
     });
     const r = await callOpenRouter(cfg.model, cfg.effort, msgs);
-    state.results.phase4.agatha = { ...r, error: null };
+    state.results.phase4.agatha = { ...r, error: null, order: orderKeys };
     setCellDone('verdict', r.content, extractConfidence(r.content));
     saveAll();
     setPhaseStatus(4, 'done');
     return true;
   } catch (e) {
-    state.results.phase4.agatha = { content: '', reasoning: '', error: e.message };
+    state.results.phase4.agatha = { content: '', reasoning: '', error: e.message, order: orderKeys };
     setCellError('verdict', e.message);
     saveAll();
     setPhaseStatus(4, 'error');
