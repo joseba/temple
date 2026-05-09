@@ -633,6 +633,26 @@ textarea#question::placeholder { color: var(--ink-faded); }
 }
 .foot .credits .err { color: var(--red); }
 .foot .credits .loading { opacity: 0.55; }
+.foot .credits .cost-delta {
+  display: inline-block;
+  margin-left: 10px;
+  padding: 1px 8px;
+  background: rgba(255, 181, 71, 0.08);
+  color: var(--amber);
+  border: 1px solid rgba(255, 181, 71, 0.28);
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  font-size: 8.5px;
+  vertical-align: 1px;
+}
+.foot .credits .cost-delta .lbl { opacity: 0.65; margin-right: 4px; }
+.foot .credits .cost-delta.fresh {
+  animation: costFlash 1.2s ease-out 1;
+}
+@keyframes costFlash {
+  0%   { background: rgba(255, 181, 71, 0.45); border-color: var(--amber); box-shadow: 0 0 12px rgba(255, 181, 71, 0.5); }
+  100% { background: rgba(255, 181, 71, 0.08); border-color: rgba(255, 181, 71, 0.28); box-shadow: none; }
+}
 
 /* ========== MODAL ========== */
 .modal-backdrop {
@@ -1657,6 +1677,7 @@ const state = {
   prompts: { ...DEFAULT_PROMPTS },
   question: '',
   webSearch: false,           // applies to phases 1 and 3
+  lastRunCost: null,          // USD cost of the most recent deliberation, persisted
   results: { phase1: {}, phase2: {}, phase3: {}, phase4: {}, phase5: {} },
   cells: {}            // cell DOM refs by id like 'agatha-r1'
 };
@@ -1676,6 +1697,7 @@ function saveAll() {
     prompts: state.prompts,
     question: state.question,
     webSearch: state.webSearch,
+    lastRunCost: state.lastRunCost,
     results: state.results
   };
   try { safeLS('set', STORAGE_KEY, JSON.stringify(payload)); } catch (e) {
@@ -1727,6 +1749,7 @@ function loadAll() {
     // payload was written before this rename was deployed.
     if (typeof data.webSearch === 'boolean') state.webSearch = data.webSearch;
     else if (typeof data.webSearchPhase1 === 'boolean') state.webSearch = data.webSearchPhase1;
+    if (typeof data.lastRunCost === 'number') state.lastRunCost = data.lastRunCost;
     if (data.results) state.results = data.results;
   } catch (e) {
     console.warn('Storage load failed', e);
@@ -1795,53 +1818,93 @@ async function callOpenRouter(model, effort, messages, options = {}) {
 
 // ============= CREDITS / BALANCE =============
 let _creditsDebounce = null;
-async function fetchKeyInfo() {
-  const display = document.getElementById('creditsDisplay');
-  if (!display) return;
-  if (!state.apiKey) {
-    display.innerHTML = '<span class="loading">SIN API KEY</span>';
-    return;
-  }
-  display.innerHTML = '<span class="loading">CONSULTANDO BALANCE…</span>';
 
+// Format a USD cost for display: 2 decimals over $1, more precision below.
+function formatCost(c) {
+  if (c >= 1)    return c.toFixed(2);
+  if (c >= 0.01) return c.toFixed(4);
+  return c.toFixed(5);
+}
+
+// Pure fetcher — returns {balance, usage, error} without touching the DOM.
+// Strategy: prefer /credits (account-level total balance). If denied (often
+// the case for non-management keys), fall back to /key which always works
+// for the bearer key and may include limit_remaining.
+async function fetchBalance() {
+  if (!state.apiKey) return { balance: null, usage: null, error: 'no-key' };
   const headers = { 'Authorization': `Bearer ${state.apiKey}` };
 
-  // Strategy: prefer /api/v1/credits (account-level total balance). If that
-  // fails (it usually requires a management key), fall back to /api/v1/key
-  // which always works for the bearer key and may include limit_remaining.
   try {
     const r = await fetch('https://openrouter.ai/api/v1/credits', { headers });
     if (r.ok) {
       const j = await r.json();
       const d = (j && j.data) || {};
       if (typeof d.total_credits === 'number' && typeof d.total_usage === 'number') {
-        const remaining = (d.total_credits - d.total_usage);
-        display.innerHTML = `BALANCE <span class="val">$${remaining.toFixed(2)}</span>`;
-        return;
+        return {
+          balance: d.total_credits - d.total_usage,
+          usage: d.total_usage,
+          error: null
+        };
       }
     }
   } catch (e) { /* fallthrough */ }
 
-  // Fallback: per-key info
   try {
     const r = await fetch('https://openrouter.ai/api/v1/key', { headers });
-    if (!r.ok) {
-      display.innerHTML = `<span class="err">BALANCE · HTTP ${r.status}</span>`;
-      return;
-    }
+    if (!r.ok) return { balance: null, usage: null, error: `HTTP ${r.status}` };
     const j = await r.json();
     const d = (j && j.data) || {};
-    if (typeof d.limit_remaining === 'number') {
-      display.innerHTML = `BALANCE <span class="val">$${d.limit_remaining.toFixed(2)}</span>`;
-    } else {
-      // No per-key limit and credits endpoint denied us — best we can show
-      const usage = (typeof d.usage === 'number' ? d.usage : 0).toFixed(2);
-      display.innerHTML = `USED <span class="val">$${usage}</span> · KEY SIN LÍMITE`;
-    }
+    return {
+      balance: typeof d.limit_remaining === 'number' ? d.limit_remaining : null,
+      usage:   typeof d.usage === 'number'           ? d.usage           : null,
+      error: null
+    };
   } catch (e) {
-    display.innerHTML = '<span class="err">BALANCE · ERROR DE RED</span>';
+    return { balance: null, usage: null, error: 'network' };
   }
 }
+
+// Render the credits display from a balance fetch result + persisted lastRunCost.
+// Pass `null` to show the loading state. Pass `flashCost: true` to briefly
+// highlight the cost pill (used right after a deliberation completes).
+function renderBalanceUI(info, opts = {}) {
+  const display = document.getElementById('creditsDisplay');
+  if (!display) return;
+
+  let html;
+  if (!info) {
+    html = '<span class="loading">CONSULTANDO BALANCE…</span>';
+  } else if (info.error === 'no-key') {
+    html = '<span class="loading">SIN API KEY</span>';
+  } else if (info.error) {
+    html = `<span class="err">BALANCE · ${info.error}</span>`;
+  } else if (typeof info.balance === 'number') {
+    html = `BALANCE <span class="val">$${info.balance.toFixed(2)}</span>`;
+  } else if (typeof info.usage === 'number') {
+    html = `USED <span class="val">$${info.usage.toFixed(2)}</span> · KEY SIN LÍMITE`;
+  } else {
+    html = '<span class="err">BALANCE · ?</span>';
+  }
+
+  if (typeof state.lastRunCost === 'number' && state.lastRunCost > 0) {
+    const flashCls = opts.flashCost ? ' fresh' : '';
+    html += ` <span class="cost-delta${flashCls}" title="Coste de la última deliberación. Δ desde el balance previo a CONVOCAR.">` +
+              `<span class="lbl">ÚLTIMA</span>−$${formatCost(state.lastRunCost)}` +
+            `</span>`;
+  }
+
+  display.innerHTML = html;
+}
+
+// Public entry point used by event handlers and init. Shows loading,
+// fetches, renders. Does NOT touch state.lastRunCost — that's only
+// updated from convoke().
+async function fetchKeyInfo() {
+  renderBalanceUI(null);
+  const info = await fetchBalance();
+  renderBalanceUI(info);
+}
+
 function scheduleCreditsRefresh(ms = 600) {
   if (_creditsDebounce) clearTimeout(_creditsDebounce);
   _creditsDebounce = setTimeout(fetchKeyInfo, ms);
@@ -2036,6 +2099,98 @@ function markCellWebSearch(cellId) {
 }
 
 // ============= VERDICT PDF =============
+
+// Map of Unicode chars that the PDF default font (Helvetica/WinAnsi) cannot
+// render and that trigger jsPDF's character-by-character fallback, producing
+// the "A g u a" letter-spacing artifact for the entire affected line.
+//
+// Spanish accents (á é í ó ú ñ ¿ ¡), the en/em dashes (– —) and smart
+// quotes (" " ' ') ARE in WinAnsi and need NO substitution — leaving them
+// preserves typography in the PDF. The list below targets only what
+// actually breaks in practice: math operators, arrows and Greek letters,
+// plus a handful of invisible whitespace edge cases.
+const PDF_UNICODE_MAP = {
+  // Math operators — the most common breakers in LLM output
+  '\u2248': '~',          // ≈
+  '\u2260': '!=',         // ≠
+  '\u2264': '<=',         // ≤
+  '\u2265': '>=',         // ≥
+  '\u221E': 'inf',        // ∞
+  '\u221A': 'sqrt',       // √
+  '\u2211': 'sum',        // ∑
+  '\u220F': 'prod',       // ∏
+  '\u222B': 'int',        // ∫
+  '\u2202': 'd',          // ∂
+  '\u2207': 'grad',       // ∇
+  '\u2208': 'in',         // ∈
+  '\u2209': '!in',        // ∉
+  '\u2282': 'subset',     // ⊂
+  '\u2283': 'superset',   // ⊃
+  '\u2200': 'forall',     // ∀
+  '\u2203': 'exists',     // ∃
+  '\u2227': '&',          // ∧
+  '\u2228': '|',          // ∨
+  '\u221D': 'prop',       // ∝
+
+  // Arrows
+  '\u2192': '->',         // →
+  '\u2190': '<-',         // ←
+  '\u2191': 'up',         // ↑
+  '\u2193': 'down',       // ↓
+  '\u2194': '<->',        // ↔
+  '\u21D2': '=>',         // ⇒
+  '\u21D0': '<=',         // ⇐
+  '\u21D4': '<=>',        // ⇔
+  '\u21A6': '|->',        // ↦
+
+  // Greek letters (occasional in scientific contexts)
+  '\u03B1': 'alpha',  '\u0391': 'Alpha',
+  '\u03B2': 'beta',   '\u0392': 'Beta',
+  '\u03B3': 'gamma',  '\u0393': 'Gamma',
+  '\u03B4': 'delta',  '\u0394': 'Delta',
+  '\u03B5': 'epsilon',
+  '\u03B6': 'zeta',
+  '\u03B7': 'eta',
+  '\u03B8': 'theta',  '\u0398': 'Theta',
+  '\u03BA': 'kappa',
+  '\u03BB': 'lambda', '\u039B': 'Lambda',
+  '\u03BC': 'mu',
+  '\u03BD': 'nu',
+  '\u03BE': 'xi',     '\u039E': 'Xi',
+  '\u03C0': 'pi',     '\u03A0': 'Pi',
+  '\u03C1': 'rho',
+  '\u03C3': 'sigma',  '\u03A3': 'Sigma',
+  '\u03C4': 'tau',
+  '\u03C6': 'phi',    '\u03A6': 'Phi',
+  '\u03C7': 'chi',
+  '\u03C8': 'psi',    '\u03A8': 'Psi',
+  '\u03C9': 'omega',  '\u03A9': 'Omega',
+
+  // Invisible whitespace that confuses jsPDF's width measurement
+  '\u00A0': ' ',          // NBSP
+  '\u2009': ' ',          // thin space
+  '\u200B': '',           // zero-width space
+  '\u202F': ' ',          // narrow no-break space
+  '\u2060': '',           // word joiner
+
+  // Sub/superscript digits (rare but seen in formulas)
+  '\u00B2': '^2',  '\u00B3': '^3',  '\u00B9': '^1',
+  '\u2070': '^0',  '\u2074': '^4',  '\u2075': '^5',
+  '\u2076': '^6',  '\u2077': '^7',  '\u2078': '^8',  '\u2079': '^9'
+};
+
+// Single regex of all the keys for one-pass replacement.
+// Built once at module load — adding/removing entries above just rebuilds it.
+const PDF_UNICODE_RE = new RegExp(
+  '[' + Object.keys(PDF_UNICODE_MAP).join('') + ']',
+  'g'
+);
+
+function normalizeUnicodeForPdf(s) {
+  if (!s) return s;
+  return s.replace(PDF_UNICODE_RE, ch => PDF_UNICODE_MAP[ch] || '');
+}
+
 function downloadVerdictPDF() {
   const verdict = state.results.phase4 && state.results.phase4.agatha;
   if (!verdict || !verdict.content) return;
@@ -2100,6 +2255,11 @@ function downloadVerdictPDF() {
     bodyMd += allMaterial.map(m => `- *(${m.from})* ${m.text}`).join('\n');
   }
 
+  // Normalize Unicode chars that the default Helvetica/WinAnsi font can't
+  // render. Done in a single pass after assembling the full body so every
+  // downstream call to doc.text() / splitTextToSize() gets clean input.
+  bodyMd = normalizeUnicodeForPdf(bodyMd);
+
   // — Header
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(20);
@@ -2133,7 +2293,7 @@ function downloadVerdictPDF() {
     doc.setFont('helvetica', 'bold');
     doc.text(qLabel, margin, y);
     doc.setFont('helvetica', 'italic');
-    const qLines = doc.splitTextToSize(state.question, maxW - 22);
+    const qLines = doc.splitTextToSize(normalizeUnicodeForPdf(state.question), maxW - 22);
     doc.text(qLines, margin + 22, y);
     y += Math.max(qLines.length * 5, 5) + 4;
   }
@@ -2748,6 +2908,12 @@ async function convoke() {
   renderGrid();
 
   document.getElementById('convoke').disabled = true;
+
+  // Snapshot starting balance to compute the cost of this run.
+  // We do this BEFORE phase 1 fires any API call, so the delta is clean.
+  const startInfo = await fetchBalance();
+  renderBalanceUI(startInfo);
+
   try {
     if (!(await runPhase1(question))) return;
     if (!(await runPhase2(question))) return;
@@ -2759,7 +2925,28 @@ async function convoke() {
     setGlobalStatus('ERROR // ' + e.message.slice(0, 60));
   } finally {
     document.getElementById('convoke').disabled = false;
-    fetchKeyInfo();
+
+    // OpenRouter's accounting takes ~1s to reflect the just-finished calls.
+    // Without this delay the post-fetch sometimes returns the same balance
+    // as pre-, hiding the cost (it would only surface on the next run).
+    await new Promise(r => setTimeout(r, 1500));
+
+    const endInfo = await fetchBalance();
+    let cost = null;
+    if (typeof startInfo.balance === 'number' && typeof endInfo.balance === 'number') {
+      cost = startInfo.balance - endInfo.balance;
+    } else if (typeof startInfo.usage === 'number' && typeof endInfo.usage === 'number') {
+      // Fallback path for keys without per-key limit: usage grows over time.
+      cost = endInfo.usage - startInfo.usage;
+    }
+    // Only persist a meaningful positive delta. A 0 or negative value means
+    // either accounting hasn't caught up yet or we couldn't snapshot at the
+    // start — keep the previous lastRunCost in either case.
+    if (cost !== null && cost > 0) {
+      state.lastRunCost = cost;
+      saveAll();
+    }
+    renderBalanceUI(endInfo, { flashCost: cost !== null && cost > 0 });
   }
 }
 
