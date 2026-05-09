@@ -2514,6 +2514,15 @@ async function runPhase3(question) {
   AGENTS.forEach(a => setCellThinking(`${a.key}-r3`));
 
   const results = await Promise.all(AGENTS.map(async a => {
+    // Anonymize the other two agents from this refiner's perspective.
+    // Without this, the prompt leaks "Crítica de AGATHA / ARTHUR / DASHIELL"
+    // straight into the model — and those names then survive into the
+    // refined output, which Phase 4's anonymization can no longer hide.
+    // Shuffled labeling so positional order doesn't leak identity either.
+    const others = shuffled(AGENTS.filter(x => x.key !== a.key));
+    const label = {};
+    others.forEach((o, i) => { label[o.key] = `OTRO EXPERTO ${i + 1}`; });
+
     const received = [];
     const observed = [];
     AGENTS.forEach(critic => {
@@ -2522,12 +2531,17 @@ async function runPhase3(question) {
       if (!cr || cr.error) return;
       const [keyA, keyB] = cr.criticOf;
       const parts = splitCritiqueAB(cr.content);
+      // Strip the "## CRÍTICA A LA RESPUESTA A/B" headers — they're stale
+      // attribution noise once the body has been re-wrapped under an
+      // anonymized label.
+      const stripA = stripCritiqueHeader(parts.a);
+      const stripB = stripCritiqueHeader(parts.b);
       if (a.key === keyA) {
-        received.push(`— Crítica de ${critic.name} a tu respuesta:\n${parts.a || cr.content}`);
-        observed.push(`— ${critic.name} criticó también a ${keyB.toUpperCase()}:\n${parts.b || ''}`);
+        received.push(`— Crítica de ${label[critic.key]} a tu respuesta:\n${stripA || cr.content}`);
+        observed.push(`— ${label[critic.key]} criticó también a ${label[keyB]}:\n${stripB || ''}`);
       } else if (a.key === keyB) {
-        received.push(`— Crítica de ${critic.name} a tu respuesta:\n${parts.b || cr.content}`);
-        observed.push(`— ${critic.name} criticó también a ${keyA.toUpperCase()}:\n${parts.a || ''}`);
+        received.push(`— Crítica de ${label[critic.key]} a tu respuesta:\n${stripB || cr.content}`);
+        observed.push(`— ${label[critic.key]} criticó también a ${label[keyA]}:\n${stripA || ''}`);
       }
     });
 
